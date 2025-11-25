@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# IDE
+.DS_Store
+**/.DS_Store
+
+# Private 
+.claude/settings.json
+.curosr/mcp.json
+
+# Logs
+logs/
+*.log
+.ai/
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Temporary files
+.tmp/
+.temp/
+tmp/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# BMad
+.bmad-core
+web-bundles
+.claude/commands/BMad
+.cursor/rules/bmad
+.bmad
+.claude/agents/bmad-analysis
+.claude/agents/bmad-planning
+.claude/agents/bmad-research
+.claude/agents/bmad-review

@@ -1,0 +1,24 @@
+{
+  "name": "gems-repo",
+  "version": "1.0.0",
+  "description": "Collection of Gems - custom AI agent definitions and workflow configurations",
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write \"gems/**/*.md\"",
+    "format:check": "prettier --check \"gems/**/*.md\"",
+    "fix": "npm run format"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "prettier-plugin-embed": "^0.5.0"
+  },
+  "keywords": [
+    "ai-agents",
+    "flash",
+    "gems",
+    "gemini",
+    "prompt-engineering",
+    "context-engineering"
+  ],
+  "author": "Dr Joe (Joseph Manghan)"
+}

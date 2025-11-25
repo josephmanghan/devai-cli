@@ -1,0 +1,2 @@
+- A CLI tool that reads your screenshots and intelligently locates them in the right place (potentially in a dedicated tool directory or custom parent) + names them. You could set parameters for patterns so for instance if you were taking screenshots for documentation they would all be named following the pattern of that feature required by the documentation.
+- A task manager/work escalater in a web app. You input your info all the time and then it aceelerates you for other tasks - like easily puts together a slack message to update on findings.
