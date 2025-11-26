@@ -123,25 +123,33 @@ ollacli commit
 
 **Functionality:**
 
-1. **Pre-commit validation**: Check for staged changes, warn if none
+1. **Pre-commit validation**: Check for staged changes, provide clear guidance if none
 2. **Context gathering**: Execute `git diff --cached` and `git status --short`
 3. **Prompt construction**: Build context-rich prompt for Conventional Commits
 4. **Model inference**: Send to `qwen2.5-coder:1.5b` via Ollama API
 5. **Interactive preview**: Display generated commit message
-6. **User confirmation**: Prompt user to approve/edit/reject
+6. **User interaction**: Approve/edit in CLI editor (Nano or equivalent)/regenerate/reject
 7. **Commit execution**: Run `git commit -m "..."` on approval
 
 **Conventional Commit Support:**
 
 - Types: `feat`, `fix`, `chore`, `docs`, `style`, `refactor`, `test`, `perf`
 - Format: `<type>(<optional-scope>): <description>`
-- Body and footer support (for breaking changes, issue references)
+- **Full format support** with smart generation:
+  - **Body**: Included automatically when changes need explanation beyond subject
+  - **Footer**: Included for breaking changes or issue references
+  - **AI decides** when to include body/footer based on diff context
 
 ### Nice-to-Have Features (Post-MVP Suggestions)
 
 - `--dry-run`: Generate message without committing
 - `--auto`: Skip preview and auto-commit
-- Configuration file support for customization
+- `--all` flag: Auto-stage all changes and generate commit (address the "no staged changes" workflow)
+- Configuration file support for customization:
+  - Model selection and management
+  - Commit message templates and preferences
+  - Default commit types/scope preferences
+- Enhanced auto-pull functionality for model management
 
 ## Future Expansion Ideas
 
@@ -237,7 +245,62 @@ Research identifies `qwen2.5-coder:1.5b` as superior to `llama3.2:1b`:
 - Total latency: 0.4-0.8s for typical commit message
 - Load time: <100ms (if Ollama resident)
 
-## Success Definition
+## Error Handling & UX Philosophy
+
+**Boundary Conditions & Decisions:**
+
+### No Staged Changes
+
+**Decision:** Manual staging approach for MVP
+
+- User gets helpful error message with specific guidance
+- `Run: git add <files>  # stage specific files`
+- `  or: git add .       # stage all changes`
+- Post-MVP: Consider `--all` flag to auto-stage everything
+
+### Ollama Environment State
+
+**Decision:** Graceful degradation with user guidance
+
+- **Ollama not running:** Clear error message to start Ollama, exit gracefully (like colima tool)
+- **Model not available:** Auto-pull `qwen2.5-coder:1.5b` (defer to post-MVP for implementation)
+- **Model auto-pull:** Complexity to be addressed later, not MVP blocker
+
+### Configuration Philosophy
+
+**Decision:** Zero-config for MVP
+
+- No configuration files or settings
+- Fixed model choice (`qwen2.5-coder:1.5b`)
+- Fixed Conventional Commit format (full spec with smart generation)
+- Future: Optional configuration for advanced features
+
+### Git Error Handling
+
+**Decision:** Pass-through Git errors deterministically
+
+- **Git Command Failures**: Report Git errors directly to user and exit gracefully
+- **User Responsibility**: User resolves underlying Git issues
+- **Clear Messaging**: Deterministic error reporting without ambiguity
+
+### User Interaction Flow
+
+**Decision:** Low-friction CLI editor workflow
+
+- **Edit**: Open generated commit message in CLI editor (Nano or equivalent) for user modifications
+- **Regenerate**: If scope permits, allow re-running generation without re-analysis
+- **Reject/Exit**: User can abandon commit generation at any point
+- **No Copy/Paste**: Direct editor access to maintain low-friction experience
+
+### Distribution Model
+
+**Decision:** Global npm package
+
+- Published to npm registry (free for public packages)
+- Installation: `npm install -g ollacli` (or alternative final name)
+- Name flexibility retained for future refinement
+
+## Success Definition & Metrics
 
 Joe will feel successful when he has:
 
@@ -264,6 +327,23 @@ Joe will feel successful when he has:
 3. ✅ Understanding of orchestrator vs. model capabilities
 4. ✅ Knowledge of Ollama API and integration patterns
 5. ✅ Foundation for future dev productivity tools
+
+### Success Metrics
+
+**Quantitative Success Criteria:**
+- **Personal Acceptance Testing**: Separate test repo, multiple runs, target ~90% acceptance rate (late-stage story)
+- **User Feedback Quality**: Qualitative feedback from local developers
+- **Unit Test Coverage**: Comprehensive Jest coverage following style guide patterns
+
+**User Experience Metrics:**
+- **Response Time**: Sub-1-second from command to preview
+- **Error Clarity**: Deterministic Git error reporting
+- **User Control**: Edit workflow (Regenerate/Reject are nice-to-haves if scope permits)
+
+**Testing Strategy:**
+- **Unit Testing**: Jest with getData()/getInstance() patterns (per dev/styleguides/unit-test-patterns.md)
+- **Integration Testing**: Jest-based git output scenario coverage (tooling needs assessed later)
+- **Manual Testing**: Personal testing + user feedback stories (late-stage development)
 
 ## Next Steps
 
