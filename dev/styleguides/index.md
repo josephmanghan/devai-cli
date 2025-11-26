@@ -6,6 +6,7 @@
 - [Ollama Integration Patterns](./ollama-integration-patterns.md) - Performance-optimized local AI integration, streaming, prompting
 - [Modular CLI Architecture Patterns](./modular-cli-patterns.md) - Hexagonal architecture, DI, interfaces, domain entities for ollacli
 - [Unit Test Patterns](./unit-test-patterns.md) - Jest testing patterns, getData/getInstance, mocking, async testing for Node.js CLI
+- [Clean Code Principles](./clean-code.md) - Node.js CLI clean code principles, class design, naming conventions, code organization
 
 ## Ollama Reference Guides
 

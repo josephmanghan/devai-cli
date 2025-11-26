@@ -1,4 +1,4 @@
-# Angular Clean Code Principles
+# Node.js CLI Clean Code Principles
 
 ```yaml
 # -------------------------------------------------------------------
@@ -26,7 +26,7 @@ meaningful_names:
     - principle: 'Use Intention-Revealing Names'
       guideline: "Choose names that clearly express the purpose of the entity without needing a comment. If a name needs a comment, it's not the right name."
     - principle: 'Make Meaningful Distinctions'
-      guideline: 'If names must differ, they should differ in meaning. Avoid arbitrary distinctions like `product1`, `product2`.'
+      guideline: 'If names must differ, they should differ in meaning. Avoid arbitrary distinctions like `provider1`, `provider2`.'
     - principle: 'Use Pronounceable and Searchable Names'
       guideline: 'Names that can be spoken are easier to discuss. Avoid single-letter variables or cryptic abbreviations that hinder code search.'
 
@@ -49,10 +49,10 @@ functions_and_methods:
 
 # -------------------------------------------------------------------
 # 4. Class Design Principles
-# Foundational OOP principles for all classes (services, components, etc.).
+# Foundational OOP principles for all classes (use cases, adapters, etc.).
 # -------------------------------------------------------------------
 class_design_principles:
-  description: 'These principles apply to ANY class within the application to ensure they are robust, maintainable, and easy to understand.'
+  description: 'These principles apply to ANY class within the CLI application to ensure they are robust, maintainable, and easy to understand.'
   enabled: true
   principles:
     - principle: 'Single Responsibility Principle (SRP)'
@@ -65,73 +65,72 @@ class_design_principles:
       guideline: 'Design classes to be extendable without modifying their source code. Use abstractions and Dependency Injection.'
 
 # -------------------------------------------------------------------
-# 5. Angular Component Standards
-# Specific rules for the internal structure of Angular components.
+# 5. CLI Class Standards
+# Specific rules for the internal structure of CLI classes.
 # -------------------------------------------------------------------
-angular_component_standards:
-  description: 'Standards for ensuring consistency, readability, and adherence to best practices for all Angular components.'
+cli_class_standards:
+  description: 'Standards for ensuring consistency, readability, and adherence to best practices for all CLI application classes.'
   enabled: true
   global_attributes:
-    - 'Components are always standalone.'
-    - 'Prioritise use of modern signals-based architecture.'
-    - 'Utilise built-in Control Flow (e.g., @if) in component templates.'
+    - 'Classes use constructor dependency injection.'
+    - 'Prioritise composition over inheritance.'
+    - 'All files use kebab-case naming (e.g., commit-controller.ts).'
   class_member_order:
     summary: 'A consistent ordering of class members improves readability and makes it easier to locate specific properties and methods.'
     order:
-      - 'inject()'
-      - 'signal input'
-      - 'signal output'
-      - 'Other Signal APIs (e.g. viewChild, model)'
-      - 'State Properties (e.g. subjects, other state variables)'
-      - 'constructor()'
-      - 'Lifecycle Hooks (e.g. ngOnInit, ngOnDestroy)'
-      - 'Public Methods'
-      - 'Protected/Private Methods'
+      - 'constructor() with readonly dependencies'
+      - 'Public Properties (configuration)'
+      - 'Public Methods (API surface)'
+      - 'Private Properties (internal state)'
+      - 'Private Methods (helpers)'
     visibility_rule:
       guideline: 'Within each category, members should be sorted by visibility: public, then protected, then private.'
 
 # -------------------------------------------------------------------
 # 6. Design Patterns
-# Defines the different types of components and their roles in the system.
+# Defines the different types of components and their roles in the CLI.
 # -------------------------------------------------------------------
 design_patterns:
   description: 'Separate components by their domain to improve reusability, testability, and separation of concerns.'
   enabled: true
   types:
-    smart_feature:
-      name: 'Smart (Feature) Components'
-      responsibility: "Manage state, fetch data, and handle business logic. They are the 'brains' of a journey."
+    smart_use_case:
+      name: 'Use Cases (Business Logic)'
+      responsibility: "Manage business logic and coordinate between adapters. They are the 'brains' of the application."
       attributes:
-        - 'Handles business logic.'
-        - 'State Management: Within the feature layer, Signal Stores are used for handling local or feature-specific state.'
-    dumb_presentational:
-      name: 'Dumb (UI/Presentational) Components'
-      responsibility: 'Purely display data. They have no knowledge of application state.'
+        - 'Handles business rules and orchestration.'
+        - 'Dependencies injected via constructor using interfaces.'
+        - 'Contains no infrastructure details (no file I/O, no HTTP, no CLI).'
+    dumb_adapter:
+      name: 'Adapters (Infrastructure)'
+      responsibility: 'Handle technical infrastructure and external integrations. They have no knowledge of business logic.'
       attributes:
-        - 'I/O: Uses Signals for reactive inputs and outputs.'
-        - 'Testing: Use Storybook to visually test UI in isolation.'
+        - 'I/O: Implements interfaces for external services (git, LLM, file system).'
+        - 'Testing: Easily mocked with test doubles.'
+        - 'Configuration: Manages connection details and technical settings.'
     data_access:
       name: 'Data Access Layer'
-      responsibility: 'Encapsulates all interactions with external data sources (e.g., HTTP clients).'
+      responsibility: 'Encapsulates all interactions with external data sources (e.g., git commands, LLM APIs).'
       attributes:
-        - 'Scope: Implemented as injectable services via inject().'
+        - 'Scope: Implemented as injectable services via constructor injection.'
+        - 'Interface: Always expose through contracts like IGitService, ILLMProvider.'
     util:
       name: 'Util Layer'
       responsibility: 'Provides shared, generic functionality, type definitions, and constants.'
       attributes:
-        - 'Content: Contains pure functions, constants, TypeScript interfaces/types, and configuration.'
+        - 'Content: Contains pure functions, constants, TypeScript interfaces/types, and configuration schemas.'
 
 # -------------------------------------------------------------------
 # 7. Data & State Management
 # Principles for predictable state.
 # -------------------------------------------------------------------
 data_and_state_management:
-  description: 'Managing state is critical for building predictable and scalable applications.'
+  description: 'Managing state is critical for building predictable and scalable CLI applications.'
   enabled: true
   principles:
     - principle: 'Embrace Immutability'
       guideline: 'Do not mutate data directly. Treat state as immutable by creating new objects when changes occur.'
-      rationale: "Immutability prevents side effects and is highly compatible with Angular's Change Detection and RxJS streams."
+      rationale: "Immutability prevents side effects and is highly compatible with Node.js stream processing and error handling."
 
 # -------------------------------------------------------------------
 # 8. Comments & Self-Documenting Code
@@ -146,5 +145,5 @@ comments_and_self_documenting_code:
     - rule: "Use Comments for 'Why', Not 'What'"
       guideline: "When necessary, a comment should explain the 'why'—the intent, business context, or a non-obvious consequence."
     - rule: 'Use TSDoc for Public APIs Only'
-      guideline: 'The only acceptable use for explanatory comments is to document public-facing APIs (e.g., service methods, `input/output` signals) for documentation and IDE support.'
+      guideline: 'The only acceptable use for explanatory comments is to document public-facing APIs (e.g., use case methods, adapter interfaces) for documentation and IDE support.'
 ```
