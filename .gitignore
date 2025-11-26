@@ -9,7 +9,7 @@ yarn-error.log*
 
 # Private 
 .claude/settings.json
-.curosr/mcp.json
+.cursor/mcp.json
 
 # Logs
 logs/
