@@ -1,5 +1,13 @@
 # Research Index
 
+## Core Implementation Guides ⭐
+
+_Essential architectural patterns and implementation guides for building the CLI application_
+
+- **[Node.js CLI Setup Style Guide](./technical/Node.js%20CLI%20Setup%20Style%20Guide.md)** - Prescriptive style guide for professional Node.js CLI project setup and best practices
+- **[Ollama Integration Style Guide](./technical/Ollama%20Integration%20Style%20Guide.md)** - Complete architectural patterns for integrating Ollama into CLI tools with performance optimization
+- **[CLI Modularity & Extensibility Style Guide](./technical/CLI%20Modularity%20&%20Extensibility%20Style%20Guide.md)** - Modular hexagonal architecture patterns for extensible CLI applications
+
 ## Competitive & Market Analysis
 
 - **[Competitive Git Commit Tool Feature Analysis](./Competitive%20Git%20Commit%20Tool%20Feature%20Analysis.md)** - Competitive analysis of aicommits vs opencommit with market gap identification
@@ -8,9 +16,6 @@
 ## Technical Architecture & Implementation Guides
 
 - **[Ollama CLI Dependency Research](./Ollama%20CLI%20Dependency%20Research.md)** - Deep technical analysis of Ollama architecture and client-server implementation patterns
-- **[Node.js CLI Setup Style Guide](./Node.js%20CLI%20Setup%20Style%20Guide.md)** - Prescriptive style guide for professional Node.js CLI project setup and best practices
-- **[Ollama Integration Style Guide](./Ollama%20Integration%20Style%20Guide.md)** - Complete architectural patterns for integrating Ollama into CLI tools with performance optimization
-- **[CLI Modularity & Extensibility Style Guide](./CLI%20Modularity%20&%20Extensibility%20Style%20Guide.md)** - Modular hexagonal architecture patterns for extensible CLI applications
 
 ## Developer Workflow & Opportunity Analysis
 
