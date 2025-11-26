@@ -2,7 +2,7 @@
 
 ## Project Goal
 
-Build a working **Git Commit Message Generator CLI** that uses Ollama and `llama3.2` (1B) to automatically generate high-quality Conventional Commit messages from staged git changes. The tool should be completable end-to-end, provide genuine developer utility, and serve as a GitHub-ready demonstration of local SLM integration.
+Build a working **Git Commit Message Generator CLI** that uses Ollama and `qwen2.5-coder:1.5b` to automatically generate high-quality Conventional Commit messages from staged git changes. The tool must be extremely simple, completable end-to-end by an intermediate developer, and provide genuine developer utility as a GitHub-ready demonstration of local SLM integration.
 
 ## Application Decision
 
@@ -14,7 +14,7 @@ Build a working **Git Commit Message Generator CLI** that uses Ollama and `llama
 
 1. Analyzes staged git changes (`git diff --cached`)
 2. Reads git status and repository context
-3. Generates Conventional Commit format messages via `llama3.2` (1B)
+3. Generates Conventional Commit format messages via `qwen2.5-coder:1.5b`
 4. Provides interactive preview and confirmation
 5. Executes the commit on user approval
 
@@ -48,8 +48,10 @@ Build a working **Git Commit Message Generator CLI** that uses Ollama and `llama
 
 ### Non-Functional Requirements
 
-- **Deliverability**: Must be achievable as a complete, working project
-- **Simplicity**: Prioritize straightforward implementation over complex features
+- **Extreme Simplicity**: Feature scope must be narrow enough for intermediate developer to complete end-to-end in 2-4 sprints
+- **Deliverability**: Must be achievable as a complete, working project with full understanding of every component
+- **Zero-Config Philosophy**: Tool should work immediately after installation with sensible defaults
+- **Lightweight Footprint**: Minimal dependencies, single command, optional configuration
 - **Technical Preference**: CLI approach (easiest path for Ollama integration)
 - **Learning Focus**: Complete understanding of how each module works
 - **GitHub Ready**: Project should be shareable and demonstrate full development process
@@ -65,7 +67,7 @@ Build a working **Git Commit Message Generator CLI** that uses Ollama and `llama
 
 ### Platform Stack
 
-- **Model**: `llama3.2:1b` (600-900MB RAM, sub-50ms latency)
+- **Model**: `qwen2.5-coder:1.5b` (optimized for code tasks, superior instruction-following)
 - **Runtime**: Ollama (local inference engine)
 - **CLI Framework**: Node.js (TypeScript optional)
 - **Integration Pattern**: Orchestrator Architecture
@@ -91,12 +93,12 @@ User → CLI App (Node.js) → Execute git commands → Get text output
 ### Technical Context
 
 - **Platform**: Ollama with local SLM models
-- **Model Choice**: `llama3.2` (1B) - optimal balance of size/performance
-- **Target Environment**: Standard developer laptops (8GB-16GB RAM)
+- **Model Choice**: `qwen2.5-coder:1.5b` - optimized for code tasks with superior instruction-following
+- **Target Environment**: Standard developer laptops (8GB-16GB RAM), M1/M2 Mac optimal
 - **Expected Performance**:
-  - Model load time: 500ms-1.5s (cold start)
-  - Inference time: <1s (warm start)
-  - Total UX: ~1-2 seconds from command to preview
+  - Model load time: <100ms (if Ollama resident)
+  - Inference time: <0.5s (typical commit message ~20-30 tokens)
+  - Total UX: Sub-1-second from command to preview
 
 ### Available Research Context
 
@@ -124,7 +126,7 @@ ollacli commit
 1. **Pre-commit validation**: Check for staged changes, warn if none
 2. **Context gathering**: Execute `git diff --cached` and `git status --short`
 3. **Prompt construction**: Build context-rich prompt for Conventional Commits
-4. **Model inference**: Send to `llama3.2:1b` via Ollama API
+4. **Model inference**: Send to `qwen2.5-coder:1.5b` via Ollama API
 5. **Interactive preview**: Display generated commit message
 6. **User confirmation**: Prompt user to approve/edit/reject
 7. **Commit execution**: Run `git commit -m "..."` on approval
@@ -135,167 +137,105 @@ ollacli commit
 - Format: `<type>(<optional-scope>): <description>`
 - Body and footer support (for breaking changes, issue references)
 
-### Nice-to-Have Features (Future)
+### Nice-to-Have Features (Post-MVP Suggestions)
 
-- `ollacli commit --auto` - Skip preview, auto-commit
-- `ollacli commit --dry-run` - Generate message only, don't commit
-- `ollacli config` - Set preferences (commit style, model choice)
-- Custom commit templates
-- Multi-line commit body generation
+- `--dry-run`: Generate message without committing
+- `--auto`: Skip preview and auto-commit
+- Configuration file support for customization
 
 ## Future Expansion Ideas
 
-### Potential Suite Extension
+The architecture supports future expansion into a multi-tool suite. **These are suggestions only - not requirements.**
 
-The architecture supports future expansion into a multi-tool suite:
+**Potential Commands:**
 
-**Future Commands:**
+- **`ollacli pr`**: PR description generator using Map-Reduce approach to summarize branch changes
+- **`ollacli screenshot`**: Vision-based (Moondream2 VLM) screenshot auto-organizer for documentation workflows
 
-1. **`ollacli pr`** - PR Description Generator
-   - Analyzes branch diff vs main
-   - Parses JIRA ticket from branch name
-   - Generates markdown PR template
-   - Copies to clipboard
+**Decision**: Focus exclusively on Git Commit tool for MVP. Consider expansion only after successful completion and validation.
 
-2. **`ollacli screenshot`** - Screenshot Assistant
-   - Watches for new screenshots
-   - Prompts user for description
-   - Generates intelligent filename
-   - Organizes into project folders
-   - **Note**: Uses text-only approach (user describes screenshot, model suggests name)
+## Research Synthesis & Market Validation
 
-**Shared Infrastructure:**
+Comprehensive competitive analysis and feasibility research has been completed ([Local SLM Dev Tool Research](docs/research/Local%20SLM%20Dev%20Tool%20Research.md), [Competitive Git Commit Tool Feature Analysis](docs/research/Competitive%20Git%20Commit%20Tool%20Feature%20Analysis.md)). Key findings:
 
-- Ollama connection management
-- Configuration system
-- Prompt templates
-- User interaction patterns
+### Market Gap Confirmed: "Local-First" Opportunity
 
-**Decision**: Focus on Git Commit tool for MVP. Expand to suite only after successful completion and validation.
+**Question: Are we reinventing the wheel?**
+**Answer: No - there is a clear market gap.**
 
-## 🚨 OPEN RESEARCH QUESTIONS: Competitive Analysis & Use Case Validation
+Existing tools fall into two categories:
 
-### Critical Questions to Resolve Before Implementation
+- **Cloud-native tools** (`aicommits`, `opencommit`) that _tolerate_ local models but default to OpenAI, introducing latency (2-5s) and privacy concerns
+- **Configuration-heavy tools** (`opencommit`, `czg`) that require DevOps-level setup, manual Ollama management, and extensive config files
 
-#### **Question 1: Are we reinventing the wheel in the local SLM + Ollama context?**
+**The Local-First Gap:**
+No tool currently provides a "Zero-Config" experience for local SLMs with auto-provisioning, seamless Ollama integration, and guaranteed privacy.
 
-Existing tools identified in research:
+**Our Differentiation Strategy:**
 
-- `aicommits` (uses cloud LLMs or local models)
-- `commitron` (similar approach)
-- Various other git commit generators
+1. **Privacy-first (Default)**: 100% local inference, zero data egress guaranteed
+2. **Speed**: Sub-1s latency vs 2-5s cloud latency
+3. **Zero-config**: Auto-detect Ollama, auto-provision models, sensible defaults
+4. **Compliance Engine**: Automates Conventional Commits adherence without cognitive load
 
-**Sub-questions to answer:**
+**Strategic Positioning**: "Trojan Horse" approach - low-risk entry point for enterprise local AI adoption through commit generation.
 
-1. What do existing tools do well/poorly?
-2. What is our unique value proposition?
-3. Are there gaps in the current solutions for local SLM + Ollama specifically?
-4. Is our differentiator strong enough?
+### Conventional Commits: Validated for All Commit Types
 
-**Potential Unique Value Angles:**
+**Question: Is Conventional Commits appropriate for mid-development commits?**
+**Answer: Yes - position as compliance automation, not format enforcement.**
 
-- **Privacy-first**: 100% local, no data leaves machine
-- **Speed**: Optimized for `llama3.2` (1B) with sub-1s responses
-- **Company-specific**: Fine-tuned for company's Conventional Commit patterns
-- **Extensibility**: Foundation for future dev productivity suite
-- **Learning**: Educational value in building complete SLM integration
+Research shows:
 
-#### **Question 2: Conventional Commits Appropriateness for Mid-Development Use Case**
+- Conventional Commits introduce "Process Friction" - cognitive load of remembering types/scopes
+- Our tool **removes cognitive load** by automating classification
+- Acts as **"interactive tutor"** for developers learning the standard
+- Ensures **100% adherence** without slowing development
 
-**Critical Assumption to Validate:**
+**Critical Implementation Requirements:**
 
-Conventional Commits specification is typically designed for "high-level," polished, final commits (e.g., squash commits before merge). However, your use case is **individual commits during active development** on a ticket.
+- Strict enforcement as **default** (not optional)
+- Use **Few-Shot Prompting** (not zero-shot) to prime model with examples
+- **Regex validation** post-generation to guarantee compliance
+- Fail gracefully if model produces non-compliant output
 
-**Research questions:**
+**Value Proposition**: Not a "message writer" but a **compliance engine** that eliminates the burden of the standard.
 
-1. **Is Conventional Commits the right format for mid-ticket commits?**
-   - Do developers actually need/want type classifications (feat, fix, chore) for work-in-progress commits?
-   - Or is a simpler format more appropriate (e.g., "WIP: description" or just "description")?
+### Context Approach: Start Minimal, Extend Strategically
 
-2. **What's the difference between conventions for:**
-   - Individual commits during development (many commits, may be WIP)
-   - Final commits before merge/squash (polished, public-facing)
+**Question: How much context should we provide the model?**
+**Answer: MVP uses minimal context. Advanced context is post-MVP differentiation.**
 
-3. **Should we support both patterns?**
-   - Development mode: Simpler, more permissive
-   - Final mode: Strict Conventional Commits enforcement
+**MVP Approach (Minimal Context):**
 
-4. **Existing tool alignment:**
-   - Do existing commit generators assume final commits or individual commits?
-   - Is there a tool already optimized for mid-development workflow?
+- Input: `git diff --cached` + `git status`
+- Model: `qwen2.5-coder:1.5b` (superior to `llama3.2:1b` for structured output)
+- Focus: Speed, privacy, Conventional Commits compliance
 
-#### **Question 3: Context Management & Ticket Integration**
+**Post-MVP Opportunities (Suggestions Only):**
 
-**Design question: How much context should we provide the model?**
+- Branch metadata parsing for Jira IDs (e.g., `feature/PROJ-123` → append ticket reference)
+- Smart scope detection from file paths (e.g., `src/app/auth/*.ts` → scope: `auth`)
+- Heuristic pre-processing (e.g., all `.md` files → force type: `docs`)
 
-**Current minimal approach:**
+**Complexity Trade-off:**
+Research validates starting minimal to ensure deliverability. Context-aware features add differentiation but increase complexity. Defer to post-MVP.
 
-```
-Input: git diff --cached + git status
-→ Model generates commit message
-```
+### Model Selection: Qwen 2.5 Coder 1.5B
 
-**Extended approach:**
+Research identifies `qwen2.5-coder:1.5b` as superior to `llama3.2:1b`:
 
-```
-Input: git diff --cached + git status + JIRA ticket info (title, description, acceptance criteria)
-→ Model generates more semantically-aware commit message
-```
+- Higher instruction-following scores (IFEval benchmarks)
+- Fine-tuned specifically for code tasks
+- Less prone to "chatty" outputs or hallucinations
+- Handles structured output (Conventional Commits) more reliably
 
-**Research questions:**
+**Performance on M1/M2 hardware:**
 
-1. **Is ticket context valuable?**
-   - Does it improve commit message quality?
-   - Does it help the model understand the "why" behind the changes?
-
-2. **Complexity vs. benefit trade-off:**
-   - How complex is JIRA/ticket integration? (CLI tool would need to detect branch name → lookup ticket ID → fetch from API)
-   - Is the quality improvement worth the architectural complexity?
-
-3. **Scope creep risk:**
-   - Does adding ticket context turn this into a more complex tool?
-   - Does it break the "simple MVP" requirement?
-
-4. **Feasibility:**
-   - Can we reasonably parse branch names to infer ticket IDs? (e.g., `feature/JIRA-123-description`)
-   - Should ticket context be optional? (user provides it, or tool auto-detects)
-   - How do we handle repos with different ticket systems or no tickets?
-
-5. **Model capability:**
-   - Can `llama3.2` (1B) effectively reason about both code changes AND ticket context?
-   - Or does it exceed the model's reasoning capability?
-
-**Potential solution patterns:**
-
-- **Option A**: Minimal (just git diff) - simpler, faster, works everywhere
-- **Option B**: Optional context (user can provide ticket info) - user decides
-- **Option C**: Auto-detected context (parse branch name for ticket ID) - more intelligent but fragile
-- **Option D**: Full context (optional + auto-detected) - most powerful but most complex
-
-### Next Actions Required
-
-**For Competitive Analysis:**
-
-- Research existing tools (feature comparison, architecture, limitations)
-- Identify specific gaps or improvements our tool could provide
-- Determine if the value is primarily:
-  - **Functional**: Genuinely better/different tool
-  - **Educational**: Learning exercise in SLM integration
-  - **Company-specific**: Tailored to organization needs
-
-**For Use Case Validation:**
-
-- Investigate Conventional Commits appropriateness for mid-development commits
-- Research developer workflow patterns (individual vs. final commits)
-- Validate whether ticket context integration is worth the complexity
-
-**Decision Criteria:**
-
-- If existing tools solve this well → Consider pivoting to different application
-- If Conventional Commits doesn't fit mid-dev use case → Adapt format or acknowledge limitation
-- If ticket context adds significant value → Plan for integration; if not → keep it minimal
-- If gaps exist → Define our specific differentiation strategy
-- If primarily educational → Acknowledge and proceed with learning focus
+- Memory footprint: ~1.2GB RAM
+- Inference speed: 70-90 tokens/sec
+- Total latency: 0.4-0.8s for typical commit message
+- Load time: <100ms (if Ollama resident)
 
 ## Success Definition
 
@@ -327,35 +267,33 @@ Joe will feel successful when he has:
 
 ## Next Steps
 
-1. **Competitive Analysis** (PRIORITY)
-   - Research existing git commit generators
-   - Identify unique value proposition or gaps
-   - Decide: proceed, pivot, or acknowledge learning focus
+**Brief Status**: ✅ Complete. Ready to proceed to PRD.
 
-2. **Project Structure & Best Practices Research**
-   - Break down the project into logical sections/modules
-   - Define research tasks for each section:
-     - Node.js CLI architecture best practices
-     - Ollama integration patterns
-     - Git command-line interaction patterns
-     - Prompt engineering for commit messages
-     - User interaction/UX for CLI tools
-     - Testing strategies for CLI applications
-     - Distribution and packaging (npm, binary)
-   - Send off deep research to identify best practices for each area
+1. **Product Requirements Document (PRD)**
+   - Define detailed functional requirements
+   - Specify user stories and acceptance criteria
+   - Document MVP feature boundaries
+   - Define testing strategy
 
-3. **Technical Architecture Design** (if proceeding)
+2. **Technical Architecture & Design**
    - Define project structure
    - Design Ollama integration layer
-   - Plan prompt engineering strategy
+   - Plan prompt engineering strategy (Few-Shot approach)
    - Define configuration approach
 
-4. **MVP Implementation Plan**
+3. **Implementation**
    - Break down into sprints/phases
-   - Define success metrics
-   - Create testing strategy
+   - Begin MVP development
+   - Iterative testing and validation
 
 ## References
+
+**Research Documentation:**
+
+- [Local SLM Dev Tool Research](docs/research/Local%20SLM%20Dev%20Tool%20Research.md) - Competitive analysis & feasibility assessment
+- [Competitive Git Commit Tool Feature Analysis](docs/research/Competitive%20Git%20Commit%20Tool%20Feature%20Analysis.md) - Feature benchmarking & roadmap
+
+**External Resources:**
 
 - Ollama docs - https://docs.ollama.com/
 - Ollama github - https://github.com/ollama/ollama
