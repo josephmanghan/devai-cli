@@ -55,6 +55,12 @@ Build a working **Git Commit Message Generator CLI** that uses Ollama and `llama
 - **GitHub Ready**: Project should be shareable and demonstrate full development process
 - **Performance**: Sub-1-second response time for commit message generation
 
+## Development Standards
+
+**Context7 Integration:** Leverages Context7 MCP for Node.js best practices and architectural patterns.
+
+**Style Guides:** Project follows documented style guides for Node.js CLI, clean code principles, unit testing, and Ollama integration patterns (see `dev/styleguides/`).
+
 ## Technical Architecture
 
 ### Platform Stack
