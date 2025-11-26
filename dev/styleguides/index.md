@@ -5,6 +5,7 @@
 - [Node.js CLI Setup Patterns](./nodejs-cli-setup-patterns.md) - TypeScript, ESM, framework configuration, project setup
 - [Ollama Integration Patterns](./ollama-integration-patterns.md) - Performance-optimized local AI integration, streaming, prompting
 - [Modular CLI Architecture Patterns](./modular-cli-patterns.md) - Hexagonal architecture, DI, interfaces, domain entities for ollacli
+- [Unit Test Patterns](./unit-test-patterns.md) - Jest testing patterns, getData/getInstance, mocking, async testing for Node.js CLI
 
 ## Ollama Reference Guides
 
