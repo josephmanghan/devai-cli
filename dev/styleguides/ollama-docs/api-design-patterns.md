@@ -80,29 +80,3 @@ export class AbortableAsyncIterator<T extends object> {
 }
 ```
 
-## Connection Management
-
-```typescript
-// Host formatting
-export const formatHost = (host: string): string => {
-  if (!host) return defaultHost
-
-  let isExplicitProtocol = host.includes('://')
-  if (!isExplicitProtocol) host = `http://${host}`
-
-  const url = new URL(host)
-  let port = url.port || (url.protocol === 'https:' ? '443' : '80')
-
-  return `${url.protocol}//${url.hostname}:${port}${url.pathname}`.replace(/\/$/, '')
-}
-
-// Headers normalization
-function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
-  if (headers instanceof Headers) {
-    const obj: Record<string, string> = {}
-    headers.forEach((value, key) => obj[key] = value)
-    return obj
-  }
-  return headers || {}
-}
-```

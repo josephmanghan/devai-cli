@@ -1,5 +1,18 @@
 # Node.js CLI Setup Patterns
 
+## File Naming Conventions
+
+**All files use kebab-case:**
+- ✅ `commit-controller.ts`
+- ✅ `generate-commit-message.ts`
+- ✅ `ollama-provider.ts`
+- ✅ `style-guide.md`
+- ❌ `CommitController.ts`
+- ❌ `generateCommitMessage.ts`
+- ❌ `OllamaProvider.ts`
+
+**Exception**: Class files exported as default MAY use PascalCase for clarity, but kebab-case is preferred.
+
 ## Package Configuration Pattern
 ```json
 {

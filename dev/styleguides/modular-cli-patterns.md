@@ -1,82 +1,237 @@
 # Modular CLI Architecture Patterns
 
-## Hexagonal Architecture Structure
+## Architecture: Hexagonal (Ports & Adapters)
+
+**Core Principle**: Decouple business logic from infrastructure. The commit message generation logic must not depend on whether you're using Ollama or OpenAI, or how Git is executed.
+
+**Dependency Rule**: Dependencies flow inward. Core defines interfaces; infrastructure implements them.
+
+## Directory Structure
+
 ```
 src/
-├── core/                 # Domain Layer (no external dependencies)
-│   ├── domain/          # Entities
-│   ├── interfaces/      # Ports (contracts)
-│   ├── types/          # Shared types
-│   └── utils/          # Domain utilities
-├── infrastructure/     # Adapters Layer
+├── main.ts                    # Application bootstrap & DI setup
+├── cli.ts                     # CLI entry (Commander.js)
+│
+├── core/                      # Domain layer (no external deps)
+│   ├── domain/
+│   │   ├── commit-message.ts  # Entity: type, scope, subject, body
+│   │   ├── git-diff.ts        # Entity: diff content, metadata
+│   │   └── prompt-context.ts  # Entity: template data
+│   ├── interfaces/            # Ports (contracts)
+│   │   ├── llm-provider.ts
+│   │   ├── git-service.ts
+│   │   ├── config-service.ts
+│   │   └── template-engine.ts
+│   ├── types/
+│   │   └── config.types.ts
+│   └── utils/
+│       └── validators.ts
+│
+├── infrastructure/            # Adapters (implementations)
 │   ├── config/
+│   │   └── cosmiconfig-service.ts
 │   ├── git/
+│   │   └── shell-git-service.ts
 │   ├── llm/
+│   │   ├── ollama-provider.ts
+│   │   ├── openai-provider.ts
+│   │   └── mock-llm-provider.ts  # For testing
 │   └── templates/
-└── features/           # Feature Modules
-    ├── commit/
-    └── pr/
+│       └── handlebars-engine.ts
+│
+└── features/                  # Use cases & controllers
+    └── commit/
+        ├── controllers/
+        │   └── commit-controller.ts
+        ├── use-cases/
+        │   ├── generate-commit-message.ts
+        │   └── validate-diff.ts
+        └── templates/
+            ├── conventional.hbs
+            └── emoji.hbs
 ```
 
-## Port Interface Pattern
+## Core Interfaces (Ports)
+
+### ILLMProvider - AI Provider Contract
+
 ```typescript
-// src/core/interfaces/ILLMProvider.ts
-export interface ILLMProvider {
-  readonly providerId: string;
-  generate(messages: ChatMessage[], options: GenerationOptions): Promise<string>;
-  stream(messages: ChatMessage[], options: GenerationOptions): AsyncGenerator<string>;
-  checkHealth(): Promise<boolean>;
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
 }
 
-// src/core/interfaces/IGitService.ts
+export interface GenerationOptions {
+  model: string;
+  temperature?: number;
+  maxTokens?: number;
+  jsonMode?: boolean;
+  abortSignal?: AbortSignal;
+}
+
+export interface ILLMProvider {
+  readonly providerId: string;
+
+  // Non-streaming generation
+  generate(messages: ChatMessage[], options: GenerationOptions): Promise<string>;
+
+  // Streaming generation (CRITICAL for CLI UX)
+  stream(messages: ChatMessage[], options: GenerationOptions): AsyncGenerator<string>;
+
+  // Health check (fail fast if Ollama not running)
+  checkHealth(): Promise<boolean>;
+}
+```
+
+### IGitService - Git Operations Contract
+
+```typescript
 export interface IGitService {
+  // Get staged changes for commit
   getStagedDiff(): Promise<string>;
-  getBranchDiff(targetBranch: string): Promise<string>;
+
+  // Get list of changed files
+  getChangedFiles(): Promise<string[]>;
+
+  // Execute commit with message
   commit(message: string): Promise<void>;
 }
 ```
 
-## Domain Entity Pattern
+### ITemplateEngine - Prompt Template Contract
+
 ```typescript
-// src/core/domain/CommitMessage.ts
+export interface ITemplateEngine {
+  // Render inline template
+  render(template: string, data: Record<string, any>): string;
+
+  // Render template file
+  renderFile(filePath: string, data: Record<string, any>): Promise<string>;
+}
+```
+
+## Domain Entities
+
+### CommitMessage Entity
+
+```typescript
 export class CommitMessage {
   constructor(
-    public readonly type: string,
-    public readonly scope?: string,
+    public readonly type: string, // feat, fix, chore, etc.
     public readonly subject: string,
-    public readonly body?: string
+    public readonly scope?: string,
+    public readonly body?: string,
+    public readonly breaking?: boolean,
   ) {}
 
   toString(): string {
     const scopePart = this.scope ? `(${this.scope})` : '';
     const bodyPart = this.body ? `\n\n${this.body}` : '';
-    return `${this.type}${scopePart}: ${this.subject}${bodyPart}`;
+    const breakingPart = this.breaking ? '\n\nBREAKING CHANGE: ' : '';
+    return `${this.type}${scopePart}: ${this.subject}${bodyPart}${breakingPart}`;
   }
 
+  // Parse from Conventional Commits string
   static fromString(text: string): CommitMessage {
-    // Parse from string logic
+    const match = text.match(/^(\w+)(?:\(([^)]+)\))?: (.+)/);
+    if (!match) throw new Error('Invalid commit format');
+    return new CommitMessage(match[1], match[3], match[2]);
+  }
+}
+```
+
+## Use Case Pattern
+
+### GenerateCommitMessage Use Case
+
+```typescript
+// src/features/commit/use-cases/generate-commit-message.ts
+export class GenerateCommitMessage {
+  constructor(
+    private gitService: IGitService,
+    private llmProvider: ILLMProvider,
+    private templateEngine: ITemplateEngine,
+    private config: IConfigService,
+  ) {}
+
+  async execute(): Promise<string> {
+    // 1. Get staged diff
+    const diff = await this.gitService.getStagedDiff();
+    if (!diff) throw new Error('No staged changes');
+
+    // 2. Build prompt context
+    const context = {
+      diff: this.truncateDiff(diff),
+      files: await this.gitService.getChangedFiles(),
+    };
+
+    // 3. Render template
+    const template = this.config.get('template');
+    const prompt = await this.templateEngine.renderFile(`templates/${template}.hbs`, context);
+
+    // 4. Generate with LLM
+    const messages: ChatMessage[] = [
+      { role: 'system', content: this.getSystemPrompt() },
+      { role: 'user', content: prompt },
+    ];
+
+    const result = await this.llmProvider.generate(messages, {
+      model: this.config.get('model'),
+      temperature: 0.3,
+      maxTokens: 100,
+    });
+
+    return this.sanitize(result);
+  }
+
+  private getSystemPrompt(): string {
+    return `Generate a Conventional Commit message.
+Format: <type>(<scope>): <subject>
+Types: feat, fix, chore, docs, style, refactor, test, perf
+Output ONLY the commit message. No markdown, no code blocks.`;
+  }
+
+  private truncateDiff(diff: string, maxLength = 4000): string {
+    return diff.length > maxLength ? diff.substring(0, maxLength) + '\n... (truncated)' : diff;
+  }
+
+  private sanitize(output: string): string {
+    return output
+      .replace(/^```(?:json|text)?\s*|\s*```$/gi, '')
+      .replace(/`/g, '')
+      .trim();
   }
 }
 ```
 
 ## Adapter Implementation Pattern
+
+### OllamaProvider Adapter
+
 ```typescript
-// src/infrastructure/llm/OllamaProvider.ts
-import { ILLMProvider } from '../../core/interfaces/ILLMProvider.ts';
+// src/infrastructure/llm/ollama-provider.ts
+import { Ollama } from 'ollama';
+import { ILLMProvider, ChatMessage, GenerationOptions } from '../../core/interfaces/llm-provider';
 
 export class OllamaProvider implements ILLMProvider {
   readonly providerId = 'ollama';
 
-  constructor(private client: Ollama) {}
+  constructor(
+    private client: Ollama,
+    private baseUrl = 'http://localhost:11434',
+  ) {}
 
   async generate(messages: ChatMessage[], options: GenerationOptions): Promise<string> {
     const response = await this.client.chat({
       model: options.model,
       messages,
       stream: false,
-      options: { temperature: options.temperature }
+      options: {
+        temperature: options.temperature,
+        num_predict: options.maxTokens,
+      },
     });
-
     return response.message.content;
   }
 
@@ -85,6 +240,7 @@ export class OllamaProvider implements ILLMProvider {
       model: options.model,
       messages,
       stream: true,
+      options: { temperature: options.temperature },
     });
 
     for await (const chunk of response) {
@@ -93,80 +249,89 @@ export class OllamaProvider implements ILLMProvider {
       }
     }
   }
-}
-```
 
-## Feature Module Pattern
-```
-src/features/commit/
-├── controllers/
-│   └── CommitController.ts
-├── use-cases/
-│   ├── GenerateCommitMessage.ts
-│   └── ValidateDiff.ts
-├── templates/
-│   ├── conventional.hbs
-│   └── emoji.hbs
-└── index.ts
-```
-
-## Use Case Pattern
-```typescript
-// src/features/commit/use-cases/GenerateCommitMessage.ts
-export class GenerateCommitMessage {
-  constructor(
-    private gitService: IGitService,
-    private llmProvider: ILLMProvider,
-    private templateEngine: ITemplateEngine
-  ) {}
-
-  async execute(options: { template: string }): Promise<string> {
-    // 1. Get diff
-    const diff = await this.gitService.getStagedDiff();
-
-    // 2. Render template
-    const prompt = await this.templateEngine.renderFile(
-      `templates/${options.template}.hbs`,
-      { diff }
-    );
-
-    // 3. Generate message
-    const messages = [
-      { role: 'system', content: this.getSystemPrompt() },
-      { role: 'user', content: prompt }
-    ];
-
-    return await this.llmProvider.generate(messages, {
-      model: 'llama3.2:1b',
-      temperature: 0.3
-    });
+  async checkHealth(): Promise<boolean> {
+    try {
+      await this.client.list();
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
 ```
 
-## Controller Pattern
+## Dependency Injection Pattern
+
+### Application Bootstrap (main.ts)
+
 ```typescript
-// src/features/commit/controllers/CommitController.ts
+// src/main.ts - Composition Root
+import { Ollama } from 'ollama';
+import { OllamaProvider } from './infrastructure/llm/ollama-provider';
+import { ShellGitService } from './infrastructure/git/shell-git-service';
+import { HandlebarsEngine } from './infrastructure/templates/handlebars-engine';
+import { CosmiconfigService } from './infrastructure/config/cosmiconfig-service';
+import { GenerateCommitMessage } from './features/commit/use-cases/generate-commit-message';
+import { CommitController } from './features/commit/controllers/commit-controller';
+
+export async function bootstrap() {
+  // Load config first
+  const configService = new CosmiconfigService();
+  await configService.load();
+
+  // Instantiate adapters
+  const llmProvider = new OllamaProvider(new Ollama({ host: configService.get('ollamaUrl') }));
+  const gitService = new ShellGitService();
+  const templateEngine = new HandlebarsEngine();
+
+  // Instantiate use cases (inject dependencies)
+  const generateCommitMessage = new GenerateCommitMessage(
+    gitService,
+    llmProvider,
+    templateEngine,
+    configService,
+  );
+
+  // Instantiate controllers
+  const commitController = new CommitController(generateCommitMessage);
+
+  return { commitController };
+}
+```
+
+## Controller Pattern
+
+```typescript
+// src/features/commit/controllers/commit-controller.ts
 import { Command } from 'commander';
-import { GenerateCommitMessage } from '../use-cases/GenerateCommitMessage.ts';
+import { GenerateCommitMessage } from '../use-cases/generate-commit-message';
+import { confirm } from '@clack/prompts';
 
 export class CommitController {
-  constructor(private useCase: GenerateCommitMessage) {}
+  constructor(private generateCommitMessage: GenerateCommitMessage) {}
 
   register(program: Command): void {
     program
       .command('commit')
-      .description('Generate commit message using AI')
-      .option('-t, --template <name>', 'Template to use', 'conventional')
-      .option('--dry-run', 'Generate message without committing')
+      .description('Generate AI commit message')
+      .option('--dry-run', 'Generate without committing')
       .action(async (options) => {
         try {
-          const message = await this.useCase.execute(options);
+          const message = await this.generateCommitMessage.execute();
 
-          if (options.dryRun) {
-            console.log(message);
-          } else {
-            await this.commitMessage(message);
+          console.log('\nGenerated commit message:\n');
+          console.log(message);
+
+          if (!options.dryRun) {
+            const shouldCommit = await confirm({
+              message: 'Create commit with this message?',
+            });
+
+            if (shouldCommit) {
+              await this.gitService.commit(message);
+              console.log('✓ Committed successfully');
+            }
           }
         } catch (error) {
           console.error('Error:', error.message);
@@ -177,129 +342,67 @@ export class CommitController {
 }
 ```
 
-## Dependency Injection Pattern
+## Configuration Management
+
+### Config Schema with Zod
+
 ```typescript
-// src/main.ts
-import { OllamaProvider } from './infrastructure/llm/OllamaProvider.ts';
-import { ShellGitService } from './infrastructure/git/ShellGitService.ts';
-import { HandlebarsTemplateEngine } from './infrastructure/templates/HandlebarsEngine.ts';
-import { GenerateCommitMessage } from './features/commit/use-cases/GenerateCommitMessage.ts';
-import { CommitController } from './features/commit/controllers/CommitController.ts';
-
-// Composition Root
-function composeApplication() {
-  // Infrastructure
-  const llmProvider = new OllamaProvider(new Ollama());
-  const gitService = new ShellGitService();
-  const templateEngine = new HandlebarsTemplateEngine();
-
-  // Use Cases
-  const generateCommitMessage = new GenerateCommitMessage(
-    gitService,
-    llmProvider,
-    templateEngine
-  );
-
-  // Controllers
-  const commitController = new CommitController(generateCommitMessage);
-
-  return { commitController };
-}
-```
-
-## Configuration Management Pattern
-```typescript
-// src/infrastructure/config/ConfigService.ts
-import cosmiconfig from 'cosmiconfig';
+// src/core/types/config.types.ts
 import { z } from 'zod';
 
-const ConfigSchema = z.object({
+export const ConfigSchema = z.object({
   provider: z.enum(['ollama', 'openai']).default('ollama'),
   model: z.string().default('llama3.2:1b'),
   temperature: z.number().min(0).max(1).default(0.3),
+  template: z.string().default('conventional'),
   ollamaUrl: z.string().url().default('http://localhost:11434'),
-  templates: z.string().default('./templates'),
+  apiKey: z.string().optional(),
 });
 
-export class ConfigService {
-  private config: z.infer<typeof ConfigSchema>;
+export type UserConfig = z.infer<typeof ConfigSchema>;
+```
+
+### Config Service with Cosmiconfig
+
+```typescript
+// src/infrastructure/config/cosmiconfig-service.ts
+import { cosmiconfig } from 'cosmiconfig';
+import { ConfigSchema, UserConfig } from '../../core/types/config.types';
+import { IConfigService } from '../../core/interfaces/config-service';
+
+export class CosmiconfigService implements IConfigService {
+  private config!: UserConfig;
 
   async load(): Promise<void> {
     const explorer = cosmiconfig('ollacli');
     const result = await explorer.search();
-    this.config = ConfigSchema.parse(result?.config);
+
+    // Validate with Zod
+    this.config = ConfigSchema.parse(result?.config || {});
   }
 
-  get<T extends keyof z.infer<typeof ConfigSchema>>(key: T): z.infer<typeof ConfigSchema>[T] {
+  get<K extends keyof UserConfig>(key: K): UserConfig[K] {
     return this.config[key];
   }
 }
 ```
 
-## Template Engine Pattern
+## Testing Strategy
+
+### Mock Provider for Tests
+
 ```typescript
-// src/core/interfaces/ITemplateEngine.ts
-export interface ITemplateEngine {
-  render(template: string, data: Record<string, any>): string;
-  renderFile(filePath: string, data: Record<string, any>): Promise<string>;
-}
-
-// src/infrastructure/templates/HandlebarsEngine.ts
-import Handlebars from 'handlebars';
-
-export class HandlebarsTemplateEngine implements ITemplateEngine {
-  constructor() {
-    // Register custom helpers
-    Handlebars.registerHelper('truncate', (str: string, len: number) => {
-      return str.length > len ? str.substring(0, len) + '...' : str;
-    });
-  }
-
-  render(template: string, data: Record<string, any>): string {
-    const compiled = Handlebars.compile(template);
-    return compiled(data);
-  }
-
-  async renderFile(filePath: string, data: Record<string, any>): Promise<string> {
-    const template = await fs.readFile(filePath, 'utf8');
-    return this.render(template, data);
-  }
-}
-```
-
-## Factory Pattern for Providers
-```typescript
-// src/infrastructure/llm/LLMProviderFactory.ts
-export class LLMProviderFactory {
-  constructor(private configService: ConfigService) {}
-
-  createProvider(): ILLMProvider {
-    const provider = this.configService.get('provider');
-
-    switch (provider) {
-      case 'ollama':
-        return new OllamaProvider(
-          new Ollama({ host: this.configService.get('ollamaUrl') })
-        );
-      case 'openai':
-        return new OpenAIProvider(this.configService.get('apiKey'));
-      default:
-        throw new Error(`Unsupported provider: ${provider}`);
-    }
-  }
-}
-```
-
-## Testing Mock Pattern
-```typescript
-// tests/mocks/MockLLMProvider.ts
+// src/infrastructure/llm/mock-llm-provider.ts
 export class MockLLMProvider implements ILLMProvider {
   readonly providerId = 'mock';
+  private responses: string[];
 
-  constructor(private responses: string[] = []) {}
+  constructor(responses: string[] = ['feat: test commit']) {
+    this.responses = responses;
+  }
 
   async generate(): Promise<string> {
-    return this.responses.shift() || 'feat: test commit message';
+    return this.responses.shift() || 'mock: default message';
   }
 
   async *stream(): AsyncGenerator<string> {
@@ -315,39 +418,80 @@ export class MockLLMProvider implements ILLMProvider {
 }
 ```
 
-## Feature Registration Pattern
+### Unit Test Example
+
 ```typescript
-// src/cli.ts
-import { Command } from 'commander';
-import { CommitController } from './features/commit/controllers/CommitController.ts';
-import { PRController } from './features/pr/controllers/PRController.ts';
+// tests/unit/generate-commit-message.test.ts
+import { GenerateCommitMessage } from '@/features/commit/use-cases/generate-commit-message';
+import { MockLLMProvider } from '@/infrastructure/llm/mock-llm-provider';
+import { MockGitService } from '@tests/mocks/mock-git-service';
 
-export function createCLI(controllers: Array<{ register: (program: Command) => void }>) {
-  const program = new Command();
+describe('GenerateCommitMessage', () => {
+  it('should generate commit message for valid diff', async () => {
+    const mockGit = new MockGitService({
+      stagedDiff: 'diff --git a/file.ts\n+added line',
+    });
+    const mockLLM = new MockLLMProvider(['feat: add new feature']);
 
-  program.name('ollacli').description('AI-powered Git assistant').version('1.0.0');
+    const useCase = new GenerateCommitMessage(mockGit, mockLLM, mockTemplate, mockConfig);
 
-  // Register all controllers
-  controllers.forEach(controller => controller.register(program));
+    const result = await useCase.execute();
 
-  return program;
+    expect(result).toBe('feat: add new feature');
+  });
+});
+```
+
+## Key Architectural Rules
+
+1. **Core is pure**: No imports of `ollama`, `execa`, `fs`, etc. in `core/`
+2. **Use cases orchestrate**: They compose domain entities and call through interfaces
+3. **Adapters are swappable**: Test with mocks, run with real implementations
+4. **Dependencies inject at root**: `main.ts` is the only place that knows concrete types
+5. **Interfaces define contracts**: Changes to Ollama API only affect `OllamaProvider.ts`
+
+## Template System
+
+### Handlebars with Custom Helpers
+
+```typescript
+// src/infrastructure/templates/handlebars-engine.ts
+import Handlebars from 'handlebars';
+
+export class HandlebarsEngine implements ITemplateEngine {
+  constructor() {
+    // Register custom helpers for Git
+    Handlebars.registerHelper('truncate', (str: string, len: number) => {
+      return str.length > len ? str.substring(0, len) + '...' : str;
+    });
+
+    Handlebars.registerHelper('fileList', (diff: string) => {
+      const matches = diff.match(/diff --git a\/([^\s]+)/g) || [];
+      return matches.map((m) => m.split('/').pop()).join(', ');
+    });
+  }
+
+  render(template: string, data: Record<string, any>): string {
+    const compiled = Handlebars.compile(template);
+    return compiled(data);
+  }
+
+  async renderFile(filePath: string, data: Record<string, any>): Promise<string> {
+    const template = await fs.readFile(filePath, 'utf8');
+    return this.render(template, data);
+  }
 }
 ```
 
-## Extensibility Pattern
-```typescript
-// src/features/index.ts
-export const features = {
-  commit: () => import('./commit/index.js'),
-  pr: () => import('./pr/index.js'),
-};
+### Example Template (conventional.hbs)
 
-// Dynamic feature loading
-export async function loadFeature(featureName: string) {
-  if (features[featureName]) {
-    const module = await features[featureName]();
-    return module.default;
-  }
-  throw new Error(`Feature '${featureName}' not found`);
-}
+```handlebars
+Analyze this git diff and generate a Conventional Commit message.
+
+Changed files: {{fileList diff}}
+
+Diff:
+{{truncate diff 4000}}
+
+Generate ONLY the commit message in format: <type>(<scope>): <subject>
 ```
