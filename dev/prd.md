@@ -4,6 +4,8 @@
 **Date:** 2025-11-27
 **Version:** 1.0
 
+**🚨 MVP SCOPE IS ABSOLUTE: This project must deliver a complete, working NPM package. All decisions must prioritize deliverability over additional features. Choose simpler implementations that work over complex ones that add weeks. When in doubt, leave it out.**
+
 ---
 
 ## Executive Summary

@@ -48,6 +48,7 @@ This UX design specification defines the complete terminal user experience for *
 ### Terminal Color Theme
 
 **Primary Colors (accessible, high-contrast):**
+
 - **Success (Green):** `#4ade80` - ✓ operations completed successfully
 - **Error (Red):** `#f87171` - ✗ errors and failures
 - **Warning (Yellow):** `#fbbf24` - ⚠ warnings and cautions
@@ -56,6 +57,7 @@ This UX design specification defines the complete terminal user experience for *
 - **Dim (Gray):** `#9ca3af` - secondary text and de-emphasized content
 
 **Accessibility Compliance:**
+
 - Respects `NO_COLOR` environment variable for colorblind users
 - High contrast ratios (>4.5:1) for all color combinations
 - Supports pipe output (plain text when redirected)
@@ -68,6 +70,7 @@ This UX design specification defines the complete terminal user experience for *
 **Spacing:** Compact but readable with blank lines between major sections
 
 **Formatting Hierarchy:**
+
 - **Labels/Prefixes:** `[INFO]`, `[ERROR]`, `[SUCCESS]` - consistent uppercase with brackets
 - **Commands/Code:** User input and file paths in highlight color
 - **Status Indicators:** Unicode symbols (✓ ✗ ⚠ ℹ) for quick visual scanning
@@ -79,17 +82,20 @@ This UX design specification defines the complete terminal user experience for *
 ### Progress Feedback System
 
 **Immediate Response (within 100ms):**
+
 - Show spinner for any operation >100ms
 - Display checkmarks for completed validation steps
 - Provide status transitions for perceived performance
 
 **Progress Indicators:**
+
 - **Connecting:** `[INFO] Connecting to Ollama...`
 - **Model Loading:** `[INFO] Model loaded... ✓`
 - **Analyzing:** `[INFO] Analyzing changes... ✓`
 - **Generating:** `[INFO] Generating commit message...`
 
 **Spinner Implementation:**
+
 - **Library:** Use `ora` library for cross-platform compatibility
 - **Design:** Unicode dots animation `⠋⠙⠹⠸⠼⠴` (clean, professional)
 - **Performance:** 100ms frame intervals for smooth animation
@@ -97,6 +103,7 @@ This UX design specification defines the complete terminal user experience for *
 - **Zero-config:** Works out-of-the-box with sensible defaults
 
 **Performance Perception:**
+
 - Each step shows immediate acknowledgment
 - Checkmarks appear as operations complete
 - Total perceived time <1 second (even with model loading)
@@ -104,11 +111,13 @@ This UX design specification defines the complete terminal user experience for *
 ### Error Message System
 
 **Error Severity Levels:**
+
 - **ERROR (Red):** Blocking failures that require user action
 - **WARNING (Yellow):** Non-blocking issues or informational alerts
 - **INFO (Blue):** Status updates and guidance
 
 **Error Message Format:**
+
 ```
 [ERROR] ✗ <Clear problem description>
 
@@ -117,6 +126,7 @@ Exit code: <number>
 ```
 
 **Key Error Flows:**
+
 1. **No Staged Changes:**
    - Clear instruction to run `git add` commands
    - Examples for specific files vs all files
@@ -134,6 +144,7 @@ Exit code: <number>
 ### Interactive Selection System
 
 **Commit Type Selection:**
+
 ```
 Select commit type:
 [1] feat: A new feature
@@ -151,12 +162,14 @@ Your choice (0-9):
 ```
 
 **Keyboard Navigation:**
+
 - Arrow keys: Up/Down for selection
 - Number input: Direct selection (1-9, 0)
 - Enter: Confirm selection
 - Ctrl+C: Cancel operation
 
 **Confirmation Prompts:**
+
 ```
 feat: add OAuth2 integration
 Added login endpoint and token validation for third-party authentication.
@@ -165,6 +178,7 @@ Added login endpoint and token validation for third-party authentication.
 ```
 
 **Keyboard Shortcuts:**
+
 - **A:** Approve and commit immediately
 - **E:** Open message in $EDITOR for editing
 - **R:** Regenerate commit message
@@ -173,12 +187,14 @@ Added login endpoint and token validation for third-party authentication.
 ### Editing Workflow
 
 **Editor Integration:**
+
 - Opens user's configured `$EDITOR` (Nano, Vim, Emacs, etc.)
 - Pre-fills editor with generated commit message
 - Falls back to Nano if `$EDITOR` not set
 - Preserves original message if user cancels edit
 
 **Edit Flow:**
+
 1. User selects [E]dit from confirmation
 2. System opens editor with generated message
 3. User modifies and saves
@@ -192,6 +208,7 @@ Added login endpoint and token validation for third-party authentication.
 ### Primary Happy Path Flow
 
 **Step-by-Step Experience:**
+
 ```bash
 $ ollatool commit
 [INFO] Detecting staged changes... ✓
@@ -225,6 +242,7 @@ Prevents infinite loops when API services are temporarily unavailable.
 ```
 
 **Flow Characteristics:**
+
 - Immediate visual feedback at each step
 - Clear progression through validation states
 - Type selection with familiar conventional commit types
@@ -234,6 +252,7 @@ Prevents infinite loops when API services are temporarily unavailable.
 ### Error Recovery Flows
 
 **Flow 1 - No Staged Changes:**
+
 ```bash
 $ ollatool commit
 [ERROR] ✗ No staged changes detected.
@@ -247,6 +266,7 @@ Exit code: 2
 ```
 
 **Flow 2 - Ollama Not Available:**
+
 ```bash
 $ ollatool commit
 [ERROR] ✗ Ollama is not running.
@@ -259,6 +279,7 @@ Exit code: 3
 ```
 
 **Flow 3 - Model Not Available:**
+
 ```bash
 $ ollatool commit
 [INFO] Connecting to Ollama... ✓
@@ -269,6 +290,7 @@ $ ollatool commit
 ```
 
 **Flow 4 - Generation Failure:**
+
 ```bash
 $ ollatool commit
 [INFO] Generating commit message...
@@ -287,6 +309,7 @@ $ ollatool commit
 ### Performance Requirements
 
 **Response Time Targets:**
+
 - CLI initialization: <100ms
 - Ollama connection check: <200ms
 - Model loading: <2s (cold start)
@@ -294,6 +317,7 @@ $ ollatool commit
 - Total end-to-end: <1s (warm model)
 
 **Resource Management:**
+
 - Memory footprint: <2GB during active use
 - CPU usage: ≤50% of one core during inference
 - No persistent background processes
@@ -301,12 +325,14 @@ $ ollatool commit
 ### Accessibility Standards
 
 **WCAG 2.1 Level A Compliance:**
+
 - Color contrast ratios >4.5:1 for all text
 - Keyboard-only navigation support
 - Screen reader compatibility via semantic text
 - Color-blind friendly with NO_COLOR support
 
 **Terminal Compatibility:**
+
 - Works in: iTerm2, Terminal.app, Warp, Alacritty, Kitty
 - Supports: TERM environment variable detection
 - Fallback: Plain text for unsupported terminals
@@ -314,6 +340,7 @@ $ ollatool commit
 ### Error Handling Standards
 
 **Exit Code Mapping:**
+
 - **0:** Success
 - **1:** User cancel/interrupt
 - **2:** No staged changes
@@ -321,6 +348,7 @@ $ ollatool commit
 - **4+:** Unexpected system error
 
 **Error Message Standards:**
+
 - Always include actionable remediation steps
 - Use clear, non-technical language
 - Provide specific commands when helpful
@@ -333,21 +361,25 @@ $ ollatool commit
 ### Why This Design Works for CLI Tools
 
 **1. Immediate Feedback Loop:**
+
 - Visual checkmarks within 100ms confirm system responsiveness
 - Users never wonder "is it working?"
 - Perceived performance matches technical performance goals
 
 **2. Progressive Information Disclosure:**
+
 - Start with validation, progress to selection, then generation
 - Each step builds on previous confirmation
 - Users understand what's happening at all times
 
 **3. Consistent Interaction Patterns:**
+
 - Numbered lists for selection (familiar CLI pattern)
 - Single-key shortcuts for common actions
 - Predictable keyboard behavior across all flows
 
 **4. Error Prevention Through Design:**
+
 - Clear validation before expensive operations (model loading)
 - Unambiguous prompts prevent user confusion
 - Graceful degradation when dependencies unavailable
@@ -355,21 +387,25 @@ $ ollatool commit
 ### Design Decisions & Trade-offs
 
 **Decision 1: Simple Spinners vs Progress Bars**
+
 - **Chosen:** Simple text spinners with checkmarks
 - **Rationale:** Model loading time is unpredictable; spinners work for any duration
 - **Trade-off:** Less precise timing information, but more reliable feedback
 
 **Decision 2: Immediate Type Selection vs Auto-Detection**
+
 - **Chosen:** User-selected commit type via numbered menu
 - **Rationale:** More reliable than AI classification for MVP scope
 - **Trade-off:** One extra interaction step for guaranteed accuracy
 
 **Decision 3: Keyboard Shortcuts vs Mouse/Touch Support**
+
 - **Chosen:** Keyboard-only interaction (number + letter keys)
 - **Rationale:** CLI users expect keyboard-first experience
 - **Trade-off:** No mouse support, but fits CLI context perfectly
 
 **Decision 4: Minimal Terminal Output vs Verbose Logging**
+
 - **Chosen:** Essential information only, no debug output by default
 - **Rationale:** Maintains clean, professional appearance
 - **Trade-off:** Less troubleshooting info, but optional debug mode can be added later
@@ -381,12 +417,14 @@ $ ollatool commit
 ### User Acceptance Testing
 
 **Success Metrics:**
+
 - 90%+ acceptance rate for generated commit messages
 - <1s perceived response time on target hardware
 - Zero user confusion during error states
 - Successful completion of typical developer workflow
 
 **Testing Scenarios:**
+
 1. **Happy Path:** Standard commit generation and approval
 2. **Edit Workflow:** User modifies generated message before commit
 3. **Error Recovery:** All documented error states with remediation
@@ -396,6 +434,7 @@ $ ollatool commit
 ### Implementation Validation Checklist
 
 **Core Functionality:**
+
 - [ ] Detects staged changes correctly
 - [ ] Connects to Ollama at localhost:11434
 - [ ] Loads qwen2.5-coder:1.5b model automatically
@@ -404,6 +443,7 @@ $ ollatool commit
 - [ ] Executes git commit with user-approved message
 
 **User Experience:**
+
 - [ ] Sub-1s response time on warm model
 - [ ] Clear error messages with actionable guidance
 - [ ] Immediate visual feedback for all operations
@@ -411,6 +451,7 @@ $ ollatool commit
 - [ ] Respects NO_COLOR environment variable
 
 **Error Handling:**
+
 - [ ] Graceful handling of missing staged changes
 - [ ] Clear guidance when Ollama not running
 - [ ] Model download and setup for first-time users
@@ -426,6 +467,7 @@ $ ollatool commit
 **Future Commands:** `ollatool pr`, `ollatool screenshot`, `ollatool daemon`
 
 **Design Patterns for Extension:**
+
 - **Consistent Progress Feedback:** All commands use same `[INFO]`/`[ERROR]` format
 - **Unified Keyboard Shortcuts:** [A]pprove, [E]dit, [R]egenerate, [C]ancel where applicable
 - **Shared Color Theme:** Same visual design across all commands
@@ -434,11 +476,13 @@ $ ollatool commit
 ### Optional Features (Post-MVP)
 
 **Configuration System:**
+
 - Custom commit types and templates
 - Model selection and management
 - Default behavior flags (--auto, --dry-run, --all)
 
 **Enhanced Feedback:**
+
 - Model confidence indicators
 - Context-aware suggestions
 - Advanced error diagnostics
@@ -456,6 +500,7 @@ $ ollatool commit
 ### Ready for Implementation
 
 All UX decisions documented with:
+
 - **Clear implementation requirements** for each interaction pattern
 - **Technical specifications** for performance and accessibility
 - **Visual design guidelines** with exact color codes and formatting
