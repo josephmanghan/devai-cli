@@ -90,7 +90,8 @@ The MVP focuses exclusively on automating git commit message generation with str
 
 2. **Ollama Lifecycle Management**
    - Auto-detect Ollama availability at `http://localhost:11434`
-   - If not running: Attempt to spawn Ollama process if installed (detached mode), OR provide installation guidance and exit
+   - If not running: Provide clear instructions to start it (`ollama serve`) and exit gracefully
+   - If not installed: Provide installation link (https://ollama.com) and exit gracefully
    - Auto-provision required model if not present (with progress bar)
    - Handle model loading delays gracefully with spinner/progress indicator
    - Fail fast if Ollama cannot be made available
@@ -167,6 +168,7 @@ The MVP focuses exclusively on automating git commit message generation with str
 - `--all` flag: Auto-stage all changes before generating commit
 - Git hooks: `prepare-commit-msg` hook installer for native git integration
 - `--hint` flag: Provide manual context hint to guide generation (e.g., `--hint "fixing login bug"`)
+- Auto-start Ollama: Automatically spawn Ollama daemon if installed but not running (simplifies user experience)
 
 **Context Enhancement:**
 
@@ -286,6 +288,31 @@ The model selection is subject to validation testing during implementation. If Q
 
 The tool architecture must support model switching without code changes. Model name should be configurable via environment variable during development to enable rapid iteration and testing. User-facing model selection is a post-MVP feature—MVP uses a single hard-coded default model.
 
+**Implementation Considerations (for Architecture phase):**
+
+The following Ollama request parameters require technical decisions during architecture/development:
+
+- **Temperature**: Controls output randomness. MVP likely uses fixed low value (e.g., 0.1-0.2) for deterministic commit messages.
+- **Keep-alive**: Controls how long model stays in memory. MVP may use `-1` (indefinite) or high value for performance, avoiding cold-start latency.
+- **Context window (num_ctx)**: Model default should suffice for MVP, but architecture must handle detection when diff exceeds limits.
+
+**Alternative Validation Strategy:**
+
+- **Single-pass validation** (simpler, faster): Generate full message, validate with regex, retry if invalid.
+- **Multi-pass sectioned generation** (more reliable, slower): Prompt model separately for type, description, body; validate each section individually before assembly.
+- Trade-off: Reliability vs. latency. Start with single-pass; consider multi-pass if reliability issues emerge during testing.
+
+**CRITICAL: First-Run Model Provisioning Flow:**
+
+- **Problem**: Tool requires both base model download AND custom model creation (with system prompt baked in via Modelfile). This only works if Ollama is running.
+- **Ollama model creation**: Tool doesn't just use base model + dynamic prompt. It creates a custom Ollama model via Modelfile that includes the system prompt, creating a new model (e.g., `[tool-name]-commit:latest`) based on `qwen2.5-coder:1.5b`.
+- **Recommended approach**:
+  - **npm postinstall hook**: Attempt full setup (download base model + create custom model). If Ollama not running, exit gracefully: "Ollama not detected. Install Ollama, run `ollama serve`, then: [tool-name] setup"
+  - **Explicit setup command**: `[tool-name] setup` - Downloads base model (if missing) AND creates custom model with system prompt. Shows progress for both operations.
+  - **Just-in-time fallback**: If custom model somehow missing when user runs `commit`, recreate it then (edge case only)
+- **User flow**: npm install tool → install Ollama → `ollama serve` → [postinstall succeeds OR user runs setup] → `[tool-name] commit`
+- **Architecture phase must define**: Modelfile structure, custom model naming convention, setup command implementation
+
 ---
 
 ## User Experience Principles
@@ -324,7 +351,7 @@ While this is a CLI tool without a graphical interface, user experience is param
 1. User: git add <files>
 2. User: [tool-name] commit
 3. Tool: [Check] Validates staged changes exist
-4. Tool: [Check] Detects Ollama availability (spawns if needed)
+4. Tool: [Check] Detects Ollama availability (exits if not running)
 5. Tool: [Prompt] "Select commit type: 1) feat  2) fix  3) docs ..."
 6. User: [Input] 2
 7. Tool: [Spinner] "Analyzing staged changes..."
@@ -365,9 +392,9 @@ While this is a CLI tool without a graphical interface, user experience is param
 3. Tool: [Error] "Ollama is not running.
 
    Start Ollama:
-     ollama serve    # if installed
+     ollama serve
 
-   Or install Ollama:
+   Or install from:
      https://ollama.com/download"
 4. Tool: [Exit code 3]
 ```
@@ -396,13 +423,13 @@ These requirements define WHAT capabilities the tool must have to deliver the pr
 
 **FR7**: The tool can detect whether the Ollama daemon is running and accessible at the configured endpoint.
 
-**FR8**: The tool can query Ollama for available models on the local system.
+**FR8**: The tool can check if the required model (hard-coded for MVP) is present on the local system.
 
 **FR9**: The tool can automatically download (pull) the required model if it is not present, displaying download progress.
 
 **FR10**: The tool can send inference requests to Ollama with custom prompts and receive streaming responses.
 
-**FR11**: The tool can configure Ollama request parameters (temperature, context window, keep-alive).
+**FR11**: The tool can detect when the diff exceeds the model's context window and exit with an error message suggesting to stage fewer files.
 
 **FR12**: The tool can detect and report Ollama connection failures with actionable error messages.
 
@@ -424,7 +451,7 @@ These requirements define WHAT capabilities the tool must have to deliver the pr
 
 **FR19**: The tool sends diff context, file status, and commit type to the model for message generation.
 
-**FR20**: The tool streams generated tokens in real-time to provide visual feedback during inference.
+**FR20**: The tool provides visual feedback during message generation to indicate processing is occurring (e.g., spinner or token streaming).
 
 **FR21**: The tool generates commit messages with three components: type, description (subject), and body.
 
@@ -432,67 +459,65 @@ These requirements define WHAT capabilities the tool must have to deliver the pr
 
 **FR23**: Generated descriptions are concise (target: 50 characters or less for subject line).
 
-**FR24**: The tool can truncate or summarize diffs that exceed the model's context window capacity.
-
-**FR25**: If the model returns conversational filler (e.g., "Here is a commit message:"), the tool strips it from output.
+**FR24**: The tool ensures the final commit message contains no conversational filler (e.g., "Here is a commit message:"). Primary strategy: strong prompt engineering to prevent filler generation. Fallback: detection and stripping (complex to implement reliably).
 
 ### Interactive User Workflow
 
-**FR26**: The tool displays generated commit messages in the terminal for user review before committing.
+**FR25**: The tool displays generated commit messages in the terminal for user review before committing.
 
-**FR27**: Users can approve generated commit messages to proceed with git commit.
+**FR26**: Users can approve generated commit messages to proceed with git commit.
 
-**FR28**: Users can edit commit messages by opening them in their configured CLI editor ($EDITOR).
+**FR27**: Users can edit commit messages by opening them in their configured CLI editor ($EDITOR).
 
-**FR29**: Users can regenerate commit messages if unsatisfied with the initial output.
+**FR28**: Users can regenerate commit messages if unsatisfied with the initial output.
 
-**FR30**: Users can cancel the commit operation at any point without side effects.
+**FR29**: Users can cancel the commit operation at any point without side effects.
 
-**FR31**: The tool displays clear action prompts with keyboard shortcuts ([A]pprove, [E]dit, [R]egenerate, [C]ancel).
+**FR30**: The tool displays clear action prompts with keyboard shortcuts ([A]pprove, [E]dit, [R]egenerate, [C]ancel).
 
-**FR32**: When users edit messages, the tool captures the edited content and uses it for the commit.
+**FR31**: When users edit messages, the tool captures the edited content and uses it for the commit.
 
-**FR33**: The tool confirms successful commits with a summary of the committed message.
+**FR32**: The tool confirms successful commits with a summary of the committed message.
 
 ### Error Handling & Edge Cases
 
-**FR34**: When no staged changes exist, the tool exits with an error message explaining how to stage files.
+**FR33**: When no staged changes exist, the tool exits with an error message explaining how to stage files.
 
-**FR35**: When Ollama is not running, the tool exits with instructions to start or install Ollama.
+**FR34**: When Ollama is not running, the tool exits with instructions to start or install Ollama.
 
-**FR36**: When the required model is not available, the tool offers to download it automatically.
+**FR35**: When the required model is not available, the tool offers to download it automatically.
 
-**FR37**: When git commands fail (e.g., not a git repo), the tool displays git's error message and exits.
+**FR36**: When git commands fail (e.g., not a git repo), the tool displays git's error message and exits.
 
-**FR38**: When model inference fails or times out, the tool reports the error and allows retry.
+**FR37**: When model inference fails or times out, the tool reports the error and allows retry.
 
-**FR39**: The tool distinguishes between user errors (exit code 1-2), system errors (exit code 3), and bugs (exit code 4+).
+**FR38**: The tool distinguishes between user errors (exit code 1-2), system errors (exit code 3), and bugs (exit code 4+).
 
-**FR40**: All error messages include actionable remediation steps, not just problem descriptions.
+**FR39**: All error messages include actionable remediation steps, not just problem descriptions.
 
 ### Performance & Resource Management
 
-**FR41**: The tool completes the full workflow (command invocation to commit) in under 1 second on M1/M2 hardware.
+**FR40**: The tool completes the full workflow (command invocation to commit) in under 1 second on M1/M2 hardware.
 
-**FR42**: The tool provides immediate visual feedback (spinner/progress) when waiting for Ollama responses.
+**FR41**: The tool provides immediate visual feedback (spinner/progress) when waiting for Ollama responses.
 
-**FR43**: The tool respects system resources by using quantized models with memory footprints under 2GB.
+**FR42**: The tool respects system resources by using quantized models with memory footprints under 2GB.
 
-**FR44**: The tool can operate while other development tools (IDE, browser, Docker) are running without causing memory pressure.
+**FR43**: The tool can operate while other development tools (IDE, browser, Docker) are running without causing memory pressure.
 
 ### Configuration & Extensibility
 
-**FR45**: The tool uses sensible defaults that work without any configuration (zero-config principle).
+**FR44**: The tool uses sensible defaults that work without any configuration (zero-config principle).
 
-**FR46**: The tool respects the `OLLAMA_HOST` environment variable for custom Ollama endpoints.
+**FR45**: The tool respects the `OLLAMA_HOST` environment variable for custom Ollama endpoints.
 
-**FR47**: The tool respects the `$EDITOR` environment variable (when set to a terminal editor like Nano/Vim/Emacs) for editing commit messages, with Nano as the fallback if `$EDITOR` is not set.
+**FR46**: The tool respects the `$EDITOR` environment variable (when set to a terminal editor like Nano/Vim/Emacs) for editing commit messages, with Nano as the fallback if `$EDITOR` is not set.
 
-**FR48**: The tool provides `--help` flag to display usage information and available commands.
+**FR47**: The tool provides `--help` flag to display usage information and available commands.
 
-**FR49**: The tool provides `--version` flag to display current version number.
+**FR48**: The tool provides `--version` flag to display current version number.
 
-**FR50**: The tool's architecture supports adding new commands (pr, screenshot) without breaking existing functionality.
+**FR49**: The tool's architecture supports adding new commands (pr, screenshot) without breaking existing functionality.
 
 ---
 
@@ -510,9 +535,9 @@ These requirements define HOW WELL the system must perform, not what it does. Th
 
 **NFR-P2: Resource Efficiency**
 
-- Maximum memory footprint: 2GB RAM for model + inference runtime
+- Maximum memory footprint: 2GB RAM for model + inference runtime during active use
 - CPU usage: ≤50% of one performance core during active inference
-- Idle resource usage: 0% when not actively generating (no persistent daemon in MVP)
+- Idle resource usage: 0% when not actively generating (model unloaded from memory after use; Ollama daemon persistence is user-managed, not controlled by tool)
 
 **NFR-P3: Startup Performance**
 
@@ -629,7 +654,7 @@ These requirements define HOW WELL the system must perform, not what it does. Th
 - README includes quickstart, installation, troubleshooting, and examples
 - Inline code comments follow style guide patterns (self-documenting code preferred)
 
-**NFR-U4: Observability**
+**NFR-U4: Observability** (post-MVP)
 
 - Optional debug logging via `DEBUG=[tool-name]` environment variable
 - Logs include: git command execution, Ollama requests/responses, validation results
@@ -645,9 +670,10 @@ These requirements define HOW WELL the system must perform, not what it does. Th
 
 **NFR-M2: Prompt Engineering**
 
-- System prompts stored in separate files (not hardcoded in logic)
-- Few-shot examples easily modifiable for experimentation and improvement
-- Model-specific prompt variations supported for different SLMs
+- System prompts defined in Modelfile and baked into custom Ollama model during setup (e.g., `[tool-name]-commit:latest` created from base model + system prompt)
+- Few-shot examples and prompt templates stored in separate files for easy modification and experimentation
+- Custom model recreated when prompts are updated (via setup or dedicated command)
+- Model-specific prompt variations supported for different base models
 
 **NFR-M3: Extensibility**
 
@@ -663,7 +689,7 @@ These requirements define HOW WELL the system must perform, not what it does. Th
 
 This PRD defines a local-first CLI tool for automating git commit message generation with these core attributes:
 
-- **50 Functional Requirements** covering git integration, Ollama management, commit generation, user workflow, error handling, and extensibility
+- **49 Functional Requirements** covering git integration, Ollama management, commit generation, user workflow, error handling, and extensibility
 - **Privacy-first architecture** guaranteeing 100% local processing with zero data egress
 - **Sub-1-second performance target** on M1/M2 hardware to preserve developer flow
 - **Zero-config experience** with automatic Ollama detection and model provisioning
