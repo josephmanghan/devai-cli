@@ -86,38 +86,45 @@ The MVP focuses exclusively on automating git commit message generation with str
 1. **Pre-commit Validation**
    - Detect if no staged changes exist
    - Exit gracefully with clear guidance: "No staged changes. Run: git add <files>"
+   - Fail fast before doing any heavy operations
 
-2. **Context Gathering**
-   - Execute `git diff --cached` to capture staged changes only
-   - Execute `git status --short` for concise file status indicators (M/A/D)
-   - Analyze diff content and file paths to inform commit classification
+2. **Ollama Lifecycle Management**
+   - Auto-detect Ollama availability at `http://localhost:11434`
+   - If not running: Attempt to spawn Ollama process if installed (detached mode), OR provide installation guidance and exit
+   - Auto-provision required model if not present (with progress bar)
+   - Handle model loading delays gracefully with spinner/progress indicator
+   - Fail fast if Ollama cannot be made available
 
 3. **Commit Type Elicitation**
    - Present numbered list of Conventional Commit types to user: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
    - Use arrow-key selection or number input for type choice
-   - Inject elicited type into prompt to guide model generation
+   - Lightweight user interaction before heavy context gathering
+   - Store selected type to inject into prompt later
 
-4. **Model Inference**
-   - Auto-detect Ollama availability at `http://localhost:11434`
-   - Auto-provision required model if not present (with progress bar)
-   - Send context-rich prompt with few-shot examples for Conventional Commits format
+4. **Context Gathering**
+   - Execute `git diff --cached` to capture staged changes only
+   - Execute `git status --short` for concise file status indicators (M/A/D)
+   - Analyze diff content and file paths to inform commit classification
+   - Only performed after confirming Ollama is available and type is selected
+
+5. **Model Inference**
+   - Construct prompt with few-shot examples, user-selected type, and diff context
+   - Send to Ollama with Conventional Commits format constraints
    - Stream response with sub-1s latency target
+   - Handle inference failures with retry option
 
-5. **Interactive Preview & Edit**
-   - Display generated commit message in terminal
+6. **Format Compliance Validation**
+   - Post-generation regex validation: `/^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):.+/`
+   - Enforce Conventional Commits format: `<type>: <description>\n\n<body>`
+   - Silent retry mechanism: if regex fails, automatically retry generation (up to max retries - TBD) without exposing failures to user
+   - Only show user messages that pass first-level validation check
+   - User can then choose to edit or regenerate if content quality is unsatisfactory
+
+7. **Interactive Preview & Edit**
+   - Display generated commit message in terminal for review
    - Offer options: [A]pprove, [E]dit, [R]egenerate, [C]ancel
    - Edit: Open default CLI editor (Nano/Vim) with message pre-filled for user modification
    - Approve: Execute `git commit -m "..."` with generated or edited message
-
-6. **Format Compliance**
-   - Enforce Conventional Commits format: `<type>: <description>\n\n<body>`
-   - Post-generation regex validation: `/^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):.+/`
-   - Graceful degradation: if regex fails, allow user to manually select type and retry generation
-
-7. **Ollama Lifecycle Management**
-   - Detect if Ollama daemon is running; if not, provide installation guidance
-   - Spawn Ollama process if installed but not running (detached mode)
-   - Handle model loading delays gracefully with spinner/progress indicator
 
 **In-Scope Constraints:**
 
@@ -133,7 +140,15 @@ The MVP focuses exclusively on automating git commit message generation with str
 - Git hooks integration (prepare-commit-msg)
 - Multi-language commit message support
 - Custom configuration files
-- `--dry-run`, `--auto`, or `--all` flags
+- `--dry-run` and `--auto` flags
+
+**Possible MVP Scope (Stretch Goal):**
+
+- `--all` flag: Auto-stage all changes before generating commit
+  - Aligns with zero-config philosophy (convenience)
+  - Lower priority: manual staging is more common workflow
+  - Implementation: simple `git add .` before context gathering
+  - Decision: Include if time permits, otherwise defer to post-MVP
 
 ### Growth Features (Post-MVP)
 
@@ -163,7 +178,7 @@ The MVP focuses exclusively on automating git commit message generation with str
 **Conventional Commits Extensions:**
 
 - Scope support: Add optional `(scope)` field based on file path analysis or user elicitation
-- Footer support: Breaking changes (`BREAKING CHANGE:`), issue references (`Refs: #123`)
+- Footer support: e.g. Breaking changes (`BREAKING CHANGE:`), issue references (`Refs: #123`)
 - GitMoji support: Optional emoji prefixes for visual commit classification (🐛 fix, ✨ feat)
 
 ### Vision (Future)
@@ -229,7 +244,7 @@ As a command-line developer tool, this product must adhere to Unix philosophy an
 
 - Zero-config by default (sensible defaults for 80% use case)
 - Optional config file: `~/.config/[tool-name]/config.json` for power users (post-MVP)
-- Environment variables: `OLLAMA_HOST`, `OLLAMA_MODEL` for override capability
+- Environment variables: `OLLAMA_HOST`, `OLLAMA_MODEL` for override capability (post-MVP)
 - Per-repo config: `.toolrc` file in repo root for team-wide settings (post-MVP)
 
 **Shell Integration:**
@@ -237,7 +252,7 @@ As a command-line developer tool, this product must adhere to Unix philosophy an
 - Installation via npm: `npm install -g [tool-name]`
 - Binary available in PATH immediately after installation
 - Shell completion support (bash, zsh, fish) for command and flag autocomplete (post-MVP)
-- Respect user's `$EDITOR` environment variable for interactive editing
+- Respect user's `$EDITOR` environment variable for terminal editor selection (Nano, Vim, Emacs, etc.), with fallback to Nano if not set
 
 **Error Handling Philosophy:**
 
@@ -269,7 +284,7 @@ The model selection is subject to validation testing during implementation. If Q
 
 **Architecture Flexibility:**
 
-The tool architecture must support model switching without code changes. Model name should be configurable via environment variable or config file, allowing rapid iteration during testing and user customization post-release.
+The tool architecture must support model switching without code changes. Model name should be configurable via environment variable during development to enable rapid iteration and testing. User-facing model selection is a post-MVP feature—MVP uses a single hard-coded default model.
 
 ---
 
@@ -297,9 +312,9 @@ While this is a CLI tool without a graphical interface, user experience is param
 
 **Graceful Degradation:**
 
-- If Ollama is not installed: provide installation link and exit gracefully (like `colima` tool).
-- If model is unavailable: offer to auto-download with progress bar and size estimate.
-- If diff is too large: truncate intelligently and warn user that context was limited.
+- If Ollama is not installed or not running: provide installation/startup instructions and exit gracefully (similar to how Docker fails with a helpful message when Colima isn't running).
+- If model is unavailable: offer to auto-download with progress bar and size estimate (edge case where user deleted model after installation).
+- If the context window is being exceeded: exit with error explaining the limitation and suggest staging fewer files (intelligent truncation is post-MVP).
 
 ### Key Interaction Patterns
 
@@ -308,23 +323,25 @@ While this is a CLI tool without a graphical interface, user experience is param
 ```
 1. User: git add <files>
 2. User: [tool-name] commit
-3. Tool: [Spinner] "Analyzing staged changes..."
-4. Tool: [Prompt] "Select commit type: 1) feat  2) fix  3) docs ..."
-5. User: [Input] 2
-6. Tool: [Streaming] "fix: handle null token in login service\n\nAdded null check..."
-7. Tool: [Prompt] "[A]pprove [E]dit [R]egenerate [C]ancel"
-8. User: [Input] a
-9. Tool: [Success] "✓ Committed: fix: handle null token in login service"
+3. Tool: [Check] Validates staged changes exist
+4. Tool: [Check] Detects Ollama availability (spawns if needed)
+5. Tool: [Prompt] "Select commit type: 1) feat  2) fix  3) docs ..."
+6. User: [Input] 2
+7. Tool: [Spinner] "Analyzing staged changes..."
+8. Tool: [Streaming] "fix: handle null token in login service\n\nAdded null check..."
+9. Tool: [Prompt] "[A]pprove [E]dit [R]egenerate [C]ancel"
+10. User: [Input] a
+11. Tool: [Success] "✓ Committed: fix: handle null token in login service"
 ```
 
 **Edit Flow:**
 
 ```
-7. Tool: [Prompt] "[A]pprove [E]dit [R]egenerate [C]ancel"
-8. User: [Input] e
-9. Tool: [Opens $EDITOR with message]
-10. User: [Edits message, saves, closes]
-11. Tool: [Success] "✓ Committed: <edited message>"
+9. Tool: [Prompt] "[A]pprove [E]dit [R]egenerate [C]ancel"
+10. User: [Input] e
+11. Tool: [Opens $EDITOR with message]
+12. User: [Edits message, saves, closes]
+13. Tool: [Success] "✓ Committed: <edited message>"
 ```
 
 **Error Flow - No Staged Changes:**
@@ -399,7 +416,7 @@ These requirements define WHAT capabilities the tool must have to deliver the pr
 
 **FR16**: The tool can validate generated commit messages against Conventional Commits format using regex.
 
-**FR17**: If generated output does not match expected format, the tool requests user to manually select type and retries.
+**FR17**: If generated output does not match expected format, the tool silently retries generation (up to a maximum retry limit) without exposing validation failures to the user, ensuring only valid format messages are presented.
 
 ### Commit Message Generation
 
@@ -469,7 +486,7 @@ These requirements define WHAT capabilities the tool must have to deliver the pr
 
 **FR46**: The tool respects the `OLLAMA_HOST` environment variable for custom Ollama endpoints.
 
-**FR47**: The tool respects the `$EDITOR` environment variable when opening messages for editing.
+**FR47**: The tool respects the `$EDITOR` environment variable (when set to a terminal editor like Nano/Vim/Emacs) for editing commit messages, with Nano as the fallback if `$EDITOR` is not set.
 
 **FR48**: The tool provides `--help` flag to display usage information and available commands.
 
