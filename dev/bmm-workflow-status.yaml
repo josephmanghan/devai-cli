@@ -59,7 +59,7 @@ workflow_status: 'phases:
   agent: "pm"
   command: "prd"
   output: "Product Requirements Document with FRs and NFRs"
-  status: "required"
+  status: "dev/prd.md"
 
   - id: "validate-prd"
   optional: true
@@ -73,7 +73,7 @@ workflow_status: 'phases:
   agent: "ux-designer"
   command: "create-design"
   note: "Determined after PRD - user/agent decides if needed"
-  status: "conditional"
+  status: "dev/ux-design-specification.md"
 
   - phase: 2
   name: "Solutioning"
