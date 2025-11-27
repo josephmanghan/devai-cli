@@ -295,6 +295,11 @@ The following Ollama request parameters require technical decisions during archi
 - **Temperature**: Controls output randomness. MVP likely uses fixed low value (e.g., 0.1-0.2) for deterministic commit messages.
 - **Keep-alive**: Controls how long model stays in memory. MVP may use `-1` (indefinite) or high value for performance, avoiding cold-start latency.
 - **Context window (num_ctx)**: Model default should suffice for MVP, but architecture must handle detection when diff exceeds limits.
+- **UX Design Decision:**
+  **Spinner Library:** Chose `ora` library for cross-platform terminal animations
+  **Design:** Unicode dots animation for professional appearance
+  **Rationale:** Battle-tested, handles Windows/macOS/Linux differences automatically
+  **MVP Scope:** Zero additional complexity for users, reliable performance feedback
 
 **Alternative Validation Strategy:**
 
