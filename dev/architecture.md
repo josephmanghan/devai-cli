@@ -818,7 +818,7 @@ const maxFormatRetries = 3;
 // src/core/domain/commit-message.ts
 export class CommitMessage {
   constructor(
-    public readonly type: string,
+    public readonly commitType: string,
     public readonly description: string,
     public readonly body?: string,
     public readonly scope?: string,
@@ -827,15 +827,15 @@ export class CommitMessage {
   }
 
   private validate(): void {
-    if (!this.type || !this.description) {
-      throw new ValidationError('Type and description are required');
+    if (!this.commitType || !this.description) {
+      throw new ValidationError('Commit type and description are required');
     }
   }
 
   toString(): string {
     const scopePart = this.scope ? `(${this.scope})` : '';
     const bodyPart = this.body ? `\n\n${this.body}` : '';
-    return `${this.type}${scopePart}: ${this.description}${bodyPart}`;
+    return `${this.commitType}${scopePart}: ${this.description}${bodyPart}`;
   }
 
   static fromString(raw: string): CommitMessage {
@@ -843,8 +843,8 @@ export class CommitMessage {
     if (!match) {
       throw new ValidationError('Invalid commit message format');
     }
-    const [, type, scope, description, body] = match;
-    return new CommitMessage(type, description, body, scope);
+    const [, commitType, scope, description, body] = match;
+    return new CommitMessage(commitType, description, body, scope);
   }
 }
 ```
@@ -855,24 +855,18 @@ export class CommitMessage {
 
 ```typescript
 // src/core/ports/llm-provider.ts
-export interface GenerateOptions {
-  temperature?: number;
-  maxTokens?: number;
-  keepAlive?: number;
-}
-
 export interface LlmProvider {
   /**
-   * Generate commit message from prompt
+   * Generate commit message from git diff context
    * @throws SystemError if Ollama unavailable
    * @throws ValidationError if generation fails after retries
    */
-  generate(prompt: string, options?: GenerateOptions): Promise<string>;
+  generateCommitMessage(prompt: string): Promise<string>;
 
   /**
-   * Check if LLM service is available
+   * Check if Ollama service is running and accessible
    */
-  checkHealth(): Promise<boolean>;
+  isServiceAvailable(): Promise<boolean>;
 }
 ```
 
@@ -920,7 +914,7 @@ export interface EditorService {
 ```typescript
 // src/infrastructure/llm/ollama-adapter.ts
 import { Ollama } from 'ollama';
-import type { LlmProvider, GenerateOptions } from '@/core/ports/llm-provider';
+import type { LlmProvider } from '@/core/ports/llm-provider';
 import { SystemError, ValidationError } from '@/core/types/errors.types';
 
 export class OllamaAdapter implements LlmProvider {
@@ -929,16 +923,12 @@ export class OllamaAdapter implements LlmProvider {
     private modelName: string = 'ollatool-commit',
   ) {}
 
-  async generate(prompt: string, options?: GenerateOptions): Promise<string> {
+  async generateCommitMessage(prompt: string): Promise<string> {
     try {
       const response = await this.client.generate({
         model: this.modelName,
         prompt,
-        options: {
-          temperature: options?.temperature ?? 0.2,
-          num_ctx: options?.maxTokens ?? 131072,
-        },
-        keep_alive: options?.keepAlive ?? 0,
+        keep_alive: 0, // Unload model after execution
       });
 
       return response.response.trim();
@@ -950,7 +940,7 @@ export class OllamaAdapter implements LlmProvider {
     }
   }
 
-  async checkHealth(): Promise<boolean> {
+  async isServiceAvailable(): Promise<boolean> {
     try {
       await this.client.list();
       return true;
