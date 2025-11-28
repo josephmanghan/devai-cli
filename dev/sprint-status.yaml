@@ -46,8 +46,8 @@ development_status:
 
   # Epic 1: Foundation & Project Setup (6 stories)
   epic-1: contexted
-  1-1-initialize-typescript-project-with-esm: backlog
-  1-2-configure-build-tooling-tsup: backlog
+  1-1-initialize-typescript-project-with-esm: done
+  1-2-configure-build-tooling-tsup: ready-for-dev
   1-3-setup-testing-framework-vitest: backlog
   1-4-setup-cli-framework-commander-js: backlog
   1-5-setup-hexagonal-architecture-structure: backlog

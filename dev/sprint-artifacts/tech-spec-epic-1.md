@@ -87,7 +87,7 @@ Epic 1 establishes the foundational modules and project structure. No business l
 
 ### Data Models and Contracts
 
-Epic 1 is infrastructure-focused with no domain data models. Configuration files define contracts for tooling:
+Epic 1 is infrastructure-focused with no domain data models. This is intentional as business logic and domain entities belong in Epics 2-7. Configuration files define contracts for tooling and establish patterns for future data modeling:
 
 **package.json Contract:**
 
@@ -155,7 +155,7 @@ export class ExampleAdapter implements ExamplePort {
 }
 ```
 
-**Note:** Real domain models (CommitMessage, GitContext, OllamaConfig) are defined in Epics 2-4.
+**Epic 1 Data Model Strategy:** This section establishes configuration contracts and example patterns. Real domain models (CommitMessage, GitContext, OllamaConfig) will be defined in Epics 2-4 with full entity relationships, validation rules, and business logic constraints. The example port/adapter pattern in Story 1.5 demonstrates how domain models will integrate with the hexagonal architecture.
 
 ### APIs and Interfaces
 

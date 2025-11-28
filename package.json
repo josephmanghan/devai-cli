@@ -3,7 +3,15 @@
   "version": "0.1.0",
   "description": "Local-first CLI tool for AI-powered git commit message generation using Ollama",
   "type": "module",
+  "bin": {
+    "ollatool": "./dist/index.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/index.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "fix": "npm run format",
@@ -18,10 +26,13 @@
     "@types/debug": "^4.1.12",
     "@types/node": "^24.10.1",
     "@vitest/coverage-v8": "^4.0.14",
+    "commander": "14.0.2",
     "debug": "^4.4.3",
     "execa": "^9.6.0",
     "prettier": "^3.0.0",
     "prettier-plugin-embed": "^0.5.0",
+    "tsup": "latest",
+    "tsx": "latest",
     "typescript": "^5.9.3",
     "vitest": "^4.0.14"
   },
