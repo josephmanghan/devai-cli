@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>0</epicId>
+    <storyId>0.1</storyId>
+    <title>Create Test Infrastructure Core</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>dev/sprint-artifacts/0-1-create-test-infrastructure-core.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>comprehensive test helper templates with smoke tests</iWant>
+    <soThat>all subsequent development can be reliably tested without external dependencies</soThat>
+    <tasks>
+      <task id="task-1">Create tests/helpers/ directory structure</task>
+      <task id="task-2">Implement GitTestHarness class with init, cleanup, writeFile, add, getDiff, getStatus methods</task>
+      <task id="task-3">Implement MockLlmProvider class implementing LlmProvider port interface</task>
+      <task id="task-4">Implement PerformanceTracker utility for operation timing</task>
+      <task id="task-5">Write smoke tests for all helpers</task>
+      <task id="task-6">Review code against clean code standards</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="ac-1">
+      <title>GitTestHarness Implementation</title>
+      <details>tests/helpers/git-harness.ts created with GitTestHarness class. Creates isolated temporary repositories, includes cleanup mechanism, implements required methods (init, cleanup, writeFile, add, getDiff, getStatus). Uses proper TypeScript types and documentation.</details>
+    </criterion>
+    <criterion id="ac-2">
+      <title>MockLlmProvider Implementation</title>
+      <details>tests/helpers/mock-llm-provider.ts created implementing LlmProvider port interface. Provides instant deterministic responses without Ollama. Includes mockResponse, mockError, getCallCount, getLastPrompt methods. Follows hexagonal architecture adapter pattern.</details>
+    </criterion>
+    <criterion id="ac-3">
+      <title>PerformanceTracker Implementation</title>
+      <details>tests/helpers/performance-tracker.ts created. Measures CLI execution time and resource usage. Records operation timings with metadata support. Implements PerformanceMetric interface with operation, duration, timestamp, metadata fields.</details>
+    </criterion>
+    <criterion id="ac-4">
+      <title>Smoke Tests</title>
+      <details>All helpers have working smoke tests: GitTestHarness creates and cleans temp repo, MockLlmProvider returns mocked string, PerformanceTracker records operation timing.</details>
+    </criterion>
+    <criterion id="ac-5">
+      <title>Code Quality</title>
+      <details>All helpers adhere to clean-code.md standards. Functions ≤15 lines. Proper class member ordering: constructor → private properties → public properties → public methods → private methods. Self-documenting code with "why" comments only.</details>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Project Structure (Pragmatic Hexagonal / Ports & Adapters)</section>
+        <snippet>For developers new to this pattern, think of it as "Plugs and Sockets": Ports (Sockets) are interfaces defined in the core/ layer describing WHAT the application needs. Adapters (Plugs) are classes in the infrastructure/ layer implementing HOW it is done.</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Directory Layout (Project Structure)</section>
+        <snippet>tests/ folder includes helpers/ subdirectory for test utilities (git-harness, mock-llm-provider, performance-tracker). Test files use co-located .test.ts pattern adjacent to implementation files.</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Error Handling Strategy</section>
+        <snippet>Typed error classes with exit codes. User=2, System=3, Validation=4, Unexpected=5. Clear remediation guidance, distinguishes user errors from bugs, actionable messages.</snippet>
+      </doc>
+      <doc>
+        <path>dev/sprint-artifacts/tech-spec-epic-0.md</path>
+        <title>Epic Technical Specification: Test Infrastructure & CI Setup</title>
+        <section>Test Infrastructure Components</section>
+        <snippet>GitTestHarness provides isolated test repositories. MockLlmProvider implements LlmProvider port interface. PerformanceTracker follows clean code standards. All helpers use hexagonal adapter patterns.</snippet>
+      </doc>
+      <doc>
+        <path>dev/styleguides/clean-code.md</path>
+        <title>Clean Code Standards</title>
+        <section>Function Size and Class Organization</section>
+        <snippet>Maximum 15 lines per function. Class member ordering: Constructor → Private Properties → Public Properties → Public Methods → Private Methods. DRY principle, self-documenting code with "why" comments only.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>dev/architecture.md</path>
+        <kind>interface-definition</kind>
+        <symbol>LlmProvider</symbol>
+        <lines>1406-1419</lines>
+        <reason>MockLlmProvider must implement this port interface. Defines generateCommitMessage and isServiceAvailable methods that context and tests need to understand.</reason>
+      </artifact>
+      <artifact>
+        <path>dev/architecture.md</path>
+        <kind>interface-definition</kind>
+        <symbol>GitService</symbol>
+        <lines>1425-1443</lines>
+        <reason>GitTestHarness must mirror this interface. Defines getStagedDiff, getStatus, commit methods that test harness needs to implement.</reason>
+      </artifact>
+      <artifact>
+        <path>dev/architecture.md</path>
+        <kind>implementation-reference</kind>
+        <symbol>GenerateCommit use case</symbol>
+        <lines>883-1002</lines>
+        <reason>Shows clean code patterns: functions ≤15 lines, proper class member ordering, error handling patterns that test helpers must follow.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="execa" version="9.6.0">Git command execution for GitTestHarness</package>
+        <package name="vitest" version="latest">Test runner and framework</package>
+        <package name="typescript" version="latest">Type safety for helpers</package>
+        <package name="@types/node" version="latest">Node.js type definitions</package>
+        <package name="debug" version="latest">Logging for test infrastructure</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <category>Architecture</category>
+      <rule>All test helpers must follow hexagonal architecture pattern. Use interfaces for contracts, not concrete classes.</rule>
+    </constraint>
+    <constraint>
+      <category>Code Quality</category>
+      <rule>Functions maximum 15 lines per dev/styleguides/clean-code.md. Extract private helper methods for complex logic.</rule>
+    </constraint>
+    <constraint>
+      <category>Class Structure</category>
+      <rule>Class member ordering: Constructor → Private Properties → Public Properties → Public Methods → Private Methods (see architecture.md Implementation Patterns)</rule>
+    </constraint>
+    <constraint>
+      <category>Error Handling</category>
+      <rule>Use try/finally for cleanup operations (GitTestHarness.cleanup). Let errors bubble to test framework. No silent failures.</rule>
+    </constraint>
+    <constraint>
+      <category>Testing</category>
+      <rule>Smoke tests validate infrastructure works, NOT production features. Co-located test pattern: *.test.ts files adjacent to implementation.</rule>
+    </constraint>
+    <constraint>
+      <category>Isolation</category>
+      <rule>GitTestHarness must create isolated temporary repositories. Cleanup MUST use try/finally to prevent test pollution.</rule>
+    </constraint>
+    <constraint>
+      <category>Documentation</category>
+      <rule>Self-documenting code preferred. Comments explain "why" only, not "what". Use JSDoc for public methods.</rule>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>LlmProvider Port</name>
+      <kind>TypeScript Interface</kind>
+      <signature>interface LlmProvider {
+  generateCommitMessage(prompt: string): Promise&lt;string&gt;;
+  isServiceAvailable(): Promise&lt;boolean&gt;;
+}</signature>
+      <path>src/core/ports/llm-provider.ts (will be created in Epic 2)</path>
+    </interface>
+    <interface>
+      <name>GitService Port</name>
+      <kind>TypeScript Interface</kind>
+      <signature>interface GitService {
+  getStagedDiff(): Promise&lt;string&gt;;
+  getStatus(): Promise&lt;string&gt;;
+  commit(message: string): Promise&lt;void&gt;;
+}</signature>
+      <path>src/core/ports/git-service.ts (will be created in Epic 2)</path>
+    </interface>
+    <interface>
+      <name>GitTestHarness</name>
+      <kind>TypeScript Interface</kind>
+      <signature>interface GitTestHarness {
+  init(): Promise&lt;void&gt;;
+  cleanup(): Promise&lt;void&gt;;
+  writeFile(path: string, content: string): Promise&lt;void&gt;;
+  add(files?: string[]): Promise&lt;void&gt;;
+  getDiff(): Promise&lt;string&gt;;
+  getStatus(): Promise&lt;string&gt;;
+}</signature>
+      <path>tests/helpers/git-harness.ts</path>
+    </interface>
+    <interface>
+      <name>MockLlmProvider</name>
+      <kind>TypeScript Class</kind>
+      <signature>class MockLlmProvider implements LlmProvider {
+  mockResponse(response: string): void;
+  mockError(error: Error): void;
+  getCallCount(): number;
+  getLastPrompt(): string | null;
+  generateCommitMessage(prompt: string): Promise&lt;string&gt;;
+  isServiceAvailable(): Promise&lt;boolean&gt;;
+}</signature>
+      <path>tests/helpers/mock-llm-provider.ts</path>
+    </interface>
+    <interface>
+      <name>PerformanceMetric</name>
+      <kind>TypeScript Interface</kind>
+      <signature>interface PerformanceMetric {
+  operation: string;
+  duration: number;
+  timestamp: number;
+  metadata?: Record&lt;string, unknown&gt;;
+}</signature>
+      <path>tests/helpers/performance-tracker.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use Vitest with Node.js environment and globals enabled. Co-located test pattern: .test.ts files adjacent to implementation (e.g., git-harness.test.ts next to git-harness.ts). Mock via Vitest vi utilities (not production mock classes). Smoke tests validate infrastructure works, not production features. Coverage target: 80% for test helpers per Epic 0 spec.
+    </standards>
+    <locations>
+      tests/helpers/*.test.ts - Smoke tests for each helper
+      tests/integration/ - Integration tests (future use)
+      Test discovery: Vitest glob pattern **/*.test.ts
+    </locations>
+    <ideas>
+      Test AC-1 (GitTestHarness): Create temp repo → write file → stage changes → get diff/status → cleanup. Verify cleanup removes all temp files (no pollution).
+      Test AC-2 (MockLlmProvider): Queue mocked responses → call generateCommitMessage → verify returns queued response. Test error mocking. Test call tracking.
+      Test AC-3 (PerformanceTracker): Measure operation timing → record metric → export metrics JSON. Verify duration is a positive number.
+      Test AC-4 (Smoke Tests): All three helpers have working smoke tests, all pass successfully.
+      Test AC-5 (Code Quality): Verify functions ≤15 lines via code review. Check class member ordering. Verify no "what" comments.
+    </ideas>
+  </tests>
+</story-context>
