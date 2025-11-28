@@ -46,7 +46,7 @@ Success for this tool is defined by three dimensions: technical capability, deve
 
 **Technical Success:**
 
-- Sub-1-second end-to-end latency on M1/M2 hardware (command invocation → message preview)
+- Sub-3-second end-to-end latency on M1/M2 hardware (command invocation → message preview)
 - 90%+ acceptance rate during personal acceptance testing in real development workflows
 - 100% Conventional Commits format compliance (validated via regex post-generation)
 - Zero data egress—all processing occurs locally without network calls to external APIs
@@ -309,6 +309,24 @@ The following Ollama request parameters require technical decisions during archi
 - **Single-pass validation** (simpler, faster): Generate full message, validate with regex, retry if invalid.
 - **Multi-pass sectioned generation** (more reliable, slower): Prompt model separately for type, description, body; validate each section individually before assembly.
 - Trade-off: Reliability vs. latency. Start with single-pass; consider multi-pass if reliability issues emerge during testing.
+
+### Future Technical Considerations (Post-MVP):
+
+**Edge Cases to Document:**
+- Mid-generation daemon death: Document as edge case, don't implement specific handling initially
+- Git repository corruption: Document as edge case, rely on git's own error reporting
+- Editor fallback failures: Document fallback chain ($EDITOR → vim → nano → vi → notepad), already covered in stories
+
+**Migration Strategy Questions:**
+- CLI tool migration patterns: Research how popular CLI tools handle version upgrades with breaking changes
+- Custom model upgrade strategy: How to migrate users from ollatool-commit v1 to v2 when system prompt changes
+- Configuration migration: Strategy for handling config file format changes between versions
+- Timeline: Document as v1.1+ consideration, not MVP blocker
+
+**Performance Validation Gaps:**
+- Empirical performance data: Add performance benchmarking as post-MVP task to validate actual vs. target latency
+- Context window testing: Validate real-world diff sizes vs. 128K token limit under various development scenarios
+- Hardware variability: Test on different Mac/Windows/Linux configurations, not just M1/M2 as
 
 **CRITICAL: First-Run Model Provisioning Flow:**
 
