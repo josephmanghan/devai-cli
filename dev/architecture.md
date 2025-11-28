@@ -306,8 +306,8 @@ To keep the CLI tool lightweight and maintainable, we are intentionally omitting
 
 ```
 src/
-├── index.ts                        # CLI entry point with shebang
-├── main.ts                         # Application bootstrap & DI composition root
+├── index.ts                        # Barrel file with shebang (NO logic - imports main.ts)
+├── main.ts                         # Application bootstrap & DI composition root (contains CLI logic)
 │
 ├── core/                           # Domain layer (pure business logic, no external deps)
 │   ├── domain/
