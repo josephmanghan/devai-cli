@@ -1,0 +1,94 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>0</epicId>
+    <storyId>0.2</storyId>
+    <title>Configure Vitest Test Framework</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>dev/sprint-artifacts/0-2-configure-vitest-test-framework.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a properly configured Vitest setup with coverage thresholds</iWant>
+    <soThat>I have fast, reliable testing with automated quality gates</soThat>
+    <tasks>
+- [ ] Task 1: Create Vitest configuration (AC: 1, 2, 3, 4, 5)
+  - [ ] Subtask 1.1: Create `vitest.config.ts` with Node.js environment and globals
+  - [ ] Subtask 1.2: Configure coverage thresholds (80% for all metrics)
+  - [ ] Subtask 1.3: Set up path aliases (@, @tests)
+  - [ ] Subtask 1.4: Configure test timeout to 10s
+  - [ ] Subtask 1.5: Configure coverage exclusions for test files and types
+
+- [ ] Task 2: Update package.json scripts (AC: 6)
+  - [ ] Subtask 2.1: Add test script for running all tests
+  - [ ] Subtask 2.2: Add test:unit script for unit tests only
+  - [ ] Subtask 2.3: Add test:integration script for integration tests
+  - [ ] Subtask 2.4: Add test:coverage script for coverage reporting
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. `vitest.config.ts` configured with Node.js environment and globals
+2. Coverage thresholds set: 80% lines, branches, functions, statements
+3. Path aliases configured: `@/` → src, `@tests/` → tests
+4. Test timeout increased to 10s for git operations
+5. Coverage excludes test files and type definitions
+6. `package.json` includes test scripts: test, test:unit, test:integration, test:coverage
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="dev/prd.md" title="Product Requirements Document" section="Testing Strategy" snippet="Unit tests use Vitest with co-located *.test.ts pattern (ADR-004). Coverage thresholds (80%) enforce quality gates. Smoke tests validate infrastructure works (not features)." />
+      <doc path="dev/architecture.md" title="Architecture Document" section="Testing Framework" snippet="Vitest configuration with Node.js environment and globals, V8 provider for fast coverage reporting, coverage thresholds set to 80% for all metrics." />
+      <doc path="dev/sprint-artifacts/tech-spec-epic-0.md" title="Epic 0 Technical Specification" section="Vitest Configuration" snippet="Complete vitest.config.ts with path aliases (@, @tests), coverage thresholds, and test environment setup." />
+      <doc path="dev/stories/epic-0-test-infrastructure.md" title="Epic 0 Stories" section="Story 0.2" snippet="Coverage thresholds set: 80% lines, branches, functions, statements. Path aliases configured: @/ → src, @tests/ → tests. Test timeout increased to 10s for git operations." />
+    </docs>
+    <code>
+      <artifact path="vitest.config.ts" kind="configuration" symbol="defineConfig" lines="1-25" reason="Existing Vitest configuration with Node.js environment, V8 provider, coverage thresholds, and path aliases (@, @tests)" />
+      <artifact path="package.json" kind="configuration" symbol="scripts" lines="6-14" reason="Package.json with test scripts already configured for test, test:watch, and test:coverage. Missing test:unit and test:integration scripts from AC6." />
+      <artifact path="tests/helpers/git-harness.ts" kind="test-helper" symbol="TestGitHarness" lines="28-134" reason="Complete test harness implementation for isolated temporary git repositories with cleanup capabilities. Follows hexagonal architecture patterns." />
+      <artifact path="tests/helpers/mock-llm-provider.ts" kind="test-helper" symbol="MockLlmProvider" lines="19-105" reason="Mock LLM provider implementing LlmProvider port interface with deterministic response queuing, error injection, and call tracking for testing." />
+      <artifact path="tests/helpers/performance-tracker.ts" kind="test-helper" symbol="PerformanceTracker" lines="11-162" reason="Performance tracking utility for timing CLI operations with metadata support and metric aggregation." />
+    </code>
+    <dependencies>
+      <dependency ecosystem="Node.js" packages="vitest, @vitest/coverage-v8, typescript, debug, execa" purpose="Test framework and utilities">
+        <package name="vitest" version="^4.0.14" />
+        <package name="@vitest/coverage-v8" version="^4.0.14" />
+        <package name="typescript" version="^5.9.3" />
+        <package name="debug" version="^4.4.3" />
+        <package name="execa" version="^9.6.0" />
+      </dependency>
+    </dependencies>
+
+  <constraints>
+      <constraint source="dev/architecture.md#Testing-Strategy" type="pattern">Use V8 provider for fast coverage reporting</constraint>
+      <constraint source="dev/architecture.md#Testing-Strategy" type="pattern">Unit tests use Vitest with co-located *.test.ts pattern (ADR-004)</constraint>
+      <constraint source="dev/architecture.md#Clean-Code-Standards" type="pattern">Function size: Maximum 15 lines per function</constraint>
+      <constraint source="dev/architecture.md#Clean-Code-Standards" type="pattern">Argument limits: 0-2 arguments preferred, 3 acceptable for simple data passing</constraint>
+      <constraint source="dev/architecture.md#Clean-Code-Standards" type="pattern">Class member ordering: Constructor → Private Properties → Public Properties → Public Methods → Private Methods</constraint>
+      <constraint source="dev/architecture.md#Clean-Code-Standards" type="pattern">DRY principle: No duplicated logic or error messages</constraint>
+      <constraint source="dev/architecture.md#Clean-Code-Standards" type="pattern">Self-documenting code: Comments for "why" only, not "what"</constraint>
+      <constraint source="dev/architecture.md#Testing-Strategy" type="standard">Coverage thresholds: 80% lines, branches, functions, statements</constraint>
+      <constraint source="dev/architecture.md#Testing-Strategy" type="standard">Test timeout: 10s for git operations</constraint>
+    </constraints>
+    <interfaces>
+      <interface name="GitTestHarness" kind="test-helper" signature="init(): Promise<void>; cleanup(): Promise<void>; writeFile(path: string, content: string): Promise<void>; add(files?: string[]): Promise<void>; getDiff(): Promise<string>; getStatus(): Promise<string>;" path="tests/helpers/git-harness.ts" />
+      <interface name="LlmProvider" kind="port" signature="generateCommitMessage(prompt: string): Promise<string>; isServiceAvailable(): Promise<boolean>;" path="src/core/ports/llm-provider.ts" />
+      <interface name="MockLlmProvider" kind="test-mock" signature="mockResponse(response: string): void; mockError(error: Error): void; getCallCount(): number; getLastPrompt(): string | null;" path="tests/helpers/mock-llm-provider.ts" />
+      <interface name="PerformanceTracker" kind="performance" signature="startOperation(operation: string): void; endOperation(operation: string, metadata?: Record<string, unknown>): void; getMetrics(): PerformanceMetric[]; getAverageDuration(): number;" path="tests/helpers/performance-tracker.ts" />
+    </interfaces>
+    <tests>
+      <standards>Unit tests use Vitest with co-located test files (*.test.ts adjacent to implementation files). Coverage thresholds enforce quality gates at 80% for lines, branches, functions, and statements. Test helpers use hexagonal architecture patterns with clean code standards (≤15 lines per function).</standards>
+      <locations>tests/helpers/ directory for test utilities; tests/ directory for main test files; co-located *.test.ts files alongside implementation files following ADR-004.</locations>
+      <ideas>
+        <idea ac="1" description="Verify vitest.config.ts paths resolve correctly in test imports">Test that @ and @tests path aliases work properly when importing modules in test files.</idea>
+        <idea ac="2" description="Verify coverage report generation works with V8 provider">Test that coverage reports generate correctly in all formats (text, json, html).</idea>
+        <idea ac="3" description="Test coverage thresholds enforce quality gates">Write tests that fail when coverage drops below 80% to verify quality gates work.</idea>
+        <idea ac="4" description="Test timeout configuration works for git operations">Write integration tests using GitTestHarness that verify 10s timeout is sufficient for git operations.</idea>
+        <idea ac="5" description="Verify test scripts execute successfully">Test that npm test scripts (test, test:unit, test:integration, test:coverage) all execute without errors.</idea>
+        <idea ac="6" description="Add missing test:unit and test:integration scripts">Add the missing test:unit and test:integration scripts to package.json to fulfill AC6.</idea>
+      </ideas>
+    </tests>
+</story-context>

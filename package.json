@@ -1,13 +1,15 @@
 {
-  "name": "gems-repo",
-  "version": "1.0.0",
-  "description": "Collection of Gems - custom AI agent definitions and workflow configurations",
+  "name": "ollatool",
+  "version": "0.1.0",
+  "description": "Local-first CLI tool for AI-powered git commit message generation using Ollama",
   "type": "module",
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "fix": "npm run format",
     "test": "vitest run",
+    "test:unit": "vitest run --dir src",
+    "test:integration": "vitest run --dir tests",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"

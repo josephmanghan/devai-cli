@@ -38,7 +38,7 @@ story_location: dev/sprint-artifacts
 development_status:
   # Epic 0: Test Infrastructure & CI Setup (4 stories)
   epic-0: contexted
-  0-1-create-test-infrastructure-core: review
+  0-1-create-test-infrastructure-core: done
   0-2-configure-vitest-test-framework: done
   0-3-implement-debug-logging-system: backlog
   0-4-setup-ci-cd-pipeline-structure: backlog

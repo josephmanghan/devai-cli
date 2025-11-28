@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    timeout: 10000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -14,6 +15,14 @@ export default defineConfig({
         branches: 80,
         statements: 80,
       },
+      exclude: [
+        'node_modules/**',
+        'dist/**',
+        '**/*.d.ts',
+        '**/*.test.ts',
+        '**/*.spec.ts',
+        'tests/helpers/**',
+      ],
     },
   },
   resolve: {
