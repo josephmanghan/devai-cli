@@ -87,6 +87,12 @@ workflow_status: 'phases:
   note: "Complete system design for greenfield projects"
   status: "dev/architecture.md"
 
+  - id: "create-styleguides"
+  optional: true
+  agent: "architect"
+  note: "Stylguides used for writing quality code"
+  status: "dev/styleguides/"
+
   - id: "create-epics-and-stories"
   required: true
   agent: "pm"
@@ -100,7 +106,7 @@ workflow_status: 'phases:
   command: "test-design"
   output: "System-level testability review"
   note: "Testability assessment before gate check - auto-detects system-level mode"
-  status: "recommended"
+  status: "dev/test-design-system.md"
 
   - id: "validate-architecture"
   optional: true

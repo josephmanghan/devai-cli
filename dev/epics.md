@@ -117,16 +117,16 @@ The following requirements are extracted from the PRDand must ALL be covered by 
 
 ## Proposed Epic Structure
 
-### Epic 0: Test Infrastructure & Model Validation
+### Epic 0: Test Infrastructure & CI Setup
 
-**Goal:** Establish comprehensive test infrastructure and validate model selection before implementation
-**User Value:** Ensures implementation choices are validated and testable; prevents architecture mistakes
+**Goal:** Establish test infrastructure and CI pipeline structure before feature implementation
+**User Value:** Ensures all subsequent development can be reliably tested; prevents architecture mistakes
 
 **FRs Covered:** None (this is foundational work that enables all FRs to be testable)
 
-**Testing Deliverables:** Test infrastructure validation, model evaluation results, CI/CD pipeline, acceptance testing framework
+**Testing Deliverables:** Test helper templates with smoke tests, Vitest configuration, DEBUG logging, basic CI pipeline
 
-**Rationale:** This epic is **CRITICAL BLOCKER** for all other epics. Without validated test infrastructure and proven model performance, subsequent implementation would be building on assumptions. The test design system shows that model quality, performance, and testability must be established before story development begins.
+**Rationale:** This epic provides the test infrastructure foundation. Test helpers (GitTestHarness, MockLlmProvider) are created with smoke tests to validate they work. No feature testing yet - that requires production code from Epics 1-6.
 
 **Dependencies:** None (this is the first epic that enables everything else)
 
@@ -212,6 +212,21 @@ The following requirements are extracted from the PRDand must ALL be covered by 
 
 ---
 
+### Epic 7: Model Validation & Manual Acceptance Testing
+
+**Goal:** Validate model selection and commit message quality across 50+ realistic scenarios
+**User Value:** Ensure selected model and generated commit messages meet MVP success criteria (90%+ acceptance rate)
+
+**FRs Covered:** All 49 FRs validated through comprehensive testing
+
+**Testing Deliverables:** Model evaluation results, E2E tests with real Ollama in CI, manual acceptance test log with 50+ scenarios
+
+**Rationale:** This epic validates the architecture's model selection (qwen2.5-coder:1.5b) with data-driven evidence and ensures commit message quality meets the 90%+ acceptance rate requirement. Model evaluation and E2E testing require the commit generation pipeline from Epic 5 to exist first.
+
+**Dependencies:** Epic 5 complete (commit generation pipeline must exist)
+
+---
+
 ## FR Coverage Map
 
 This matrix ensures EVERY functional requirement is covered by at least one epic:
@@ -223,18 +238,20 @@ This matrix ensures EVERY functional requirement is covered by at least one epic
 **Epic 4 (AI Generation):** FR15, FR16, FR17, FR18, FR19, FR20, FR21, FR22, FR23, FR24, FR37
 **Epic 5 (Interactive Workflow):** FR13, FR14, FR25, FR26, FR27, FR28, FR29, FR30, FR31, FR32, FR46, FR47, FR48
 **Epic 6 (Performance & Errors):** FR34, FR35, FR38, FR39, FR40, FR41, FR42, FR43, FR44
+**Epic 7 (Model Validation & Testing):** All 49 FRs validated through comprehensive testing
 
 **Verification:** All 49 FRs accounted for ✓
 
 **Epic Dependency Chain:**
 
-0. Test Infrastructure & Model Validation (enables and validates everything)
+0. Test Infrastructure & CI Setup (enables TDD for all epics)
 1. Foundation (enables everything)
 2. Ollama Integration (required for AI generation)
 3. Git Context (required for AI generation input)
 4. AI Generation (required for interactive workflow)
 5. Interactive Workflow (orchestrates 2, 3, 4)
 6. Performance & Errors (polishes all epics)
+7. Model Validation & Testing (validates everything, requires Epic 5 complete)
 
 ---
 
@@ -242,15 +259,15 @@ This matrix ensures EVERY functional requirement is covered by at least one epic
 
 Detailed story breakdowns for each epic are available in the following files:
 
-- **Epic 0:** [dev/stories/epic-0-test-infrastructure.md](./stories/epic-0-test-infrastructure.md) - 8 stories
+- **Epic 0:** [dev/stories/epic-0-test-infrastructure.md](./stories/epic-0-test-infrastructure.md) - 4 stories
 - **Epic 1:** [dev/stories/epic-1-foundation.md](./stories/epic-1-foundation.md) - 6 stories
 - **Epic 2:** [dev/stories/epic-2-ollama-integration.md](./stories/epic-2-ollama-integration.md) - 6 stories
 - **Epic 3:** [dev/stories/epic-3-git-context.md](./stories/epic-3-git-context.md) - 7 stories
 - **Epic 4:** [dev/stories/epic-4-ai-generation.md](./stories/epic-4-ai-generation.md) - 7 stories
 - **Epic 5:** [dev/stories/epic-5-interactive-workflow.md](./stories/epic-5-interactive-workflow.md) - 8 stories
 - **Epic 6:** [dev/stories/epic-6-performance-errors.md](./stories/epic-6-performance-errors.md) - 8 stories
-- **Epic 7:** [dev/stories/epic-7-manual-acceptance-testing.md](./stories/epic-7-manual-acceptance-testing.md) - 1 story
+- **Epic 7:** [dev/stories/epic-7-manual-acceptance-testing.md](./stories/epic-7-manual-acceptance-testing.md) - 5 stories
 
-**Total Stories:** 51 user stories covering all 49 functional requirements + manual acceptance testing
+**Total Stories:** 47 user stories covering all 49 functional requirements + comprehensive testing and validation
 
 ---

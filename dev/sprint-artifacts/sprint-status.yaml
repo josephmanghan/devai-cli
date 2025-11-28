@@ -1,0 +1,120 @@
+# Sprint Status
+# Generated: 2025-11-28
+# Project: Ollama-CLI-application
+# Project Key: ollatool
+# Tracking System: file-system
+# Story Location: dev/sprint-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic exists in epic file but not contexted
+#   - contexted: Epic tech context created (required before drafting stories)
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Under SM review (via code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+
+# WORKFLOW NOTES:
+# ===============
+# - Epics should be 'contexted' before stories can be 'drafted'
+# - Stories are typically worked in order to incorporate learnings
+# - Dev moves story to 'review', SM reviews, then Dev moves to 'done'
+
+generated: 2025-11-28
+project: Ollama-CLI-application
+project_key: ollatool
+tracking_system: file-system
+story_location: dev/sprint-artifacts
+
+development_status:
+  # Epic 0: Test Infrastructure & CI Setup (4 stories)
+  epic-0: contexted
+  0-1-create-test-infrastructure-core: backlog
+  0-2-configure-vitest-test-framework: backlog
+  0-3-implement-debug-logging-system: backlog
+  0-4-setup-ci-cd-pipeline-structure: backlog
+  epic-0-retrospective: optional
+
+  # Epic 1: Foundation & Project Setup (6 stories)
+  epic-1: backlog
+  1-1-initialize-typescript-project-with-esm: backlog
+  1-2-configure-build-tooling-tsup: backlog
+  1-3-setup-testing-framework-vitest: backlog
+  1-4-setup-cli-framework-commander-js: backlog
+  1-5-setup-hexagonal-architecture-structure: backlog
+  1-6-setup-linting-formatting: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2: Ollama Integration & Model Management (6 stories)
+  epic-2: backlog
+  2-1-create-ollama-port-interface: backlog
+  2-2-implement-ollama-adapter: backlog
+  2-3-implement-model-existence-check: backlog
+  2-4-implement-custom-model-creation: backlog
+  2-5-implement-setup-command: backlog
+  2-6-implement-setup-validation-error-handling: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: Git Context Gathering & Validation (7 stories)
+  epic-3: backlog
+  3-1-create-git-port-interface: backlog
+  3-2-implement-shell-git-adapter: backlog
+  3-3-implement-staged-changes-detection: backlog
+  3-4-implement-branch-name-extraction: backlog
+  3-5-implement-commit-execution: backlog
+  3-6-implement-git-validation-use-case: backlog
+  3-7-implement-git-error-handling: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: AI-Powered Message Generation (7 stories)
+  epic-4: backlog
+  4-1-create-prompt-builder: backlog
+  4-2-implement-conventional-commits-type-support: backlog
+  4-3-implement-format-validator: backlog
+  4-4-implement-type-enforcement-logic: backlog
+  4-5-implement-message-normalization: backlog
+  4-6-implement-retry-logic-with-silent-regeneration: backlog
+  4-7-integrate-generation-pipeline: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: Interactive Commit Workflow (8 stories)
+  epic-5: backlog
+  5-1-implement-commit-type-selector: backlog
+  5-2-implement-message-preview-display: backlog
+  5-3-implement-action-selector-approve-edit-regenerate-cancel: backlog
+  5-4-implement-editor-integration: backlog
+  5-5-implement-regenerate-logic: backlog
+  5-6-implement-commit-execution-on-approval: backlog
+  5-7-implement-commit-workflow-orchestrator: backlog
+  5-8-wire-commit-command-to-cli: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: Performance & Error Handling (8 stories)
+  epic-6: backlog
+  6-1-implement-performance-benchmarking: backlog
+  6-2-implement-spinner-for-ai-generation: backlog
+  6-3-implement-typed-error-classes: backlog
+  6-4-implement-error-message-formatting: backlog
+  6-5-implement-global-error-handler: backlog
+  6-6-implement-resource-cleanup-on-exit: backlog
+  6-7-add-context-window-overflow-detection: backlog
+  6-8-implement-performance-monitoring-optional: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7: Model Validation & Manual Acceptance Testing (5 stories)
+  epic-7: backlog
+  7-1-create-model-evaluation-framework: backlog
+  7-2-execute-model-evaluation-and-document-decision: backlog
+  7-3-setup-e2e-testing-with-real-ollama: backlog
+  7-4-implement-manual-acceptance-testing-framework: backlog
+  7-5-execute-manual-acceptance-testing-50-scenarios: backlog
+  epic-7-retrospective: optional
