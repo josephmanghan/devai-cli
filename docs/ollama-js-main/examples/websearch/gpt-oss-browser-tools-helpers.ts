@@ -23,7 +23,6 @@ interface WebSearchResult {
   }
 }
 
-
 // Default number of tokens to show when calling displayPage
 const DEFAULT_VIEW_TOKENS = 1024
 
@@ -144,20 +143,15 @@ export class Browser {
       const data = this.state.getData()
 
       if (txt.length > data.viewTokens) {
-
         const maxCharsPerToken = 128
-
 
         const upperBound = Math.min((data.viewTokens + 1) * maxCharsPerToken, txt.length)
         const textToAnalyze = txt.substring(0, upperBound)
 
-
         const approxTokens = textToAnalyze.length / 4
 
         if (approxTokens > data.viewTokens) {
-
           const endIdx = Math.min(data.viewTokens * 4, txt.length)
-
 
           numLines = (txt.substring(0, endIdx).match(/\n/g) || []).length + 1
         } else {
@@ -170,7 +164,6 @@ export class Browser {
 
     return Math.min(loc + numLines, totalLines)
   }
-
 
   protected joinLinesWithNumbers(lines: string[]): string {
     let result = ''
@@ -202,23 +195,19 @@ export class Browser {
     const links: Record<number, string> = {}
     let linkID = 0
 
-
     const multiLinePattern = /\[([^\]]+)\]\s*\n\s*\(([^)]+)\)/g
     text = text.replace(multiLinePattern, (match) => {
-
       let cleaned = match.replace(/\n/g, ' ')
 
       cleaned = cleaned.replace(/\s+/g, ' ')
       return cleaned
     })
 
-
     const linkPattern = /\[([^\]]+)\]\(([^)]+)\)/g
 
     const processedText = text.replace(linkPattern, (match, linkText, linkURL) => {
       const cleanLinkText = linkText.trim()
       const cleanLinkURL = linkURL.trim()
-
 
       let domain = cleanLinkURL
       try {
@@ -228,13 +217,9 @@ export class Browser {
 
           domain = domain.replace(/^www\./, '')
         }
-      } catch {
-
-      }
-
+      } catch {}
 
       const formatted = `【${linkID}†${cleanLinkText}†${domain}】`
-
 
       links[linkID] = cleanLinkURL
       linkID++
@@ -258,22 +243,18 @@ export class Browser {
 
     for (const line of lines) {
       if (line === '') {
-
         wrapped.push('')
       } else if (line.length <= width) {
         wrapped.push(line)
       } else {
-
         const words = line.split(/\s+/)
         if (words.length === 0) {
-
           wrapped.push(line)
           continue
         }
 
         let currentLine = ''
         for (const word of words) {
-
           let testLine = currentLine
           if (testLine !== '') {
             testLine += ' '
@@ -281,18 +262,15 @@ export class Browser {
           testLine += word
 
           if (testLine.length > width && currentLine !== '') {
-
             wrapped.push(currentLine)
             currentLine = word
           } else {
-
             if (currentLine !== '') {
               currentLine += ' '
             }
             currentLine += word
           }
         }
-
 
         if (currentLine !== '') {
           wrapped.push(currentLine)
@@ -314,19 +292,16 @@ export class Browser {
   ): string {
     let totalLines = page.lines.length
 
-
     if (totalLines === 0) {
       page.lines = ['']
       totalLines = 1
     }
-
 
     if (Number.isNaN(loc) || loc < 0) {
       loc = 0
     } else if (loc >= totalLines) {
       loc = Math.max(0, totalLines - 1)
     }
-
 
     const endLoc = this.getEndLoc(loc, numLines, totalLines, page.lines)
 
@@ -373,8 +348,7 @@ export class Browser {
     let textBuilder = ''
     let linkIdx = 0
 
-
-    textBuilder += '\n' 
+    textBuilder += '\n'
     textBuilder += 'URL: \n' // L1: URL: (empty for search)
     textBuilder += '# Search Results\n' // L2: # Search Results
     textBuilder += '\n' // L3: empty
@@ -396,7 +370,8 @@ export class Browser {
       textBuilder += linkFormat
 
       const rawSnippet = result.content || ''
-      const capped = rawSnippet.length > 400 ? rawSnippet.substring(0, 400) + '…' : rawSnippet
+      const capped =
+        rawSnippet.length > 400 ? rawSnippet.substring(0, 400) + '…' : rawSnippet
       const cleaned = capped
         .replace(/\d{40,}/g, (m) => m.substring(0, 40) + '…')
         .replace(/\s{3,}/g, ' ')
@@ -429,7 +404,6 @@ export class Browser {
     }
 
     let textBuilder = ''
-
 
     const linkFormat = `【${linkIdx}†${result.title || `Result ${linkIdx}`}】`
     textBuilder += linkFormat
@@ -493,7 +467,6 @@ export class Browser {
     page.text = processedText
     page.links = links
 
-
     page.lines = this.wrapLines(page.text, 80)
 
     return page
@@ -553,7 +526,6 @@ export class Browser {
       lineIdx += numShowLines
     }
 
-
     if (resultChunks.length > 0) {
       textBuilder = resultChunks.join('\n\n')
     }
@@ -567,7 +539,7 @@ export class Browser {
     findPage.lines = this.wrapLines(findPage.text, 80)
     return findPage
   }
-  
+
   async search(args: {
     query: string
     topn?: number
@@ -577,10 +549,10 @@ export class Browser {
       throw new Error('Search client not provided')
     }
 
-  const searchArgs: SearchRequest = {
-    query,
-    max_results: topn,
-  }
+    const searchArgs: SearchRequest = {
+      query,
+      max_results: topn,
+    }
 
     const result = await this.searchClient.search(searchArgs)
 
@@ -624,7 +596,6 @@ export class Browser {
     let page: Page | undefined
     const state = this.getState()
 
-
     if (typeof args.id === 'string') {
       const url = args.id
 
@@ -655,7 +626,7 @@ export class Browser {
         page = this.getPageFromStack(pageURL)
       }
     }
-    
+
     if (typeof args.id === 'number') {
       if (!page) {
         throw new Error('No current page to resolve link from')
@@ -707,7 +678,9 @@ export class Browser {
             url: pageURL,
             title: `Failed to fetch: ${pageURL}`,
             text: `This tool result wasn't accessible. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            lines: [`This tool result wasn't accessible. Error: ${error instanceof Error ? error.message : 'Unknown error'}`],
+            lines: [
+              `This tool result wasn't accessible. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            ],
             links: {},
             fetchedAt: new Date(),
           }

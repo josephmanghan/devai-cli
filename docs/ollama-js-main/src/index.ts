@@ -50,7 +50,7 @@ export class Ollama extends OllamaBrowser {
   ): Promise<ProgressResponse | AbortableAsyncIterator<ProgressResponse>> {
     // fail if request.from is a local path
     // TODO: https://github.com/ollama/ollama-js/issues/191
-    if (request.from && await this.fileExists(resolve(request.from))) {
+    if (request.from && (await this.fileExists(resolve(request.from)))) {
       throw Error('Creating with a local path is not currently supported from ollama-js')
     }
 

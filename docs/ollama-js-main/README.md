@@ -54,19 +54,19 @@ Run larger models by offloading to Ollama’s cloud while keeping your local wor
 
 ### Run via local Ollama
 
-1) Sign in (one-time):
+1. Sign in (one-time):
 
 ```
 ollama signin
 ```
 
-2) Pull a cloud model:
+2. Pull a cloud model:
 
 ```
 ollama pull gpt-oss:120b-cloud
 ```
 
-3) Use as usual (offloads automatically):
+3. Use as usual (offloads automatically):
 
 ```javascript
 import { Ollama } from 'ollama'
@@ -86,13 +86,13 @@ for await (const part of response) {
 
 Access cloud models directly by pointing the client at `https://ollama.com`.
 
-1) Create an [API key](https://ollama.com/settings/keys), then set the `OLLAMA_API_KEY` environment variable:
+1. Create an [API key](https://ollama.com/settings/keys), then set the `OLLAMA_API_KEY` environment variable:
 
 ```
 export OLLAMA_API_KEY=your_api_key
 ```
 
-2) Generate a response via the cloud API:
+2. Generate a response via the cloud API:
 
 ```javascript
 import { Ollama } from 'ollama'
@@ -124,13 +124,12 @@ ollama.chat(request)
 ```
 
 - `request` `<Object>`: The request object containing chat parameters.
-
   - `model` `<string>` The name of the model to use for the chat.
   - `messages` `<Message[]>`: Array of message objects representing the chat history.
     - `role` `<string>`: The role of the message sender ('user', 'system', or 'assistant').
     - `content` `<string>`: The content of the message.
     - `images` `<Uint8Array[] | string[]>`: (Optional) Images to be included in the message, either as Uint8Array or base64 encoded strings.
-    - `tool_name` `<string>`: (Optional) Add the name of the tool that was executed to inform the model of the result 
+    - `tool_name` `<string>`: (Optional) Add the name of the tool that was executed to inform the model of the result
   - `format` `<string>`: (Optional) Set the expected format of the response (`json`).
   - `stream` `<boolean>`: (Optional) When true an `AsyncGenerator` is returned.
   - `think` `<boolean | "high" | "medium" | "low">`: (Optional) Enable model thinking. Use `true`/`false` or specify a level. Requires model support.
@@ -267,8 +266,10 @@ ollama.embed(request)
 - Returns: `<EmbedResponse>`
 
 ### web search
-- Web search capability requires an Ollama account. [Sign up on ollama.com](https://ollama.com/signup) 
+
+- Web search capability requires an Ollama account. [Sign up on ollama.com](https://ollama.com/signup)
 - Create an API key by visiting https://ollama.com/settings/keys
+
 ```javascript
 ollama.webSearch(request)
 ```

@@ -44,12 +44,19 @@ async function main() {
         type: 'object',
         properties: {
           id: {
-            description: 'Link id (number) from the results page, or a URL string to open',
+            description:
+              'Link id (number) from the results page, or a URL string to open',
             anyOf: [{ type: 'number' }, { type: 'string' }],
           },
-          cursor: { type: 'number', description: 'Page index in the stack to operate on' },
+          cursor: {
+            type: 'number',
+            description: 'Page index in the stack to operate on',
+          },
           loc: { type: 'number', description: 'Start line to view from' },
-          num_lines: { type: 'number', description: 'Number of lines to display (-1 for auto)' },
+          num_lines: {
+            type: 'number',
+            description: 'Number of lines to display (-1 for auto)',
+          },
         },
       },
     },
@@ -141,11 +148,15 @@ async function main() {
 
         hadToolCalls = true
         for (const toolCall of chunk.message.tool_calls) {
-          const functionToCall =
-            availableTools[toolCall.function.name]
+          const functionToCall = availableTools[toolCall.function.name]
           if (functionToCall) {
             const args = toolCall.function.arguments as any
-            console.log('\nCalling function:', toolCall.function.name, 'with arguments:', args)
+            console.log(
+              '\nCalling function:',
+              toolCall.function.name,
+              'with arguments:',
+              args,
+            )
             let output
             try {
               output = await functionToCall(args)

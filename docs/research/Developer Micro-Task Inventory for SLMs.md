@@ -178,7 +178,7 @@ These tasks represent the high-friction, "toil" of communicating work to teammat
 
 - **Frequency:** Daily
 - **Current Friction (High):** The research is unanimous: developers "hate" writing documentation.36 It is a "tedious chore" 38 that feels like "a waste of time" and is often skipped, leading to technical debt.36
-- **Input/Output:** _I:_ A function signature (e.g., def get_user(user_id: int) \-\> User:). _O:_ The full docstring/JSDoc boilerplate (e.g., """Gets user by ID. :param user_id:... :return:...""").
+- **Input/Output:** _I:_ A function signature (e.g., def get*user(user_id: int) \-\> User:). \_O:* The full docstring/JSDoc boilerplate (e.g., """Gets user by ID. :param user_id:... :return:...""").
 - **Context Needs (Small):** The 1-3 lines of the function signature.
 - **Privacy Sensitivity (Low):** The function signature is low-sensitivity.
 - SLM Fit Score (High): This is a quintessential SLM task. The context is tiny and well-defined. The transformation is 100% formulaic. An 80% "good enough" boilerplate that the developer just needs to fill in is a perfect, instant value-add. It lowers the activation energy for  

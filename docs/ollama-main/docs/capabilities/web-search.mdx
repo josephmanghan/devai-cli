@@ -32,9 +32,7 @@ Returns an object containing:
 
 ### Examples
 
-<Note>
-  Ensure OLLAMA_API_KEY is set or it must be passed in the Authorization header.
-</Note>
+<Note>Ensure OLLAMA_API_KEY is set or it must be passed in the Authorization header.</Note>
 
 #### cURL Request
 
@@ -107,10 +105,10 @@ More Ollama [Python example](https://github.com/ollama/ollama-python/blob/main/e
 #### JavaScript Library
 
 ```tsx
-import { Ollama } from "ollama";
+import { Ollama } from 'ollama';
 
 const client = new Ollama();
-const results = await client.webSearch({ query: "what is ollama?" });
+const results = await client.webSearch({ query: 'what is ollama?' });
 console.log(JSON.stringify(results, null, 2));
 ```
 
@@ -210,10 +208,10 @@ models](https://ollama.com/models)\n\nAvailable for macOS, Windows, and Linux',
 #### JavaScript SDK
 
 ```tsx
-import { Ollama } from "ollama";
+import { Ollama } from 'ollama';
 
 const client = new Ollama();
-const fetchResult = await client.webFetch({ url: "https://ollama.com" });
+const fetchResult = await client.webFetch({ url: 'https://ollama.com' });
 console.log(JSON.stringify(fetchResult, null, 2));
 ```
 
@@ -223,11 +221,7 @@ console.log(JSON.stringify(fetchResult, null, 2));
 {
   "title": "Ollama",
   "content": "[Cloud models](https://ollama.com/blog/cloud-models) are now available in Ollama...",
-  "links": [
-    "https://ollama.com/",
-    "https://ollama.com/models",
-    "https://github.com/ollama/ollama"
-  ]
+  "links": ["https://ollama.com/", "https://ollama.com/models", "https://github.com/ollama/ollama"]
 }
 ```
 

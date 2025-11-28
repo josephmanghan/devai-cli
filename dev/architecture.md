@@ -28,6 +28,22 @@
 
 ---
 
+## Code Quality Standards Reference
+
+**MANDATORY:** All implementation must adhere to clean code principles documented in:
+
+- **[dev/styleguides/clean-code.md](./styleguides/clean-code.md)**
+
+Key requirements enforced during implementation:
+
+- **Function Size:** Maximum 15 lines per function
+- **Argument Limits:** 0-2 arguments preferred, 3 acceptable for simple data passing
+- **Class Member Ordering:** Constructor → Private Properties → Public Properties → Public Methods → Private Methods
+- **DRY Principle:** No duplicated logic or error messages
+- **Self-Documenting Code:** Comments for "why" only, not "what"
+
+---
+
 ## Decision Summary
 
 This table provides a quick reference for all major architectural decisions, enabling AI agents to understand choices without reading the full document.
@@ -263,53 +279,67 @@ src/
 │
 ├── core/                           # Domain layer (pure business logic, no external deps)
 │   ├── domain/
-│   │   ├── commit-message.ts       # Entity: Conventional Commit structure
-│   │   └── git-context.ts          # Entity: diff, status, file list
+│   │   ├── commit/
+│   │   │   ├── commit-message.ts     # Entity: Conventional Commit structure
+│   │   │   └── commit-message.test.ts # Entity tests
+│   │   └── git/
+│   │       ├── git-context.ts        # Entity: diff, status, file list
+│   │       └── git-context.test.ts  # Entity tests
 │   ├── ports/                      # Port interfaces (contracts for adapters)
-│   │   ├── llm-provider.ts         # LlmProvider interface
-│   │   ├── git-service.ts          # GitService interface
-│   │   └── editor-service.ts       # EditorService interface
+│   │   ├── llm/
+│   │   │   └── llm-provider.ts       # LlmProvider interface
+│   │   ├── git/
+│   │   │   └── git-service.ts        # GitService interface
+│   │   └── editor/
+│   │       └── editor-service.ts     # EditorService interface
 │   └── types/
 │       ├── commit-config.ts        # Zod schemas for commit feature configuration
 │       └── errors.types.ts         # Custom error classes
 │
 ├── infrastructure/                 # Adapters (external service implementations)
 │   ├── git/
-│   │   ├── git-service.ts          # GitService interface
-│   │   └── shell-git-adapter.ts    # Git operations via shell commands (execa)
+│   │   ├── shell-git-adapter.ts    # Git operations via shell commands (execa)
+│   │   └── shell-git-adapter.test.ts # Git adapter tests
 │   ├── llm/
-│   │   ├── llm-provider.ts         # LlmProvider interface
 │   │   ├── ollama-adapter.ts       # Ollama API adapter implementation
-│   │   └── mock-llm-adapter.ts     # Mock implementation for testing
+│   │   └── ollama-adapter.test.ts # Ollama adapter tests
 │   └── editor/
-│       └── shell-editor-adapter.ts # Terminal editor integration ($EDITOR)
+│       ├── shell-editor-adapter.ts # Terminal editor integration ($EDITOR)
+│       └── shell-editor-adapter.test.ts # Editor adapter tests
 │
 ├── features/                       # Use cases & controllers
 │   └── commit/
 │       ├── controllers/
 │       │   ├── commit-controller.ts     # Commander.js command handler
-│       │   └── commit-controller.test.ts # Adjacent test
+│       │   └── commit-controller.test.ts # Controller tests
 │       ├── use-cases/
 │       │   ├── generate-commit.ts       # Core commit generation orchestration
-│       │   ├── generate-commit.test.ts  # Adjacent test
+│       │   ├── generate-commit.test.ts  # Use case tests
 │       │   ├── validate-preconditions.ts # Check staged changes, Ollama health
-│       │   ├── validate-preconditions.test.ts # Adjacent test
+│       │   ├── validate-preconditions.test.ts # Validation tests
 │       │   ├── format-validator.ts      # Conventional Commits regex validation
-│       │   └── format-validator.test.ts # Adjacent test
+│       │   └── format-validator.test.ts # Format validation tests
 │       └── prompts/
 │           ├── user-prompt-builder.ts   # Simple template literals
-│           └── user-prompt-builder.test.ts # Adjacent test
+│           └── user-prompt-builder.test.ts # Prompt builder tests
 │
 └── ui/                             # Terminal UI components
     ├── prompts/
     │   ├── commit-type-selector.ts # @clack/prompts type selection
-    │   └── commit-type-selector.test.ts # Adjacent test
+    │   └── commit-type-selector.test.ts # UI component tests
     ├── spinners/
     │   ├── loading-spinner.ts      # ora spinner wrapper
-    │   └── loading-spinner.test.ts # Adjacent test
+    │   └── loading-spinner.test.ts # Spinner tests
     └── formatters/
         ├── message-formatter.ts    # Terminal color/formatting
-        └── message-formatter.test.ts # Adjacent test
+        └── message-formatter.test.ts # Formatter tests
+
+tests/
+├── helpers/                        # Test utilities and factories
+│   ├── test-fixtures.ts          # Sample data and scenarios
+│   ├── mock-factories.ts         # Factory functions for creating test mocks
+│   └── test-configuration.ts     # Common test setup and configuration
+└── integration/                   # Integration tests (if needed)
 ```
 
 ### Dependency Flow (Hexagonal Pattern)
@@ -806,105 +836,136 @@ export type CommitConfig = z.infer<typeof CommitConfigSchema>;
 
 **Note:** This section documents the implementation details for the four-phase validation strategy defined in "Validation & Error Recovery Strategy" above.
 
+**Clean Code Compliance:** This implementation demonstrates adherence to clean-code.md standards:
+
+- Each method ≤15 lines (enforced via private helper extraction)
+- Class member ordering: constructor → private properties → public methods → private methods
+- DRY principle: Error messages extracted to constants, validation logic encapsulated
+
 **Complete Implementation Flow:**
 
 ```typescript
 // src/features/commit/use-cases/generate-commit.ts
 
-async function generateCommitMessage(
-  userSelectedType: string,
-  diff: string,
-  status: string,
-): Promise<string> {
-  const maxRetries = 3;
-  let previousError: string | null = null;
+export class GenerateCommit {
+  // Constructor
+  constructor(
+    private readonly llm: LlmProvider,
+    private readonly promptBuilder: PromptBuilder,
+  ) {}
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    // Build prompt with error feedback from previous attempt
-    const prompt = buildPrompt(userSelectedType, diff, status, previousError);
-    const rawOutput = await llmProvider.generate(prompt);
+  // Private Properties
+  private readonly maxRetries = 3;
+  private readonly commitTypeRegex =
+    /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):/m;
+
+  // Public Methods
+  public async execute(userSelectedType: string, diff: string, status: string): Promise<string> {
+    let previousError: string | null = null;
+
+    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      const { success, result, error } = await this.attemptGeneration(
+        userSelectedType,
+        diff,
+        status,
+        previousError,
+      );
+      if (success) return result!;
+      previousError = error!;
+    }
+
+    throw new ValidationError(
+      'Failed to generate valid commit message format after multiple attempts.',
+      '[R]egenerate [E]dit manually [C]ancel',
+    );
+  }
+
+  // Private Methods
+  private extractCommitMessage(rawOutput: string): string | null {
+    const match = rawOutput.match(this.commitTypeRegex);
+    if (!match) return null;
+    const startIndex = rawOutput.indexOf(match[0]);
+    return rawOutput.substring(startIndex).trim();
+  }
+
+  private validateTypeAndColon(firstLine: string): string | null {
+    if (!/^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):.+/.test(firstLine)) {
+      return "ERROR: First line must start with commit type and colon (e.g., 'feat: description')";
+    }
+    return null;
+  }
+
+  private validateDescription(firstLine: string): string | null {
+    const description = firstLine.split(':').slice(1).join(':').trim();
+    if (description.length === 0)
+      return "ERROR: Description after colon is empty. Format: 'type: description'";
+    if (description.length > 72) return 'ERROR: Description too long (>72 chars). Keep it concise.';
+    return null;
+  }
+
+  private validateBody(lines: string[]): string | null {
+    const restOfMessage = lines.slice(1).join('\n').trim();
+    if (restOfMessage.length === 0) {
+      return 'ERROR: Body is missing. You must include a body paragraph after the subject line explaining what and why.';
+    }
+    if (restOfMessage.length < 10) {
+      return `ERROR: Body too short (${restOfMessage.length} chars). Provide meaningful explanation of what changed and why.`;
+    }
+    return null;
+  }
+
+  private validateStructure(message: string): string | null {
+    const lines = message.split('\n');
+    const firstLine = lines[0];
+    return (
+      this.validateTypeAndColon(firstLine) ||
+      this.validateDescription(firstLine) ||
+      this.validateBody(lines)
+    );
+  }
+
+  private enforceType(message: string, userSelectedType: string): string {
+    const [, ...rest] = message.split(':');
+    const description = rest.join(':').trim();
+    return `${userSelectedType}: ${description}`;
+  }
+
+  private normalizeFormat(message: string): string {
+    const [subject, ...bodyLines] = message.split('\n');
+    const body = bodyLines.join('\n').trim();
+    return `${subject}\n\n${body}`;
+  }
+
+  private async attemptGeneration(
+    userSelectedType: string,
+    diff: string,
+    status: string,
+    previousError: string | null,
+  ): Promise<{ success: boolean; result?: string; error?: string }> {
+    const prompt = this.promptBuilder.build(userSelectedType, diff, status, previousError);
+    const rawOutput = await this.llm.generate(prompt);
 
     // PHASE 1: Intelligent Parsing (extract commit from potential preamble)
-    const parsed = extractCommitMessage(rawOutput);
+    const parsed = this.extractCommitMessage(rawOutput);
     if (!parsed) {
-      previousError =
-        'ERROR: No valid commit message found. Output must contain a line starting with a commit type (feat:, fix:, docs:, etc.)';
-      continue;
+      return {
+        success: false,
+        error:
+          'ERROR: No valid commit message found. Output must contain a line starting with a commit type (feat:, fix:, docs:, etc.)',
+      };
     }
 
     // PHASE 2: Structural Validation (returns error string or null)
-    const validationError = validateStructure(parsed);
-    if (validationError) {
-      previousError = validationError;
-      continue;
-    }
+    const validationError = this.validateStructure(parsed);
+    if (validationError) return { success: false, error: validationError };
 
     // PHASE 3: Type Enforcement (overwrite with user selection)
-    const withCorrectType = enforceType(parsed, userSelectedType);
+    const withCorrectType = this.enforceType(parsed, userSelectedType);
 
     // PHASE 4: Normalization (ensure blank line separator)
-    const normalized = normalizeFormat(withCorrectType);
-
-    return normalized; // Success!
+    const normalized = this.normalizeFormat(withCorrectType);
+    return { success: true, result: normalized };
   }
-
-  // All retries exhausted
-  throw new ValidationError(
-    'Failed to generate valid commit message format after multiple attempts.',
-    '[R]egenerate [E]dit manually [C]ancel',
-  );
-}
-
-function extractCommitMessage(rawOutput: string): string | null {
-  const commitLineRegex = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):/m;
-  const match = rawOutput.match(commitLineRegex);
-
-  if (!match) return null;
-
-  const startIndex = rawOutput.indexOf(match[0]);
-  return rawOutput.substring(startIndex).trim();
-}
-
-function validateStructure(message: string): string | null {
-  const lines = message.split('\n');
-  const firstLine = lines[0];
-
-  // Must start with valid type and colon
-  if (!/^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):.+/.test(firstLine)) {
-    return "ERROR: First line must start with commit type and colon (e.g., 'feat: description')";
-  }
-
-  // Description must exist and be reasonable length
-  const description = firstLine.split(':').slice(1).join(':').trim();
-  if (description.length === 0) {
-    return "ERROR: Description after colon is empty. Format: 'type: description'";
-  }
-  if (description.length > 72) {
-    return 'ERROR: Description too long (>72 chars). Keep it concise.';
-  }
-
-  // Body MUST exist (not optional)
-  const restOfMessage = lines.slice(1).join('\n').trim();
-  if (restOfMessage.length === 0) {
-    return 'ERROR: Body is missing. You must include a body paragraph after the subject line explaining what and why.';
-  }
-  if (restOfMessage.length < 10) {
-    return `ERROR: Body too short (${restOfMessage.length} chars). Provide meaningful explanation of what changed and why.`;
-  }
-
-  return null; // Valid
-}
-
-function enforceType(message: string, userSelectedType: string): string {
-  const [, ...rest] = message.split(':');
-  const description = rest.join(':').trim();
-  return `${userSelectedType}: ${description}`;
-}
-
-function normalizeFormat(message: string): string {
-  const [subject, ...bodyLines] = message.split('\n');
-  const body = bodyLines.join('\n').trim();
-  return `${subject}\n\n${body}`;
 }
 ```
 
@@ -1001,14 +1062,58 @@ interface LlmProvider {
 class OllamaAdapter implements LlmProvider {
   // Uses Ollama SDK
 }
-
-// Another implementation
-class MockLlmAdapter implements LlmProvider {
-  // Returns fake data for testing
-}
 ```
 
 **NO "I" prefix on interfaces** - Modern TypeScript style
+
+### Class Member Ordering
+
+**CRITICAL:** All classes must follow this exact member ordering for consistency across the codebase.
+
+**Standard Order:**
+
+1. **Constructor** (with readonly dependency injection)
+2. **Private Properties** (internal state)
+3. **Public Properties** (configuration/exposed state)
+4. **Private Methods** (helpers)
+5. **Public Methods** (API surface)
+
+**Rationale:** Constructor first (Node.js/TypeScript convention), then properties (private before public), then methods (private before public). This groups encapsulated implementation details together while keeping the public API at the bottom where it is most visible.
+
+**Example:**
+
+```typescript
+export class GenerateCommit {
+  // 1. Constructor
+  constructor(
+    private readonly llm: LlmProvider,
+    private readonly git: GitService,
+  ) {}
+
+  // 2. Private Properties
+  private readonly maxRetries = 3;
+  private previousError: string | null = null;
+
+  // 3. Public Properties
+  public retryCount = 0;
+
+  // 4. Private Methods
+  private extractCommitMessage(raw: string): string | null {
+    // Implementation
+  }
+
+  private validateStructure(message: string): string | null {
+    // Implementation
+  }
+
+  // 5. Public Methods
+  public async execute(type: string, diff: string): Promise<string> {
+    // Implementation
+  }
+}
+```
+
+**Reference:** See `dev/styleguides/clean-code.md` for complete standards.
 
 ### Error Handling Patterns
 
@@ -1107,31 +1212,77 @@ async function generate() {
 
 ### Testing Patterns
 
-**Co-located tests, mock via interfaces:**
+**Co-located tests, mock via Vitest utilities:**
 
 ```typescript
 // commit-controller.test.ts
+import { vi } from 'vitest';
+import type { LlmProvider } from '@/core/ports/llm-provider';
+import type { GitService } from '@/core/ports/git-service';
+
 describe('CommitController', () => {
   let controller: CommitController;
-  let mockLlm: MockLlmAdapter;
-  let mockGit: MockGitAdapter;
+  let mockLlm: LlmProvider;
+  let mockGit: GitService;
 
   beforeEach(() => {
-    mockLlm = new MockLlmAdapter();
-    mockGit = new MockGitAdapter();
+    // ✅ Create test-only mocks using Vitest utilities
+    mockLlm = {
+      generateCommitMessage: vi.fn(),
+      isServiceAvailable: vi.fn().mockResolvedValue(true),
+    };
+    mockGit = {
+      getStagedDiff: vi.fn().mockResolvedValue('diff content'),
+      getStatus: vi.fn().mockResolvedValue('M file.ts'),
+      commit: vi.fn().mockResolvedValue(undefined),
+    };
     controller = new CommitController(new GenerateCommit(mockLlm, mockGit));
   });
 
   it('should generate commit message', async () => {
-    mockGit.setDiff('diff content');
-    mockLlm.setResponse('feat: add feature');
+    mockLlm.generateCommitMessage.mockResolvedValue('feat: add feature');
 
     const result = await controller.execute();
 
     expect(result).toBe('feat: add feature');
+    expect(mockGit.getStagedDiff).toHaveBeenCalled();
+    expect(mockLlm.generateCommitMessage).toHaveBeenCalledWith(
+      expect.stringContaining('diff content'),
+    );
   });
 });
 ```
+
+**Mock Factory Pattern:**
+
+```typescript
+// tests/helpers/mock-factories.ts
+import { vi } from 'vitest';
+import type { LlmProvider } from '@/core/ports/llm-provider';
+
+export function createMockLlmProvider(): LlmProvider {
+  return {
+    generateCommitMessage: vi.fn(),
+    isServiceAvailable: vi.fn().mockResolvedValue(true),
+  };
+}
+
+export function createMockGitService(): GitService {
+  return {
+    getStagedDiff: vi.fn(),
+    getStatus: vi.fn(),
+    commit: vi.fn().mockResolvedValue(undefined),
+  };
+}
+```
+
+**Key Testing Principles:**
+
+1. **No Production Mock Classes**: Mocks are created per test using Vitest utilities
+2. **Interface-Based Mocking**: Mock objects implement the same interfaces as production
+3. **Test Isolation**: Each test gets fresh mock instances
+4. **Behavior Verification**: Test both that methods are called AND with correct parameters
+5. **Test Utilities**: Common mock creation patterns extracted to helper functions
 
 ### File Organization Rules
 

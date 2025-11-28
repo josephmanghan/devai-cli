@@ -1,4 +1,4 @@
-import { Ollama, Logprob } from 'ollama';
+import { Ollama, Logprob } from 'ollama'
 
 function printLogprobs(entries: Logprob[], label: string) {
   console.log(`\n${label}:`)
@@ -28,4 +28,3 @@ main().catch((err) => {
   console.error(err)
   process.exitCode = 1
 })
-

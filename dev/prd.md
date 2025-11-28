@@ -313,17 +313,20 @@ The following Ollama request parameters require technical decisions during archi
 ### Future Technical Considerations (Post-MVP):
 
 **Edge Cases to Document:**
+
 - Mid-generation daemon death: Document as edge case, don't implement specific handling initially
 - Git repository corruption: Document as edge case, rely on git's own error reporting
 - Editor fallback failures: Document fallback chain ($EDITOR → vim → nano → vi → notepad), already covered in stories
 
 **Migration Strategy Questions:**
+
 - CLI tool migration patterns: Research how popular CLI tools handle version upgrades with breaking changes
 - Custom model upgrade strategy: How to migrate users from ollatool-commit v1 to v2 when system prompt changes
 - Configuration migration: Strategy for handling config file format changes between versions
 - Timeline: Document as v1.1+ consideration, not MVP blocker
 
 **Performance Validation Gaps:**
+
 - Empirical performance data: Add performance benchmarking as post-MVP task to validate actual vs. target latency
 - Context window testing: Validate real-world diff sizes vs. 128K token limit under various development scenarios
 - Hardware variability: Test on different Mac/Windows/Linux configurations, not just M1/M2 as

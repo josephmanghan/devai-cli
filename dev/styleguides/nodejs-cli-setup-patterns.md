@@ -3,6 +3,7 @@
 ## File Naming Conventions
 
 **All files use kebab-case:**
+
 - ✅ `commit-controller.ts`
 - ✅ `generate-commit-message.ts`
 - ✅ `ollama-provider.ts`
@@ -14,6 +15,7 @@
 **Exception**: Class files exported as default MAY use PascalCase for clarity, but kebab-case is preferred.
 
 ## Package Configuration Pattern
+
 ```json
 {
   "name": "ollacli",
@@ -24,6 +26,7 @@
 ```
 
 ## TypeScript Configuration Pattern
+
 ```json
 {
   "compilerOptions": {
@@ -39,14 +42,18 @@
 ```
 
 ## CLI Framework Selection Pattern
+
 **Recommended**: Commander.js
+
 ```bash
 npm install commander @clack/prompts
 ```
+
 - Commander: Argument parsing
 - @clack/prompts: Interactive UX (modern replacement for inquirer)
 
 ## Project Structure Pattern
+
 ```
 src/
 ├── cli/
@@ -63,6 +70,7 @@ src/
 ```
 
 ## Essential Dependencies Pattern
+
 ```bash
 # Runtime
 npm install commander @clack/prompts execa ollama zod cosmiconfig chalk
@@ -72,6 +80,7 @@ npm install -D typescript tsup vitest @types/node eslint prettier
 ```
 
 ## Build Configuration Pattern (tsup.config.ts)
+
 ```typescript
 import { defineConfig } from 'tsup';
 
@@ -88,6 +97,7 @@ export default defineConfig({
 ```
 
 ## Testing Configuration Pattern (vitest.config.ts)
+
 ```typescript
 import { defineConfig } from 'vitest/config';
 
@@ -100,12 +110,14 @@ export default defineConfig({
 ```
 
 ## Entry Point Pattern (bin/ollacli.js)
+
 ```javascript
 #!/usr/bin/env node
 require('../dist/index.js');
 ```
 
 ## Git Integration Pattern (execa)
+
 ```typescript
 import { execa } from 'execa';
 
@@ -117,9 +129,13 @@ await execa('git', ['commit', '-m', message]);
 ```
 
 ## Error Handling Pattern
+
 ```typescript
 class AppError extends Error {
-  constructor(message: string, public code: string) {
+  constructor(
+    message: string,
+    public code: string,
+  ) {
     super(message);
     this.name = 'AppError';
   }
@@ -127,6 +143,7 @@ class AppError extends Error {
 ```
 
 ## Development Workflow Pattern
+
 ```bash
 npm run build    # Compile TypeScript
 npm run dev      # Build + npm link
@@ -135,6 +152,7 @@ npm run lint     # ESLint
 ```
 
 ## Configuration Loading Pattern (cosmiconfig + zod)
+
 ```typescript
 import cosmiconfig from 'cosmiconfig';
 import { z } from 'zod';
@@ -150,6 +168,7 @@ const config = ConfigSchema.parse(result?.config);
 ```
 
 ## Development Installation Pattern
+
 ```bash
 # For local development
 npm link

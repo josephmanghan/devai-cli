@@ -145,7 +145,7 @@ export class CommitMessage {
 
 ### GenerateCommitMessage Use Case
 
-```typescript
+````typescript
 // src/features/commit/use-cases/generate-commit-message.ts
 export class GenerateCommitMessage {
   constructor(
@@ -203,7 +203,7 @@ Output ONLY the commit message. No markdown, no code blocks.`;
       .trim();
   }
 }
-```
+````
 
 ## Adapter Implementation Pattern
 

@@ -4,8 +4,8 @@
   "description": "Collection of Gems - custom AI agent definitions and workflow configurations",
   "type": "module",
   "scripts": {
-    "format": "prettier --write \"gems/**/*.md\"",
-    "format:check": "prettier --check \"gems/**/*.md\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "fix": "npm run format"
   },
   "devDependencies": {

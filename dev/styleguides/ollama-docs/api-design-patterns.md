@@ -5,32 +5,32 @@
 ```typescript
 // Chat Request Pattern
 interface ChatRequest {
-  model: string
-  messages: Message[]
-  stream?: boolean
-  format?: string | object
-  tools?: Tool[]
-  think?: boolean | 'high' | 'medium' | 'low'
-  options?: Partial<Options>
+  model: string;
+  messages: Message[];
+  stream?: boolean;
+  format?: string | object;
+  tools?: Tool[];
+  think?: boolean | 'high' | 'medium' | 'low';
+  options?: Partial<Options>;
 }
 
 // Generate Request Pattern
 interface GenerateRequest {
-  model: string
-  prompt: string
-  stream?: boolean
-  format?: string | object
-  think?: boolean | 'high' | 'medium' | 'low'
-  options?: Partial<Options>
+  model: string;
+  prompt: string;
+  stream?: boolean;
+  format?: string | object;
+  think?: boolean | 'high' | 'medium' | 'low';
+  options?: Partial<Options>;
 }
 
 // Message Pattern
 interface Message {
-  role: string
-  content: string
-  thinking?: string
-  images?: Uint8Array[] | string[]
-  tool_calls?: ToolCall[]
+  role: string;
+  content: string;
+  thinking?: string;
+  images?: Uint8Array[] | string[];
+  tool_calls?: ToolCall[];
 }
 ```
 
@@ -42,41 +42,40 @@ class ResponseError extends Error {
     public error: string,
     public status_code: number,
   ) {
-    super(error)
-    this.name = 'ResponseError'
+    super(error);
+    this.name = 'ResponseError';
   }
 }
 
 // Usage in API calls
 const checkOk = async (response: Response): Promise<void> => {
   if (!response.ok) {
-    let message = `Error ${response.status}: ${response.statusText}`
-    throw new ResponseError(message, response.status)
+    let message = `Error ${response.status}: ${response.statusText}`;
+    throw new ResponseError(message, response.status);
   }
-}
+};
 ```
 
 ## Streaming Pattern
 
 ```typescript
 export class AbortableAsyncIterator<T extends object> {
-  private readonly abortController: AbortController
+  private readonly abortController: AbortController;
 
   abort() {
-    this.abortController.abort()
+    this.abortController.abort();
   }
 
   async *[Symbol.asyncIterator]() {
     for await (const message of this.itr) {
       if ('error' in message) {
-        throw new Error(message.error)
+        throw new Error(message.error);
       }
-      yield message
+      yield message;
       if ((message as any).done) {
-        return
+        return;
       }
     }
   }
 }
 ```
-

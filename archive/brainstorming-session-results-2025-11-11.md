@@ -209,15 +209,18 @@ _Key realizations from the session_
 ## Appendix: Pre-Research Ideas Capture
 
 ### 📝 Dr Joe's Initial Ideas
+
 📁 **File:** `docs/IDEAS.md`
 
 **Note:** These are raw ideas captured by Dr Joe before completing the deep research phase. They represent initial thinking and intuition about potential productivity tools and may evolve significantly after research findings are incorporated.
 
 **Ideas captured:**
+
 - CLI tool for intelligent screenshot organization and naming with configurable patterns
 - Web app task manager with work escalation and automated communication features (Slack messages, status updates)
 
 **Purpose:** This file serves as:
+
 - Capture point for spontaneous ideas during the research phase
 - Reference for understanding initial thought patterns before research influence
 - Potential source of insights during final idea generation phase

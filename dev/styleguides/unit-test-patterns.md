@@ -12,6 +12,7 @@
 Test what users experience, not implementation details.
 
 **For CLI Applications:**
+
 - Exit codes (0 for success, 1 for error)
 - stdout/stderr output
 - File system changes
@@ -293,12 +294,7 @@ const getInstance = (config?: InstanceConfig) => {
     }),
   };
 
-  const useCase = new GenerateCommitMessage(
-    mockGit,
-    mockLLM,
-    mockTemplate,
-    mockConfig
-  );
+  const useCase = new GenerateCommitMessage(mockGit, mockLLM, mockTemplate, mockConfig);
 
   return { useCase, mockGit, mockLLM, mockTemplate, mockConfig };
 };
@@ -315,7 +311,7 @@ const getInstance = (config?: { baseUrl?: string }) => {
 
   const provider = new OllamaProvider(
     mockOllamaClient,
-    config?.baseUrl ?? 'http://localhost:11434'
+    config?.baseUrl ?? 'http://localhost:11434',
   );
 
   return { provider, mockOllamaClient };
@@ -422,7 +418,7 @@ it('should call LLM with correct prompt', async () => {
       expect.objectContaining({ role: 'system' }),
       expect.objectContaining({ role: 'user' }),
     ]),
-    expect.any(Object)
+    expect.any(Object),
   );
 });
 ```
@@ -535,7 +531,7 @@ it('should complete observable after emission', (done) => {
 
 ### Use Case Test Example
 
-```typescript
+````typescript
 // tests/unit/use-cases/generate-commit-message.spec.ts
 import { GenerateCommitMessage } from '@/features/commit/use-cases/generate-commit-message';
 
@@ -572,7 +568,7 @@ describe('GenerateCommitMessage', () => {
     };
 
     const mockConfig = {
-      get: jest.fn((key) => ({ model: 'llama3.2:1b', template: 'conventional' }[key])),
+      get: jest.fn((key) => ({ model: 'llama3.2:1b', template: 'conventional' })[key]),
     };
 
     const useCase = new GenerateCommitMessage(mockGit, mockLLM, mockTemplate, mockConfig);
@@ -599,7 +595,7 @@ describe('GenerateCommitMessage', () => {
 
       expect(mockTemplate.renderFile).toHaveBeenCalledWith(
         'templates/conventional.hbs',
-        expect.objectContaining({ diff: expect.any(String) })
+        expect.objectContaining({ diff: expect.any(String) }),
       );
 
       expect(mockLLM.generate).toHaveBeenCalledWith(
@@ -607,7 +603,7 @@ describe('GenerateCommitMessage', () => {
           expect.objectContaining({ role: 'system' }),
           expect.objectContaining({ role: 'user' }),
         ]),
-        expect.objectContaining({ model: 'llama3.2:1b' })
+        expect.objectContaining({ model: 'llama3.2:1b' }),
       );
     });
   });
@@ -627,7 +623,7 @@ describe('GenerateCommitMessage', () => {
     });
   });
 });
-```
+````
 
 ### Adapter Test Example
 
@@ -734,14 +730,9 @@ describe('Commit Workflow Integration', () => {
     const gitService = new ShellGitService();
     const llmProvider = new MockLLMProvider(['feat: integration test commit']);
     const templateEngine = new HandlebarsEngine();
-    const config = { get: (key) => ({ model: 'llama3.2:1b' }[key]) };
+    const config = { get: (key) => ({ model: 'llama3.2:1b' })[key] };
 
-    const useCase = new GenerateCommitMessage(
-      gitService,
-      llmProvider,
-      templateEngine,
-      config
-    );
+    const useCase = new GenerateCommitMessage(gitService, llmProvider, templateEngine, config);
 
     // Mock git to avoid actual file system changes
     jest.spyOn(gitService, 'getStagedDiff').mockResolvedValue('diff content');

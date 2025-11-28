@@ -28,6 +28,7 @@ Structured outputs let you enforce a JSON schema on model responses so you can r
     )
     print(response.message.content)
     ```
+
   </Tab>
   <Tab title="JavaScript">
     ```javascript
@@ -40,6 +41,7 @@ Structured outputs let you enforce a JSON schema on model responses so you can r
     })
     console.log(response.message.content)
     ```
+
   </Tab>
 </Tabs>
 
@@ -94,6 +96,7 @@ Provide a JSON schema to the `format` field.
     country = Country.model_validate_json(response.message.content)
     print(country)
     ```
+
   </Tab>
   <Tab title="JavaScript">
     Serialize a Zod schema with `zodToJsonSchema()` and parse the structured response:
@@ -118,6 +121,7 @@ Provide a JSON schema to the `format` field.
     const country = Country.parse(JSON.parse(response.message.content))
     console.log(country)
     ```
+
   </Tab>
 </Tabs>
 
@@ -191,4 +195,4 @@ print(image_description)
 
 - Define schemas with Pydantic (Python) or Zod (JavaScript) so they can be reused for validation.
 - Lower the temperature (e.g., set it to `0`) for more deterministic completions.
-- Structured outputs work through the OpenAI-compatible API via `response_format` 
+- Structured outputs work through the OpenAI-compatible API via `response_format`

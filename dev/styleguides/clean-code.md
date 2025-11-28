@@ -79,12 +79,11 @@ cli_class_standards:
     summary: 'A consistent ordering of class members improves readability and makes it easier to locate specific properties and methods.'
     order:
       - 'constructor() with readonly dependencies'
-      - 'Public Properties (configuration)'
-      - 'Public Methods (API surface)'
       - 'Private Properties (internal state)'
-      - 'Private Methods (helpers)'
-    visibility_rule:
-      guideline: 'Within each category, members should be sorted by visibility: public, then protected, then private.'
+      - 'Public Properties (configuration/exposed state)'
+      - 'Public Methods (API surface - called first by consumers)'
+      - 'Private Methods (implementation helpers)'
+    rationale: 'Constructor first (Node.js/TypeScript convention), then properties (private before public), then methods (public before private). Public methods are the API surface that consumers call, so they appear first. Private helper methods that support the public API appear below, keeping implementation details at the bottom.'
 
 # -------------------------------------------------------------------
 # 6. Design Patterns
@@ -130,7 +129,7 @@ data_and_state_management:
   principles:
     - principle: 'Embrace Immutability'
       guideline: 'Do not mutate data directly. Treat state as immutable by creating new objects when changes occur.'
-      rationale: "Immutability prevents side effects and is highly compatible with Node.js stream processing and error handling."
+      rationale: 'Immutability prevents side effects and is highly compatible with Node.js stream processing and error handling.'
 
 # -------------------------------------------------------------------
 # 8. Comments & Self-Documenting Code

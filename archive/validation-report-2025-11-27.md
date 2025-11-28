@@ -21,6 +21,7 @@
 **Issue:** The PRD workflow requires two-file output (prd.md + epics.md). Only prd.md exists.
 
 **Impact:** Without epics and stories:
+
 - Cannot validate FR coverage (no traceability from requirements to implementation)
 - Cannot validate story sequencing or dependencies
 - Cannot verify vertical slicing
@@ -30,6 +31,7 @@
 **Evidence:** Searched dev/ folder - no epics.md or epics/ directory found.
 
 **Remediation:** Run the create-epics-and-stories workflow to generate epics.md with:
+
 - Epic breakdown from PRD requirements
 - User stories for each epic
 - Acceptance criteria per story
@@ -40,6 +42,7 @@
 ## Section Results
 
 ### 1. PRD Document Completeness
+
 **Pass Rate:** 11/13 (85%)
 
 #### Core Sections Present
@@ -108,6 +111,7 @@ Evidence: Lines 35-37 provide clear rationale for low complexity classification
 ---
 
 ### 2. Functional Requirements Quality
+
 **Pass Rate:** 17/18 (94%)
 
 #### FR Format and Structure
@@ -167,6 +171,7 @@ Evidence: MVP vs post-MVP mentioned in prose throughout PRD, but FRs themselves 
 ---
 
 ### 3. Epics Document Completeness
+
 **Pass Rate:** 0/3 (0%)
 
 ❌ **FAIL** - epics.md exists in output folder
@@ -181,6 +186,7 @@ Evidence: Cannot validate - no epics.md exists
 ---
 
 ### 4. FR Coverage Validation (CRITICAL)
+
 **Pass Rate:** 0/9 (0%)
 
 ❌ **FAIL** - Every FR covered by at least one story
@@ -213,6 +219,7 @@ Evidence: Cannot validate - no stories exist
 ---
 
 ### 5. Story Sequencing Validation (CRITICAL)
+
 **Pass Rate:** 0/12 (0%)
 
 ❌ **FAIL** - Epic 1 establishes foundational infrastructure
@@ -254,6 +261,7 @@ Evidence: Cannot validate - no stories exist
 ---
 
 ### 6. Scope Management
+
 **Pass Rate:** 10/11 (91%)
 
 #### MVP Discipline
@@ -301,6 +309,7 @@ Evidence: PRD clearly delineates MVP boundaries throughout
 ---
 
 ### 7. Research and Context Integration
+
 **Pass Rate:** 11/11 (100%)
 
 #### Source Document Integration
@@ -348,6 +357,7 @@ Evidence: PRD requirements are detailed enough to inform epic creation; however,
 ---
 
 ### 8. Cross-Document Consistency
+
 **Pass Rate:** 4/8 (50%)
 
 #### Terminology Consistency
@@ -381,6 +391,7 @@ Evidence: PRD and brief boundaries consistent, but cannot validate against epics
 ---
 
 ### 9. Readiness for Implementation
+
 **Pass Rate:** 10/13 (77%)
 
 #### Architecture Readiness (Next Phase)
@@ -434,6 +445,7 @@ Evidence: PRD provides sufficient foundation for creating value-delivering epic 
 ---
 
 ### 10. Quality and Polish
+
 **Pass Rate:** 12/12 (100%)
 
 #### Writing Quality
@@ -494,11 +506,13 @@ Evidence: Every section provides meaningful detail and analysis
 ### Section Failures (26)
 
 **Section 3: Epics Document Completeness (3 failures)**
+
 - ❌ epics.md exists
 - ❌ Epic list matches between PRD and epics
 - ❌ All epics have detailed breakdown sections
 
 **Section 4: FR Coverage Validation (9 failures)**
+
 - ❌ Every FR covered by story
 - ❌ Stories reference FR numbers
 - ❌ No orphaned FRs
@@ -510,6 +524,7 @@ Evidence: Every section provides meaningful detail and analysis
 - ❌ NFRs reflected in acceptance criteria
 
 **Section 5: Story Sequencing (12 failures)**
+
 - ❌ Epic 1 establishes foundation
 - ❌ Epic 1 delivers deployable functionality
 - ❌ Epic 1 creates baseline
@@ -524,15 +539,18 @@ Evidence: Every section provides meaningful detail and analysis
 - ❌ Parallel tracks indicated
 
 **Section 6: Scope Management (2 failures)**
+
 - ❌ Stories marked MVP vs Growth vs Vision
 - ❌ Epic sequencing aligns with progression
 
 **Section 8: Cross-Document Consistency (3 failures)**
+
 - ❌ Feature names consistent (can't validate without epics)
 - ❌ Epic titles match (can't validate without epics)
 - ❌ Technical preferences align with story hints (can't validate without stories)
 
 **Section 9: Readiness for Implementation (3 failures)**
+
 - ❌ Acceptance criteria testable (no stories)
 - ❌ Epic structure supports phased delivery (no epics)
 - ❌ Scope supports phased development (no epic phasing)
@@ -544,6 +562,7 @@ Evidence: Every section provides meaningful detail and analysis
 ### Section 1: PRD Document Completeness (1 partial)
 
 ⚠ **Innovation patterns documentation**
+
 - What's Present: PRD describes "Local-First Compliance Engine" differentiation strategy
 - What's Missing: Explicit validation approach for novel market positioning
 - Impact: Minor - innovation validation can be addressed in architecture phase or during implementation
@@ -552,16 +571,19 @@ Evidence: Every section provides meaningful detail and analysis
 ### Section 2: Functional Requirements Quality (3 partials)
 
 ⚠ **FRs contain some borderline technical details**
+
 - Examples: FR2 mentions `git diff --cached` command, FR10 mentions "streaming responses"
 - Impact: Minor - these are boundary specifications, not implementation prescriptions
 - Recommendation: Consider if these details should move to architecture phase, though they may be necessary for clarity
 
 ⚠ **Some FRs lack full measurability**
+
 - Example: FR21 "three components" without defining completeness criteria
 - Impact: Minor - most FRs are measurable; this is edge case
 - Recommendation: Review FRs for missing acceptance thresholds during epic creation
 
 ⚠ **Priority/phase not explicitly tagged in FRs**
+
 - What's Present: MVP vs post-MVP mentioned in prose context
 - What's Missing: Explicit phase tags on each FR (e.g., "[MVP]", "[Growth]")
 - Impact: Minor - context makes phase clear, but tags would improve scanability
@@ -578,6 +600,7 @@ Evidence: Every section provides meaningful detail and analysis
 **WHY:** This is the primary blocker. Without epics and stories, the PRD cannot be validated for completeness, and the implementation phase cannot begin.
 
 **HOW:** Run the `create-epics-and-stories` workflow:
+
 - Menu command: `*create-epics-and-stories`
 - Input: Current PRD (dev/prd.md)
 - Output: dev/epics.md with:
@@ -588,6 +611,7 @@ Evidence: Every section provides meaningful detail and analysis
   - Vertical slicing (each story delivers end-to-end functionality)
 
 **AFTER GENERATION:** Re-run this validation to verify:
+
 - Epic 1 establishes foundation
 - All FRs covered by stories
 - No forward dependencies
@@ -603,6 +627,7 @@ Evidence: Every section provides meaningful detail and analysis
 **WHY:** PRD claims novel "Local-First Compliance Engine" positioning but doesn't specify how to validate this differentiation.
 
 **HOW:** Add brief section to PRD (or defer to architecture phase):
+
 - How will privacy-first claim be validated? (network traffic monitoring, code review)
 - How will sub-1s performance be measured? (benchmark criteria, test scenarios)
 - What adoption metrics define success for zero-config experience? (installation success rate, support requests)
@@ -616,9 +641,10 @@ Evidence: Every section provides meaningful detail and analysis
 **WHY:** Some FRs contain borderline implementation details (e.g., specific git commands, streaming behavior).
 
 **HOW:** During architecture phase, review whether details like:
+
 - FR2: `git diff --cached` (could be "staged changes")
 - FR10: "streaming responses" (could be "incremental feedback")
-Should remain in FRs or move to architecture decisions.
+  Should remain in FRs or move to architecture decisions.
 
 **PRIORITY:** Low - current FRs are functional, this is optimization
 
@@ -629,6 +655,7 @@ Should remain in FRs or move to architecture decisions.
 **WHY:** MVP vs Growth vs Vision clear in prose, but explicit tags would improve FR list scanability.
 
 **HOW:** Consider adding tags to FR list:
+
 - `[MVP] FR1: The tool can detect whether any files are staged...`
 - `[Growth] FR45: The tool respects the OLLAMA_HOST environment variable...`
 
@@ -641,6 +668,7 @@ Should remain in FRs or move to architecture decisions.
 **3.1. Strengthen Measurability of Specific FRs**
 
 Review FRs like FR21, FR23 for more specific acceptance criteria:
+
 - FR21: Define what constitutes "complete" type/description/body
 - FR23: Specify "50 characters or less" as hard limit vs guideline
 
@@ -653,6 +681,7 @@ Review FRs like FR21, FR23 for more specific acceptance criteria:
 PRD flags model selection as "subject to validation testing" (line 281) but doesn't detail validation plan.
 
 Consider adding:
+
 - Test scenarios for acceptance criteria validation
 - Fallback model selection criteria
 - Benchmark dataset for model comparison
@@ -695,6 +724,7 @@ The PRD demonstrates thorough planning and analysis. The missing epics file is t
 **Why This Validation Failed:**
 
 The PRD workflow requires **two-file output**: prd.md + epics.md. The PRD itself is excellent quality (85%+ pass rate on PRD-specific checks), but without epics and stories:
+
 - No FR traceability (cannot verify all requirements are covered)
 - No implementation roadmap (cannot sequence development)
 - No story-level acceptance criteria (cannot validate readiness)

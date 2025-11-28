@@ -74,34 +74,34 @@ export interface Message {
 
 export interface ToolCall {
   function: {
-    name: string;
+    name: string
     arguments: {
-      [key: string]: any;
-    };
-  };
+      [key: string]: any
+    }
+  }
 }
 
 export interface Tool {
-  type: string;
+  type: string
   function: {
-    name?: string;
-    description?: string;
-    type?: string;
+    name?: string
+    description?: string
+    type?: string
     parameters?: {
-      type?: string;
-      $defs?: any;
-      items?: any;
-      required?: string[];
+      type?: string
+      $defs?: any
+      items?: any
+      required?: string[]
       properties?: {
         [key: string]: {
-          type?: string | string[];
-          items?: any;
-          description?: string;
-          enum?: any[];
-        };
-      };
-    };
-  };
+          type?: string | string[]
+          items?: any
+          description?: string
+          enum?: any[]
+        }
+      }
+    }
+  }
 }
 
 export interface ChatRequest {
@@ -267,8 +267,8 @@ export interface ShowResponse {
   details: ModelDetails
   messages: Message[]
   modified_at: Date
-  model_info: Map<string, any>,
-  capabilities: string[],
+  model_info: Map<string, any>
+  capabilities: string[]
   projector_info?: Map<string, any>
 }
 

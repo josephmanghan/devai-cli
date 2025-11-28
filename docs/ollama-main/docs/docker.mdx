@@ -56,8 +56,9 @@ docker run -d --gpus=all -v ollama:/root/.ollama -p 11434:11434 --name ollama ol
 ```
 
 <Note>
-  If you're running on an NVIDIA JetPack system, Ollama can't automatically discover the correct JetPack version.
-  Pass the environment variable `JETSON_JETPACK=5` or `JETSON_JETPACK=6` to the container to select version 5 or 6.
+  If you're running on an NVIDIA JetPack system, Ollama can't automatically discover the correct
+  JetPack version. Pass the environment variable `JETSON_JETPACK=5` or `JETSON_JETPACK=6` to the
+  container to select version 5 or 6.
 </Note>
 
 ## AMD GPU
@@ -70,12 +71,11 @@ docker run -d --device /dev/kfd --device /dev/dri -v ollama:/root/.ollama -p 114
 
 ## Vulkan Support
 
-Vulkan is bundled into the `ollama/ollama` image.  
+Vulkan is bundled into the `ollama/ollama` image.
 
 ```shell
 docker run -d --device /dev/kfd --device /dev/dri -v ollama:/root/.ollama -p 11434:11434 -e OLLAMA_VULKAN=1 --name ollama ollama/ollama
 ```
-
 
 ## Run model locally
 
@@ -88,4 +88,3 @@ docker exec -it ollama ollama run llama3.2
 ## Try different models
 
 More models can be found on the [Ollama library](https://ollama.com/library).
-

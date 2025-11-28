@@ -19,6 +19,7 @@
 - [ ] Type definitions for diff output and commit parameters
 - [ ] Interface documented with JSDoc
 - [ ] Zero external dependencies in core/
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -51,6 +52,7 @@
 - [ ] Constructor accepts cwd parameter (manual DI)
 - [ ] All port methods implemented with error handling
 - [ ] Commands use execa for shell execution
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -84,6 +86,7 @@
 - [ ] Returns unified diff output if changes exist
 - [ ] Handles binary file changes gracefully
 - [ ] Command: `git diff --staged`
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -116,6 +119,7 @@
 - [ ] Handles detached HEAD state (return commit hash)
 - [ ] Command: `git branch --show-current`
 - [ ] Fallback: `git rev-parse HEAD` if detached
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -148,6 +152,7 @@
 - [ ] Returns success/failure status
 - [ ] Preserves multi-line commit messages
 - [ ] Handles commit hook failures gracefully
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 

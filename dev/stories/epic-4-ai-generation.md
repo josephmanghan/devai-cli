@@ -19,6 +19,7 @@
 - [ ] Constructs user message combining type + diff + instructions
 - [ ] Output: plain text prompt ready for LLM
 - [ ] No external dependencies (pure function)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -52,6 +53,7 @@
 - [ ] Type validation function (reject invalid types)
 - [ ] Default type: infer from diff or prompt user
 - [ ] Type enforced in final message regardless of AI output
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -85,6 +87,7 @@
 - [ ] Detects conversational pollution ("Here's a commit message...")
 - [ ] Returns boolean: valid or invalid
 - [ ] No schema validation (Zod deferred to post-MVP)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -119,6 +122,7 @@
 - [ ] Prepends user-selected type
 - [ ] Preserves scope if present in AI output
 - [ ] Handles breaking change indicator (!)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -152,6 +156,7 @@
 - [ ] Capitalizes first letter after type
 - [ ] Removes trailing periods
 - [ ] Ensures single-line subject (optional multi-line body)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -186,6 +191,7 @@
 - [ ] Retry triggers: format validation failure only
 - [ ] No user-facing retry indicators (completely silent)
 - [ ] Fallback: show error after max retries exhausted
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 

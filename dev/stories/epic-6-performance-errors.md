@@ -19,6 +19,7 @@
 - [ ] Target: total flow <1000ms on M1/M2
 - [ ] Reports: p50, p95, p99 latencies
 - [ ] Runs on real hardware (not mocked)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -52,6 +53,7 @@
 - [ ] Message: "Generating commit message..."
 - [ ] Stops on success or failure
 - [ ] Cross-platform support (macOS, Linux, Windows)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -85,6 +87,7 @@
 - [ ] Each error includes: message, remediation guidance, exit code
 - [ ] All errors extend base OllatoolError class
 - [ ] Specific errors: NotGitRepository, NoStagedChanges, OllamaNotRunning, etc.
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -120,6 +123,7 @@
 - [ ] Color-coded (red for errors, yellow for warnings)
 - [ ] References relevant commands or docs
 - [ ] Consistent format across all error types
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -165,6 +169,7 @@
 - [ ] Formats errors using error formatter
 - [ ] Logs stack traces in debug mode (env var)
 - [ ] Clean exit (no stack traces in production)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -199,6 +204,7 @@
 - [ ] Unloads Ollama model (keep_alive=0 ensures this)
 - [ ] Handles process signals: SIGINT, SIGTERM
 - [ ] Cleanup runs on success, failure, and cancellation
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -233,6 +239,7 @@
 - [ ] Context limit: 128K tokens (512K chars)
 - [ ] Error if diff + prompt > limit
 - [ ] Remediation: suggest splitting commits or reducing diff
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -267,6 +274,7 @@
 - [ ] Output to stderr (not stdout, to avoid polluting output)
 - [ ] No external services (local logging only)
 - [ ] Zero performance impact when disabled
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 

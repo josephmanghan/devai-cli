@@ -19,6 +19,7 @@
 - [ ] tsconfig.json includes proper paths and module resolution settings
 - [ ] Project compiles successfully with `tsc --noEmit`
 - [ ] Basic package.json scripts: `build`, `dev`, `typecheck`
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 

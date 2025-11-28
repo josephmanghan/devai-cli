@@ -22,6 +22,7 @@
 - [ ] Keyboard navigation (arrow keys, enter)
 - [ ] Returns selected type to workflow
 - [ ] Cancellable (Ctrl+C)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -56,6 +57,7 @@
 - [ ] Highlights commit type (color-coded)
 - [ ] Displays message subject and body (if multi-line)
 - [ ] No "success" indicator (silent generation per UX spec)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -89,6 +91,7 @@
 - [ ] Keyboard shortcuts: a (approve), e (edit), r (regenerate), c (cancel)
 - [ ] Uses @clack/prompts select component
 - [ ] Returns action enum to workflow
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -125,6 +128,7 @@
 - [ ] Spawns editor with `stdio: 'inherit'`
 - [ ] Reads edited message after editor closes
 - [ ] Cleans up temp file (try/finally)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -161,6 +165,7 @@
 - [ ] Shows new message preview
 - [ ] Returns to action selector (approve/edit/regenerate loop)
 - [ ] No limit on regenerate attempts (user controls loop)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -195,6 +200,7 @@
 - [ ] Shows success message with commit hash
 - [ ] Handles commit hook failures gracefully
 - [ ] Exits cleanly after successful commit
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -230,6 +236,7 @@
 - [ ] Integrates all Epic 5 components
 - [ ] Error handling for each step
 - [ ] Clean exit on cancel (exit code 0)
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -267,6 +274,7 @@
 - [ ] Handles top-level errors (show user-friendly messages)
 - [ ] Exit codes: 0 (success/cancel), 2 (user error), 3 (system error)
 - [ ] `--help` shows commit command usage
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 

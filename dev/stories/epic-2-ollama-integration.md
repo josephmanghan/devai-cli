@@ -19,6 +19,7 @@
 - [ ] Type definitions for model parameters and responses
 - [ ] Interface documented with JSDoc
 - [ ] Zero external dependencies in core/
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -51,6 +52,7 @@
 - [ ] Constructor accepts Ollama instance (manual DI)
 - [ ] All port methods implemented with proper error handling
 - [ ] Connection defaults to http://localhost:11434
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 
@@ -83,6 +85,7 @@
 - [ ] Detects custom model existence (`ollatool-commit:latest`)
 - [ ] Returns clear boolean or typed result
 - [ ] Handles list API errors gracefully
+- [ ] Code adheres to dev/styleguides/clean-code.md standards
 
 **Technical Notes:**
 

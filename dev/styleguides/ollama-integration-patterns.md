@@ -1,6 +1,7 @@
 # Ollama Integration Patterns
 
 ## Client Setup Pattern
+
 ```bash
 npm install ollama
 ```
@@ -18,6 +19,7 @@ class OllamaService {
 ```
 
 ## Chat Generation Pattern
+
 ```typescript
 async generateResponse(prompt: string): Promise<string> {
   const response = await this.client.chat({
@@ -31,6 +33,7 @@ async generateResponse(prompt: string): Promise<string> {
 ```
 
 ## Streaming Pattern
+
 ```typescript
 async *streamResponse(prompt: string): AsyncGenerator<string> {
   const response = await this.client.chat({
@@ -48,6 +51,7 @@ async *streamResponse(prompt: string): AsyncGenerator<string> {
 ```
 
 ## System Prompt Pattern
+
 ```typescript
 const SYSTEM_PROMPT = `You are an expert software engineer and git commit message generator.
 STRICT RULES:
@@ -58,6 +62,7 @@ STRICT RULES:
 ```
 
 ## Few-Shot Prompting Pattern
+
 ```typescript
 const messages = [
   { role: 'system', content: SYSTEM_PROMPT },
@@ -65,11 +70,12 @@ const messages = [
   { role: 'assistant', content: 'chore(release): bump version to 1.1.0' },
   { role: 'user', content: 'Diff: function login() {...} added to src/auth.js' },
   { role: 'assistant', content: 'feat(auth): add user login function' },
-  { role: 'user', content: actualDiff }
+  { role: 'user', content: actualDiff },
 ];
 ```
 
 ## Model Availability Check Pattern
+
 ```typescript
 async checkHealth(): Promise<boolean> {
   try {
@@ -82,6 +88,7 @@ async checkHealth(): Promise<boolean> {
 ```
 
 ## Auto-Pull Pattern
+
 ```typescript
 async ensureModel(model: string): Promise<void> {
   try {
@@ -98,19 +105,21 @@ async ensureModel(model: string): Promise<void> {
 ```
 
 ## Performance Optimization Pattern
+
 ```typescript
 const generationOptions = {
   model: 'llama3.2:1b',
   stream: true,
   options: {
-    temperature: 0.3,        // Lower for more deterministic output
-    num_ctx: 8192,          // Context window limit
-    keep_alive: '60m',      // Keep model in memory
-  }
+    temperature: 0.3, // Lower for more deterministic output
+    num_ctx: 8192, // Context window limit
+    keep_alive: '60m', // Keep model in memory
+  },
 };
 ```
 
 ## Context Management Pattern
+
 ```typescript
 function truncateDiff(diff: string, maxLength = 8000): string {
   if (diff.length <= maxLength) return diff;
@@ -139,16 +148,18 @@ function truncateDiff(diff: string, maxLength = 8000): string {
 ```
 
 ## Output Sanitization Pattern
+
 ```typescript
 function sanitizeOutput(output: string): string {
   return output
     .replace(/^\`\`\`(?:json|text)?\s*|\s*\`\`\`$/gi, '') // Remove code blocks
-    .replace(/\`/g, '')                                  // Remove backticks
-    .trim();                                             // Remove whitespace
+    .replace(/\`/g, '') // Remove backticks
+    .trim(); // Remove whitespace
 }
 ```
 
 ## Error Handling Pattern
+
 ```typescript
 interface OllamaError {
   error: string;
@@ -167,6 +178,7 @@ function handleOllamaError(error: any): OllamaError {
 ```
 
 ## Streaming UI Pattern
+
 ```typescript
 import { spinner } from '@clack/prompts';
 
@@ -189,6 +201,7 @@ async generateWithUI(prompt: string): Promise<string> {
 ```
 
 ## Git Diff Preprocessing Pattern
+
 ```typescript
 async getCleanStagedDiff(): Promise<string> {
   const { stdout } = await execa('git', [
@@ -201,6 +214,7 @@ async getCleanStagedDiff(): Promise<string> {
 ```
 
 ## Cache Pattern
+
 ```typescript
 class DiffCache {
   private cachePath = '.git/ollama_cache.json';

@@ -76,11 +76,7 @@
         "groups": [
           {
             "group": "Get started",
-            "pages": [
-              "index",
-              "quickstart",
-              "/cloud"
-            ]
+            "pages": ["index", "quickstart", "/cloud"]
           },
           {
             "group": "Capabilities",

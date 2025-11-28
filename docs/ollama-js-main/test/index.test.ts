@@ -69,7 +69,9 @@ describe('formatHost Function Tests', () => {
   })
 
   it('should preserve username and password in URL', () => {
-    expect(formatHost('http://user:pass@localhost:5678')).toBe('http://user:pass@localhost:5678')
+    expect(formatHost('http://user:pass@localhost:5678')).toBe(
+      'http://user:pass@localhost:5678',
+    )
   })
 
   it('should preserve username with default port', () => {
@@ -81,14 +83,20 @@ describe('formatHost Function Tests', () => {
   })
 
   it('should preserve basic auth with https', () => {
-    expect(formatHost('https://user:secret@secure.com')).toBe('https://user:secret@secure.com:443')
+    expect(formatHost('https://user:secret@secure.com')).toBe(
+      'https://user:secret@secure.com:443',
+    )
   })
 
   it('should preserve basic auth with domain and custom port', () => {
-    expect(formatHost('http://admin:1234@example.com:8080')).toBe('http://admin:1234@example.com:8080')
+    expect(formatHost('http://admin:1234@example.com:8080')).toBe(
+      'http://admin:1234@example.com:8080',
+    )
   })
 
   it('should preserve basic auth and remove trailing slash', () => {
-    expect(formatHost('http://john:doe@site.com:3000/')).toBe('http://john:doe@site.com:3000')
+    expect(formatHost('http://john:doe@site.com:3000/')).toBe(
+      'http://john:doe@site.com:3000',
+    )
   })
 })

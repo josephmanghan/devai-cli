@@ -81,13 +81,13 @@ npm i ollama
 Then use the library to run a cloud model:
 
 ```typescript
-import { Ollama } from "ollama";
+import { Ollama } from 'ollama';
 
 const ollama = new Ollama();
 
 const response = await ollama.chat({
-  model: "gpt-oss:120b-cloud",
-  messages: [{ role: "user", content: "Explain quantum computing" }],
+  model: 'gpt-oss:120b-cloud',
+  messages: [{ role: 'user', content: 'Explain quantum computing' }],
   stream: true,
 });
 
@@ -188,18 +188,18 @@ npm i ollama
 Next, make a request to the model:
 
 ```typescript
-import { Ollama } from "ollama";
+import { Ollama } from 'ollama';
 
 const ollama = new Ollama({
-  host: "https://ollama.com",
+  host: 'https://ollama.com',
   headers: {
-    Authorization: "Bearer " + process.env.OLLAMA_API_KEY,
+    Authorization: 'Bearer ' + process.env.OLLAMA_API_KEY,
   },
 });
 
 const response = await ollama.chat({
-  model: "gpt-oss:120b",
-  messages: [{ role: "user", content: "Explain quantum computing" }],
+  model: 'gpt-oss:120b',
+  messages: [{ role: 'user', content: 'Explain quantum computing' }],
   stream: true,
 });
 
