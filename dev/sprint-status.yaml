@@ -40,8 +40,8 @@ development_status:
   epic-0: contexted
   0-1-create-test-infrastructure-core: done
   0-2-configure-vitest-test-framework: done
-  0-3-implement-debug-logging-system: backlog
-  0-4-setup-ci-cd-pipeline-structure: backlog
+  0-3-implement-debug-logging-system: review
+  0-4-setup-ci-cd-pipeline-structure: ready-for-dev
   epic-0-retrospective: optional
 
   # Epic 1: Foundation & Project Setup (6 stories)
