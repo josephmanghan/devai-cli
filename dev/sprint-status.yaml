@@ -42,7 +42,7 @@ development_status:
   0-2-configure-vitest-test-framework: done
   0-3-implement-debug-logging-system: done
   0-4-setup-ci-cd-pipeline-structure: closed
-  epic-0-retrospective: optional
+  epic-0-retrospective: done
 
   # Epic 1: Foundation & Project Setup (6 stories)
   epic-1: backlog

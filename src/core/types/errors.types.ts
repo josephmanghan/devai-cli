@@ -30,7 +30,7 @@ export class AppError extends Error {
   /**
    * Serialize error to debug object for file output
    */
-  serializeToDebugObject(): object {
+  serializeToDebugObject() {
     return {
       name: this.name,
       message: this.message,
