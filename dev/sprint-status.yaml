@@ -45,7 +45,7 @@ development_status:
   epic-0-retrospective: done
 
   # Epic 1: Foundation & Project Setup (6 stories)
-  epic-1: backlog
+  epic-1: contexted
   1-1-initialize-typescript-project-with-esm: backlog
   1-2-configure-build-tooling-tsup: backlog
   1-3-setup-testing-framework-vitest: backlog
