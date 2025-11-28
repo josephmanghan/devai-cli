@@ -99,32 +99,32 @@ Story 0.2 is fully implemented and meets all acceptance criteria. The Vitest con
 
 ### Acceptance Criteria Coverage
 
-| AC# | Description | Status | Evidence |
-|-----|-------------|---------|-----------|
-| AC1 | `vitest.config.ts` configured with Node.js environment and globals | IMPLEMENTED | `vitest.config.ts:6-8` - environment: 'node', globals: true |
-| AC2 | Coverage thresholds set: 80% lines, branches, functions, statements | IMPLEMENTED | `vitest.config.ts:12-17` - all thresholds set to 80 |
-| AC3 | Path aliases configured: `@/` → src, `@tests/` → tests | IMPLEMENTED | `vitest.config.ts:28-33` - both aliases properly configured |
-| AC4 | Test timeout increased to 10s for git operations | IMPLEMENTED | `vitest.config.ts:8` - timeout: 10000 |
-| AC5 | Coverage excludes test files and type definitions | IMPLEMENTED | `vitest.config.ts:18-26` - comprehensive exclusion list |
-| AC6 | `package.json` includes test scripts: test, test:unit, test:integration, test:coverage | IMPLEMENTED | `package.json:10-15` - all required scripts present |
+| AC# | Description                                                                            | Status      | Evidence                                                    |
+| --- | -------------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------- |
+| AC1 | `vitest.config.ts` configured with Node.js environment and globals                     | IMPLEMENTED | `vitest.config.ts:6-8` - environment: 'node', globals: true |
+| AC2 | Coverage thresholds set: 80% lines, branches, functions, statements                    | IMPLEMENTED | `vitest.config.ts:12-17` - all thresholds set to 80         |
+| AC3 | Path aliases configured: `@/` → src, `@tests/` → tests                                 | IMPLEMENTED | `vitest.config.ts:28-33` - both aliases properly configured |
+| AC4 | Test timeout increased to 10s for git operations                                       | IMPLEMENTED | `vitest.config.ts:8` - timeout: 10000                       |
+| AC5 | Coverage excludes test files and type definitions                                      | IMPLEMENTED | `vitest.config.ts:18-26` - comprehensive exclusion list     |
+| AC6 | `package.json` includes test scripts: test, test:unit, test:integration, test:coverage | IMPLEMENTED | `package.json:10-15` - all required scripts present         |
 
 **Summary:** 6 of 6 acceptance criteria fully implemented
 
 ### Task Completion Validation
 
-| Task | Marked As | Verified As | Evidence |
-|------|------------|--------------|-----------|
-| Task 1: Create Vitest configuration | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts` fully configured per requirements |
-| Subtask 1.1: Create `vitest.config.ts` with Node.js environment and globals | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts:6-8` |
-| Subtask 1.2: Configure coverage thresholds (80% for all metrics) | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts:12-17` |
-| Subtask 1.3: Set up path aliases (@, @tests) | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts:28-33` |
-| Subtask 1.4: Configure test timeout to 10s | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts:8` |
-| Subtask 1.5: Configure coverage exclusions for test files and types | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts:18-26` |
-| Task 2: Update package.json scripts | ✅ Complete | VERIFIED COMPLETE | `package.json:10-15` |
-| Subtask 2.1: Add test script for running all tests | ✅ Complete | VERIFIED COMPLETE | `package.json:10` |
-| Subtask 2.2: Add test:unit script for unit tests only | ✅ Complete | VERIFIED COMPLETE | `package.json:11` |
-| Subtask 2.3: Add test:integration script for integration tests | ✅ Complete | VERIFIED COMPLETE | `package.json:12` |
-| Subtask 2.4: Add test:coverage script for coverage reporting | ✅ Complete | VERIFIED COMPLETE | `package.json:14` |
+| Task                                                                        | Marked As   | Verified As       | Evidence                                             |
+| --------------------------------------------------------------------------- | ----------- | ----------------- | ---------------------------------------------------- |
+| Task 1: Create Vitest configuration                                         | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts` fully configured per requirements |
+| Subtask 1.1: Create `vitest.config.ts` with Node.js environment and globals | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts:6-8`                               |
+| Subtask 1.2: Configure coverage thresholds (80% for all metrics)            | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts:12-17`                             |
+| Subtask 1.3: Set up path aliases (@, @tests)                                | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts:28-33`                             |
+| Subtask 1.4: Configure test timeout to 10s                                  | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts:8`                                 |
+| Subtask 1.5: Configure coverage exclusions for test files and types         | ✅ Complete | VERIFIED COMPLETE | `vitest.config.ts:18-26`                             |
+| Task 2: Update package.json scripts                                         | ✅ Complete | VERIFIED COMPLETE | `package.json:10-15`                                 |
+| Subtask 2.1: Add test script for running all tests                          | ✅ Complete | VERIFIED COMPLETE | `package.json:10`                                    |
+| Subtask 2.2: Add test:unit script for unit tests only                       | ✅ Complete | VERIFIED COMPLETE | `package.json:11`                                    |
+| Subtask 2.3: Add test:integration script for integration tests              | ✅ Complete | VERIFIED COMPLETE | `package.json:12`                                    |
+| Subtask 2.4: Add test:coverage script for coverage reporting                | ✅ Complete | VERIFIED COMPLETE | `package.json:14`                                    |
 
 **Summary:** 10 of 10 tasks verified complete, 0 questionable, 0 falsely marked complete
 

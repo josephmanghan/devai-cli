@@ -6,13 +6,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { existsSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
-import {
-  AppError,
-  UserError,
-  SystemError,
-  ValidationError,
-  UnexpectedError,
-} from './errors.types';
+import { AppError, UserError, SystemError, ValidationError, UnexpectedError } from './errors.types';
 
 // Mock debug module
 vi.mock('debug', () => {

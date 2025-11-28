@@ -75,7 +75,9 @@ describe('GitTestHarness', () => {
   it('throws error when operations called before init', async () => {
     const uninitializedHarness = new TestGitHarness();
 
-    await expect(uninitializedHarness.writeFile('test.txt', 'content')).rejects.toThrow('Repository not initialized');
+    await expect(uninitializedHarness.writeFile('test.txt', 'content')).rejects.toThrow(
+      'Repository not initialized',
+    );
     await expect(uninitializedHarness.add()).rejects.toThrow('Repository not initialized');
     await expect(uninitializedHarness.getDiff()).rejects.toThrow('Repository not initialized');
     await expect(uninitializedHarness.getStatus()).rejects.toThrow('Repository not initialized');

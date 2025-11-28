@@ -59,7 +59,7 @@ export class PerformanceTracker {
   async timeOperation<T>(
     operation: string,
     fn: () => T | Promise<T>,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ): Promise<T> {
     this.startOperation(operation);
 
@@ -85,7 +85,7 @@ export class PerformanceTracker {
    * Get metrics for a specific operation
    */
   getMetricsByOperation(operation: string): PerformanceMetric[] {
-    return this.metrics.filter(metric => metric.operation === operation);
+    return this.metrics.filter((metric) => metric.operation === operation);
   }
 
   /**
@@ -121,21 +121,27 @@ export class PerformanceTracker {
     if (operationMetrics.length === 0) {
       return 0;
     }
-    return operationMetrics.reduce((sum, metric) => sum + metric.duration, 0) / operationMetrics.length;
+    return (
+      operationMetrics.reduce((sum, metric) => sum + metric.duration, 0) / operationMetrics.length
+    );
   }
 
   /**
    * Export metrics as JSON
    */
   exportMetrics(): string {
-    return JSON.stringify({
-      summary: {
-        totalMetrics: this.metrics.length,
-        totalDuration: this.getTotalDuration(),
-        averageDuration: this.getAverageDuration(),
+    return JSON.stringify(
+      {
+        summary: {
+          totalMetrics: this.metrics.length,
+          totalDuration: this.getTotalDuration(),
+          averageDuration: this.getAverageDuration(),
+        },
+        metrics: this.metrics,
       },
-      metrics: this.metrics,
-    }, null, 2);
+      null,
+      2,
+    );
   }
 
   /**

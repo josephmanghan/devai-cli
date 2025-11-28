@@ -34,7 +34,9 @@ describe('MockLlmProvider', () => {
     const testError = new Error('Mock service unavailable');
     provider.mockError(testError);
 
-    await expect(provider.generateCommitMessage('Test prompt')).rejects.toThrow('Mock service unavailable');
+    await expect(provider.generateCommitMessage('Test prompt')).rejects.toThrow(
+      'Mock service unavailable',
+    );
     expect(provider.getCallCount()).toBe(1);
   });
 
