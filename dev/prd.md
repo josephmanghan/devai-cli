@@ -18,7 +18,7 @@ The tool is not just another commit message generator—it's a **Local-First Com
 
 1. **Privacy-First (Default)**: 100% local inference using Ollama and an appropriate Small Language Model. Zero data egress—proprietary code diffs never leave the developer's machine. This addresses enterprise Data Loss Prevention (DLP) requirements that currently prevent adoption of cloud-based tools like GitHub Copilot in regulated environments.
 
-2. **Speed Over Cloud**: Sub-1-second response time on M1/M2/M3 hardware vs 2-5 second latency for cloud-based competitors (aicommits, opencommit). Preserves developer flow state by making AI generation feel instantaneous—indistinguishable from native git commands.
+2. **Speed Over Cloud**: 3-5 second response time on M1/M2/M3 hardware vs 2-5 second latency for cloud-based competitors (aicommits, opencommit). Preserves developer flow state by making AI generation feel fast and responsive—comparable to native git commands.
 
 3. **Zero-Config Experience**: No API keys, no manual Ollama configuration, no DevOps setup. The tool auto-detects Ollama, auto-provisions models, and works immediately after installation with sensible defaults.
 
@@ -36,7 +36,7 @@ The tool is not just another commit message generator—it's a **Local-First Com
 
 **Classification Rationale:**
 
-This is a command-line developer tool targeting high-frequency micro-interactions (git commits). As a general-purpose developer productivity tool outside regulated industries (healthcare, fintech, etc.), it faces low domain complexity. The primary technical challenges are performance optimization (latency), user experience (zero-config setup), and reliability (output format compliance)—not regulatory compliance or domain-specific validation.
+This is a command-line developer tool targeting high-frequency micro-interactions (git commits). As a general-purpose developer productivity tool outside regulated industries (healthcare, fintech, etc.), it faces low domain complexity. The primary technical challenges are realistic performance optimization (3-5 second latency), user experience (zero-config setup), and reliability (output format compliance)—not regulatory compliance or domain-specific validation.
 
 ---
 
@@ -46,7 +46,7 @@ Success for this tool is defined by three dimensions: technical capability, deve
 
 **Technical Success:**
 
-- Sub-3-second end-to-end latency on M1/M2 hardware (command invocation → message preview)
+- End-to-end workflow completion in 3-5 seconds on M1/M2 hardware (command invocation → message preview)
 - 90%+ acceptance rate during personal acceptance testing in real development workflows
 - 100% Conventional Commits format compliance (validated via regex post-generation)
 - Zero data egress—all processing occurs locally without network calls to external APIs
@@ -68,7 +68,7 @@ Success for this tool is defined by three dimensions: technical capability, deve
 
 **What "Good" Looks Like:**
 
-- A developer stages changes, runs `git commit`, and sees a well-formatted Conventional Commit message appear in their editor within 1 second
+- A developer stages changes, runs `git commit`, and sees a well-formatted Conventional Commit message appear in their editor within 3-5 seconds
 - The message accurately summarizes the changes with correct type classification (feat/fix/chore) and concise description
 - The developer saves and closes without needing to edit, trusting the AI-generated content
 - The tool feels like a native git enhancement, not an external AI service
@@ -81,7 +81,7 @@ Success for this tool is defined by three dimensions: technical capability, deve
 
 **Core Command: `[tool-name] commit`**
 
-The MVP focuses exclusively on automating git commit message generation with strict Conventional Commits adherence and sub-second performance.
+The MVP focuses exclusively on automating git commit message generation with strict Conventional Commits adherence and realistic 3-5 second performance.
 
 **Must-Have Capabilities:**
 
@@ -113,7 +113,7 @@ The MVP focuses exclusively on automating git commit message generation with str
 5. **Model Inference**
    - Construct prompt with few-shot examples, user-selected type, and diff context
    - Send to Ollama with Conventional Commits format constraints
-   - Stream response with sub-1s latency target
+   - Stream response with 3-5s latency target
    - Handle inference failures with retry option
 
 6. **Format Compliance Validation**
@@ -558,9 +558,15 @@ These requirements define HOW WELL the system must perform, not what it does. Th
 
 **NFR-P1: Latency Target**
 
-- End-to-end workflow completion in <1 second on M1/M2 hardware (command invocation → commit completion)
-- Model inference time: <800ms for typical commit message (20-30 tokens)
+- End-to-end workflow completion in 3-5 seconds on M1/M2 hardware (command invocation → commit completion)
+- Model inference time: 2-4 seconds for typical commit message (20-30 tokens)
 - Time-to-first-token (TTFT): <50ms when model is already loaded in memory
+
+**Performance Optimization Strategy:**
+
+- **Cold Start Target**: Sub-5 seconds for complete workflow (MVP baseline)
+- **Warm Inference Optimization**: Performance testing during implementation will determine optimization opportunities
+- **Adaptive Approach**: Based on real-world performance data, we may explore warm-up strategies, model caching, or other optimizations post-MVP
 
 **NFR-P2: Resource Efficiency**
 
@@ -572,7 +578,7 @@ These requirements define HOW WELL the system must perform, not what it does. Th
 
 - CLI tool initialization: <100ms (binary load + argument parsing)
 - Ollama connection check: <200ms timeout for availability detection
-- Model loading (cold start): <2 seconds when model must be loaded into memory
+- Model loading (cold start): 3-5 seconds when model must be loaded into memory
 
 **NFR-P4: Perceived Performance**
 

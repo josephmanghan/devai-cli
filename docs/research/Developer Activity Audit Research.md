@@ -159,7 +159,7 @@ A core, "hidden" activity, particularly for senior developers, is _translating_ 
 - **Translating to Product:** A developer must constantly "explain technical constraints or trade-offs" to Product Managers (PMs). A PM might ask for a "simple" button, but the developer knows this "simple" button requires a multi-sprint database migration. The developer's job in that moment is not "coding"; it is _negotiation_, _risk management_, and _education_. They must "sell" the PM on _why_ the work is complex, often without the shared vocabulary to do so. This is high-skill, high-stress, and completely untracked.
 - **Translating from Design:** The "Design Handoff" is a critical alignment meeting between designers and developers. The developer must translate a "pixel-perfect" visual design from a tool like Figma into a mental model of _components_, _state_, and _API calls_. This is where feasibility is "negotiated" and assumptions are checked. A failure in this "translation" activity leads to weeks of wasted work.
 
-This "translation" work is a form of "glue work" that is exceptionally high in cognitive load. The friction comes from a _knowledge gap_. An AI assistant could bridge this gap. An "AI Analyst" integrated into Jira could, when a developer flags a ticket for high-complexity, _automatically_ add a comment for the PM: "This feature request impacts 3 services and will require schema changes to table_X. Estimated complexity: High. This is similar to the JIRA-123 project, which took 3 sprints. Suggest: Descope or approve a Tech Debt ticket to run concurrently." This _quantifies_ and _justifies_ the "why" for the PM, automating the developer's "translation" work.
+This "translation" work is a form of "glue work" that is exceptionally high in cognitive load. The friction comes from a _knowledge gap_. An AI assistant could bridge this gap. An "AI Analyst" integrated into Jira could, when a developer flags a ticket for high-complexity, _automatically_ add a comment for the PM: "This feature request impacts 3 services and will require schema changes to table*X. Estimated complexity: High. This is similar to the JIRA-123 project, which took 3 sprints. Suggest: Descope or approve a Tech Debt ticket to run concurrently." This \_quantifies* and _justifies_ the "why" for the PM, automating the developer's "translation" work.
 
 ### **Asynchronous vs. Synchronous Overhead**
 
@@ -211,12 +211,12 @@ This personal checklist is _completely untooled_ and _invisible_ to the organiza
 The developer's organizational life is dominated by low-value, high-frequency "meta-work" that fragments their day.
 
 - **Estimation:** This is a universally "hated" task. It is often described as "wild guesswork" precisely because the "ticket" fails to account for the "real" day. Developers are asked to estimate the _ideal_ task (e.g., "2 days") but must deliver it in a _real_ world of constant interruption and "invisible work". This gap is the source of all estimation friction.
-- **Status Reporting:** This is a high-frequency, low-value task. The "Daily Standup" is a classic example. It forces every developer to _stop_ working (incurring the S_S10 context-switch tax) to _summarize_ what they've been doing. This is a verbal "copy-paste" of their "shadow" to-do list.
+- **Status Reporting:** This is a high-frequency, low-value task. The "Daily Standup" is a classic example. It forces every developer to _stop_ working (incurring the S*S10 context-switch tax) to \_summarize* what they've been doing. This is a verbal "copy-paste" of their "shadow" to-do list.
 - **Task/Context Switching:** This is the _default state_ of the modern developer. They are constantly "juggling" (e.g., "working on task A, PR review for task B, Slack question about task C").
 
 The "work about work" problem—estimation and reporting—is "broken" because it is based on the _wrong data_. It is based on the "work-as-ticketed" model.
 
-An AI assistant that _passively_ and _privately_ tracks the _real_ day ("work-as-done") could solve this. By integrating with the IDE, calendar, and Slack, it could generate a "Daily Digest" that _automatically_ fills out the S_S44 "status report": "Yesterday, you spent 3 hours in 'deep work' on JIRA-123, 1.5 hours reviewing 4 PRs, 1 hour in planning meetings, and responded to 25 'quick questions' in Slack." This makes the _real_ day visible, automates the status report, and, over time, provides a _data-driven_ basis for better future estimates that _account for_ the "invisible" overhead.
+An AI assistant that _passively_ and _privately_ tracks the _real_ day ("work-as-done") could solve this. By integrating with the IDE, calendar, and Slack, it could generate a "Daily Digest" that _automatically_ fills out the S*S44 "status report": "Yesterday, you spent 3 hours in 'deep work' on JIRA-123, 1.5 hours reviewing 4 PRs, 1 hour in planning meetings, and responded to 25 'quick questions' in Slack." This makes the \_real* day visible, automates the status report, and, over time, provides a _data-driven_ basis for better future estimates that _account for_ the "invisible" overhead.
 
 ## **VI. The Continuous Learning Engine: Skill, Knowledge, and Mentorship**
 
@@ -247,7 +247,7 @@ This "tribal knowledge" is the source of the organization's _greatest_ bottlenec
 3. **The Expert's Interruption:** This "quick question" _interrupts_ the senior developer, breaking their "deep work" and inflicting the 23-minute "context switch" tax.
 4. **The "Lose-Lose" Outcome:** This system is a "lose-lose." The junior dev is _blocked_ (waiting for an answer) and the senior dev is _interrupted_ (losing focus). The organization's most valuable knowledge is accessible _only_ by interrupting its most valuable "expert" developers.
 
-This S_S54 \+ S_S70 \+ S_S08 \+ S_S10 "vicious cycle" is the _single greatest "blue ocean" opportunity for AI in the enterprise_.
+This S*S54 \+ S_S70 \+ S_S08 \+ S_S10 "vicious cycle" is the \_single greatest "blue ocean" opportunity for AI in the enterprise*.
 
 The solution is an AI that can _passively absorb_ this "tribal knowledge." An AI that is given read-access to the _entire_ company corpus—all of Confluence, all of Slack, all of GitHub (PRs, Issues, ADRs)—can _build its own model_ of this "domain knowledge".
 
@@ -324,7 +324,7 @@ This is a massive, systemic organizational problem. An AI platform can help _sol
 This is the work that "doesn't fit neatly" into a ticket.
 
 - **"Helping Teammates":** This is the ad-hoc "quick question". As detailed in Section VI, this "Human API" polling is the primary "knowledge-sharing" mechanism, and it is a _direct_ tax on the "expert's" focus.
-- **"Emotional Labor":** This is the _most_ hidden workload. This is the cognitive and emotional drain of _managing stakeholder expectations_ (S_S34, the "translation" work). It is the stress of _negotiating_ a "contentious" PR. It is the _patience_ required for "mentoring" a frustrated junior developer. This "emotional labor" is a real drain on a developer's cognitive energy and is a primary driver of burnout, yet it is _never_ discussed or factored into "capacity."
+- **"Emotional Labor":** This is the _most_ hidden workload. This is the cognitive and emotional drain of _managing stakeholder expectations_ (S*S34, the "translation" work). It is the stress of \_negotiating* a "contentious" PR. It is the _patience_ required for "mentoring" a frustrated junior developer. This "emotional labor" is a real drain on a developer's cognitive energy and is a primary driver of burnout, yet it is _never_ discussed or factored into "capacity."
 
 The AI opportunity here is two-fold. First, as discussed in Section VI, is to _deflect_ the "Human API" queries with a knowledge-base AI. Second, and more subtly, is to _support_ the "emotional labor." An "AI Communication Coach" could, _in real-time_ in Slack or GitHub, suggest rephrasing: "This PR comment seems confrontational. Suggestion: 'Can you walk me through the trade-offs here?'" This reduces team friction and improves the quality of collaboration.
 

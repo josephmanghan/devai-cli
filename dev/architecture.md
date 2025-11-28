@@ -44,6 +44,38 @@ Key requirements enforced during implementation:
 
 ---
 
+## Implementation References
+
+This architecture draws upon several comprehensive reference documents that provide detailed specifications for implementation:
+
+### User Experience & Design
+
+- **[UX Design Specification](./ux-design-specification.md)** - Complete terminal user experience, interaction patterns, error handling flows, and performance requirements
+- **[Color Theme Visualizer](./ux-color-themes.html)** - Interactive terminal color scheme and visual design system
+
+### Testing & Quality Assurance
+
+- **[System-Level Test Design](./test-design-system.md)** - Comprehensive testing strategy including unit, integration, E2E, and manual acceptance testing protocols
+- **[Unit Test Patterns](./styleguides/unit-test-patterns.md)** - Specific testing patterns and conventions for unit tests
+
+### Development Standards
+
+- **[Clean Code Standards](./styleguides/clean-code.md)** - Complete coding standards, naming conventions, and implementation patterns
+- **[Node.js CLI Setup Patterns](./styleguides/nodejs-cli-setup-patterns.md)** - Modern ESM, TypeScript, and CLI-specific tooling configurations
+
+### Complete Style Guide Reference
+
+- **[Style Guides Index](./styleguides/index.md)** - Comprehensive overview and navigation for all project style guides (coding, testing, documentation, processes)
+
+**Critical Integration Points:**
+
+- **Performance Targets:** Sub-1s response times (UX spec) aligned with test validation strategies
+- **Error Handling:** Four-phase validation pipeline (architecture) implemented per UX error flow specifications
+- **Testing Strategy:** Mock-first approach with real Ollama E2E validation (test design) supporting architecture decisions
+- **Visual Design:** Terminal color scheme and interaction patterns (UX themes) for consistent user experience
+
+---
+
 ## Decision Summary
 
 This table provides a quick reference for all major architectural decisions, enabling AI agents to understand choices without reading the full document.
@@ -390,6 +422,7 @@ tests/
 **Location:** `Modelfile` (project root)
 **Content:** Role definition, format rules, few-shot examples
 **Creation:** `ollama create ollatool-commit -f Modelfile` during setup
+**Upgrade Path Requirement:** The setup command must implement version/hash checking of the Modelfile to ensure users can upgrade the `ollatool-commit` model when newer versions are released with improved system prompts
 
 > **Note:** The few-shot examples below are a subset example. For the full specification and dataset, see `docs/research/technical/Commit Message Generator Prompt Engineering.md`.
 

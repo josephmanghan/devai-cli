@@ -92,7 +92,7 @@ workflow_status: 'phases:
   agent: "pm"
   command: "create-epics-and-stories"
   note: "Required: Break down PRD into implementable epics and stories with full context (PRD + UX + Architecture)"
-  status: "required"
+  status: "dev/stories/"
 
   - id: "test-design"
   recommended: true
@@ -107,7 +107,7 @@ workflow_status: 'phases:
   agent: "architect"
   command: "validate-architecture"
   note: "Quality check for architecture completeness"
-  status: "optional"
+  status: "archive/implementation-readiness-report-2025-11-28.md"
 
   - id: "implementation-readiness"
   required: true
