@@ -137,7 +137,13 @@ Exit code: <number>
    - Link to ollama.com/download for installation
    - Exit code 3
 
-3. **Git Repository Issues:**
+3. **Context Window Overflow:**
+   - Clear explanation that changes are too large
+   - Instruction to unstage and stage fewer files
+   - Suggestion to commit in smaller batches
+   - Exit code 2
+
+4. **Git Repository Issues:**
    - Pass-through git error messages directly
    - Guidance for repository-specific issues
 
@@ -282,11 +288,52 @@ Exit code: 3
 
 ```bash
 $ ollatool commit
+[INFO] Detecting staged changes... ✓
 [INFO] Connecting to Ollama... ✓
-[INFO] Model not found. Downloading qwen2.5-coder:1.5b...
-[INFO] Download complete. Setting up model...
-[SUCCESS] ✓ Model ready
-[INFO] Generating commit message...
+[ERROR] ✗ Custom model 'ollatool-commit' not found.
+
+Run setup to configure Ollama:
+  ollatool setup
+
+Exit code: 4
+```
+
+**Flow 3a - Setup Command Success:**
+
+```bash
+$ ollatool setup
+[INFO] Checking Ollama installation... ✓
+[INFO] Connecting to Ollama daemon... ✓
+[INFO] Checking base model... ✓
+[INFO] Base model already present ✓
+[INFO] Creating custom model ollatool-commit...
+[SUCCESS] ✓ Setup complete. Run 'ollatool commit' to start.
+```
+
+**Flow 3b - Setup Command - First Time Setup:**
+
+```bash
+$ ollatool setup
+[INFO] Checking Ollama installation... ✓
+[INFO] Connecting to Ollama daemon... ✓
+[INFO] Pulling base model qwen2.5-coder:1.5b...
+[INFO] Download: 750MB / 1.2GB (62%)
+[INFO] Download complete ✓
+[INFO] Creating custom model ollatool-commit...
+[SUCCESS] ✓ Setup complete. Run 'ollatool commit' to start.
+```
+
+**Flow 3c - Setup Command - Ollama Not Installed:**
+
+```bash
+$ ollatool setup
+[ERROR] ✗ Ollama is not installed.
+
+Install Ollama first:
+  https://ollama.com/download
+
+Then run: ollatool setup
+Exit code: 3
 ```
 
 **Flow 4 - Generation Failure:**
@@ -300,6 +347,24 @@ $ ollatool commit
 
 [INFO] Regenerating commit message...
 [SUCCESS] ✓ Generated commit message successfully
+```
+
+**Flow 5 - Context Window Overflow:**
+
+```bash
+$ ollatool commit
+[INFO] Detecting staged changes... ✓
+[INFO] Connecting to Ollama... ✓
+[ERROR] ✗ Changes exceed model context window.
+
+Your staged changes are too large for the model to process.
+
+Try staging fewer files:
+  git reset              # unstage all changes
+  git add <files>        # stage specific files only
+
+Or commit changes in smaller batches.
+Exit code: 2
 ```
 
 ---
@@ -409,6 +474,26 @@ $ ollatool commit
 - **Chosen:** Essential information only, no debug output by default
 - **Rationale:** Maintains clean, professional appearance
 - **Trade-off:** Less troubleshooting info, but optional debug mode can be added later
+
+**Decision 5: Explicit Setup vs Auto-Provisioning**
+
+- **Chosen:** Explicit `ollatool setup` command required before first commit
+- **Rationale:**
+  - Preserves sub-1s commit performance (no model downloads during commit)
+  - Clear separation of one-time setup vs repeated workflow
+  - Users understand system requirements before committing
+  - Fails fast with clear guidance if setup incomplete
+- **Trade-off:** One additional setup step before first use, but aligns with zero-friction philosophy after setup
+
+**Decision 6: Silent Retry vs Transparent Retry**
+
+- **Chosen:** Completely silent retries for format validation failures
+- **Rationale:**
+  - Cleaner UX without technical noise
+  - Users only see successful outputs or actionable errors
+  - Retry mechanism is implementation detail, not user concern
+  - Success is binary: good message or error, no "almost worked" states
+- **Trade-off:** Less transparency into model struggles, but simpler mental model
 
 ---
 

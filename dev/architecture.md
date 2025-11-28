@@ -28,6 +28,41 @@
 
 ---
 
+## Decision Summary
+
+This table provides a quick reference for all major architectural decisions, enabling AI agents to understand choices without reading the full document.
+
+| Category                 | Decision                                          | Version/Value                                                             | Rationale                                                                                                                                |
+| ------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Language & Runtime**   | TypeScript on Node.js ESM                         | TypeScript Latest (strict), Node ≥20.0.0                                  | Type safety prevents runtime errors (deliverability), ESM required by execa 9.x, Node 20 LTS supports M1/M2 target platform              |
+| **Module System**        | ESM (type: "module")                              | NodeNext resolution, ES2022 target                                        | Modern standard, required by execa 9.x, enables tree-shaking and faster startup                                                          |
+| **Build Tool**           | tsup                                              | Latest                                                                    | Fast ESM bundling with minimal config, built for TypeScript ESM projects                                                                 |
+| **CLI Framework**        | Commander.js                                      | 14.0.2                                                                    | Industry standard (50M+ weekly downloads), stable API, minimal API surface                                                               |
+| **Interactive UI**       | @clack/prompts + ora                              | @clack/prompts 0.11.0, ora 8.2.0                                          | Modern Inquirer alternative with better aesthetics, cross-platform spinner support, zero config complexity                               |
+| **Git Integration**      | execa                                             | 9.6.0                                                                     | Shell command execution with TypeScript support, ESM-native, replaces child_process with better API                                      |
+| **LLM SDK**              | ollama (official)                                 | 0.6.3                                                                     | Official Ollama JavaScript SDK, streaming support, type definitions included                                                             |
+| **LLM Model**            | Qwen 2.5 Coder 1.5B                               | qwen2.5-coder:1.5b (quantized)                                            | Sub-1s inference on M1/M2 (70-90 tok/sec), code-optimized, low "chatty" output, 1.2GB RAM footprint                                      |
+| **Model Parameters**     | temperature=0.2, num_ctx=131072, keep_alive=0     | Ollama parameters                                                         | Low randomness for determinism, full 128K context window, unload after use (clean lifecycle)                                             |
+| **Prompt Engineering**   | Modelfile-based system prompt                     | Static (baked into custom model)                                          | Iterate prompts without code deploys (`ollama create`), separates static role from dynamic diff, custom model instance `ollatool-commit` |
+| **Validation Strategy**  | Regex-only (structural check)                     | `/^\w+: .+$/`                                                             | Zero deps (no Zod in MVP), detects conversational pollution, deterministic type overwrite makes schema validation unnecessary            |
+| **Type Enforcement**     | Force overwrite (user selection is truth)         | Programmatic strip + replace                                              | Eliminates type hallucination, no retry needed for type mismatches, 100% user control                                                    |
+| **Architecture Pattern** | Pragmatic Hexagonal (Ports & Adapters)            | Manual DI, no IoC container                                               | Testability via interfaces, swappable adapters (OpenAI fallback), maintainable by solo dev without framework overhead                    |
+| **Project Structure**    | Hexagonal layers: core/infrastructure/features/ui | src/ with 4 top-level dirs                                                | Clear dependency flow inward, zero external deps in core, adapters implement interfaces                                                  |
+| **Testing Framework**    | Vitest                                            | Latest                                                                    | Modern test runner with native ESM support, fast execution, minimal config                                                               |
+| **Test Pattern**         | Co-located tests (adjacent .test.ts)              | One test file per source file                                             | Angular-style familiarity, clear 1:1 relationship, easier navigation                                                                     |
+| **Error Handling**       | Typed error classes with exit codes               | User=2, System=3, Validation=4, Unexpected=5                              | Clear remediation guidance (PRD req), distinguishes user errors from bugs, actionable messages                                           |
+| **Configuration**        | Zero-config (hard-coded defaults)                 | MVP only, post-MVP: cosmiconfig + Zod                                     | Works immediately after npm install, 80% use case, config complexity deferred                                                            |
+| **Editor Integration**   | Temp file & spawn pattern                         | `.git/COMMIT_EDITMSG_OLLATOOL` + `$EDITOR`                                | Standard git pattern, stdio: 'inherit' for terminal control, try/finally cleanup                                                         |
+| **First-Run Setup**      | Explicit setup command                            | `ollatool setup` required before first commit                             | Preserves sub-1s commit performance, clear separation of setup vs workflow, fails fast with guidance                                     |
+| **Model Provisioning**   | Manual setup (MVP)                                | Require `ollatool setup`, no auto-pull during commit                      | Zero auto-downloads during commit (speed), idempotent setup (safe to re-run), post-MVP: automatic Ollama install                         |
+| **Ollama Validation**    | Fail fast (3-tier check, no auto-pull)            | Daemon → Base model → Custom model                                        | Preserves speed (no auto-pull during commit), clear error guidance, exit codes guide resolution                                          |
+| **Retry Visibility**     | Completely silent retries                         | No user-facing retry indicators                                           | Clean UX, implementation detail hidden, binary success/failure only                                                                      |
+| **Success Messaging**    | Silent format (UX spec-compliant)                 | Show commit directly, no success indicator between generation and preview | Matches UX spec lines 219-248, success only shown post-approval                                                                          |
+
+**Key Design Principles:** Every decision optimizes for PRD's three pillars: (1) **Speed** - sub-1s via Qwen 1.5B + simple validation, (2) **Privacy** - 100% local via hexagonal isolation, (3) **Simplicity** - zero-config via hard-coded defaults + manual DI.
+
+---
+
 ## Starter Template Decision
 
 **Decision:** No traditional starter template—use custom manual setup based on project styleguides
@@ -39,7 +74,7 @@ You've already researched and documented comprehensive setup patterns in `dev/st
 - CLI-specific tooling: Commander.js + @clack/prompts for interactive UX
 - Performance-optimized build: tsup for fast bundling with ESM output
 - Testing: Vitest for modern, fast test execution
-- Essential dependencies pre-selected: execa (git), ollama SDK, zod (validation), chalk (colors)
+- Essential dependencies pre-selected: execa (git), ollama SDK
 
 **Project Initialization:**
 The first implementation story will execute manual npm project setup following the documented patterns rather than a CLI generator command.
@@ -69,7 +104,6 @@ The first implementation story will execute manual npm project setup following t
 | `ora`            | 8.2.0   | Terminal spinner for loading states          | 2025-11-27        |
 | `ollama`         | 0.6.3   | Official Ollama SDK for model inference      | 2025-11-27        |
 | `execa`          | 9.6.0   | Git command execution (diff, commit, status) | 2025-11-27        |
-| `zod`            | Latest  | Schema validation (Conventional Commits)     | TBD               |
 
 **Node.js Requirement:** >=20.0.0 (tested and verified on Node 22.20)
 
@@ -159,6 +193,44 @@ ollama create ollatool-commit -f Modelfile
 | `keep_alive`  | 0      | MVP: Unload model after each execution. Clean lifecycle: load → infer → commit → unload. Performance validation during testing may adjust this. |
 
 **Context Window Strategy:** Use full model capacity (131,072 tokens = 128K). This accommodates large multi-file diffs without artificial limits. If Ollama returns context overflow error during testing, we can reduce this value.
+
+### Setup Command Implementation
+
+**Command:** `ollatool setup`
+**Purpose:** One-time configuration of Ollama integration and model provisioning (idempotent - safe to run multiple times)
+
+**Prerequisites Check:**
+
+1. Ollama installed (binary exists in PATH)
+   - Detection: `which ollama` or `ollama --version`
+   - Failure: Exit with link to https://ollama.com/download
+2. Ollama daemon running
+   - Detection: HTTP GET http://localhost:11434/
+   - Failure: Exit with instruction to run `ollama serve`
+   - Note: Required for `pull` and `create` commands (daemon manages all model operations)
+
+**Setup Operations (with conditional checks):**
+
+1. Pull base model: `qwen2.5-coder:1.5b`
+   - Check: `ollama.list()` - does `qwen2.5-coder:1.5b` exist?
+   - If exists: Skip pull, display `[INFO] Base model already present ✓`
+   - If missing: `ollama pull qwen2.5-coder:1.5b` with progress bar
+2. Create custom model instance
+   - Check: `ollama.list()` - does `ollatool-commit` exist?
+   - If exists: Skip creation, display `[INFO] Custom model already present ✓`
+   - If missing: Read Modelfile, run `ollama create ollatool-commit -f Modelfile` with spinner
+3. Final Validation
+   - Verify both models exist via `ollama.list()`
+   - Display: `[SUCCESS] ✓ Setup complete. Run 'ollatool commit' to start.`
+
+**Error Handling:**
+
+- Ollama not installed: Exit code 3, link to download
+- Ollama daemon not running: Exit code 3, instruction to run `ollama serve`
+- Base model pull failure: Exit code 3, network troubleshooting guidance
+- Custom model creation failure: Exit code 4, Modelfile validation error
+
+**Post-MVP:** Automatic Ollama installation can be added
 
 ---
 
@@ -337,7 +409,7 @@ Update the README.md file to include a step-by-step guide for setting up the dev
 """
 
 PARAMETER temperature 0.2
-PARAMETER num_ctx 4096
+PARAMETER num_ctx 131072
 ```
 
 ### User Prompt (Dynamic - Per Request)
@@ -426,16 +498,103 @@ Generate commit message in Conventional Commits format.
 
 ### Error Handling Strategy
 
-### Error Recovery Strategy
+### Validation & Error Recovery Strategy
 
-**1. Model Hallucination / Format Violation**
+**Philosophy:** Intelligent parsing + normalization handles minor issues, retries only for truly broken outputs
 
-- **Detection:** Regex validation fails (e.g., model adds markdown blocks or conversational text).
-- **Retry Logic:**
-  - Max Retries: 3
-  - Strategy: Feed the error back to the model.
-  - Prompt: _"Error: Invalid format. You must output ONLY the commit message in the format: <type>: <description>\n\n<body>"_
-- **Fallback:** If 3 retries fail, open `$EDITOR` with the raw diff and let the user write it manually.
+**Four-Phase Processing Pipeline:**
+
+**Phase 1: Intelligent Parsing (Strip Preamble)**
+
+```typescript
+// Look for FIRST line matching commit type pattern
+const commitLineRegex = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):/m;
+const match = rawOutput.match(commitLineRegex);
+
+if (match) {
+  const startIndex = rawOutput.indexOf(match[0]);
+  const cleaned = rawOutput.substring(startIndex).trim();
+  // Continue to validation...
+} else {
+  // No valid commit line found - retry with error feedback
+  previousError =
+    'ERROR: No valid commit message found. Output must contain a line starting with a commit type (feat:, fix:, docs:, etc.)';
+}
+```
+
+**Phase 2: Structural Validation (Require Body)**
+
+```typescript
+function validateStructure(message: string): string | null {
+  const lines = message.split('\n');
+  const firstLine = lines[0];
+
+  // Must start with valid type and colon
+  if (!/^(feat|fix|docs|...):.+/.test(firstLine)) {
+    return "ERROR: First line must start with commit type and colon (e.g., 'feat: description')";
+  }
+
+  // Description must exist and be reasonable length
+  const description = firstLine.split(':').slice(1).join(':').trim();
+  if (description.length === 0) {
+    return "ERROR: Description after colon is empty. Format: 'type: description'";
+  }
+  if (description.length > 72) {
+    return 'ERROR: Description too long (>72 chars). Keep it concise.';
+  }
+
+  // Body MUST exist (not optional)
+  const restOfMessage = lines.slice(1).join('\n').trim();
+  if (restOfMessage.length === 0) {
+    return 'ERROR: Body is missing. You must include a body paragraph after the subject line explaining what and why.';
+  }
+  if (restOfMessage.length < 10) {
+    return `ERROR: Body too short (${restOfMessage.length} chars). Provide meaningful explanation of what changed and why.`;
+  }
+
+  return null; // Valid
+}
+```
+
+**Phase 3: Type Enforcement (User Selection is Truth)**
+
+```typescript
+// Always overwrite model's type with user's selection
+const [, ...rest] = parsed.split(':');
+const description = rest.join(':').trim();
+const withCorrectType = `${userSelectedType}: ${description}`;
+```
+
+**Phase 4: Normalization (Ensure Blank Line Separator)**
+
+```typescript
+const [subject, ...bodyLines] = withCorrectType.split('\n');
+const body = bodyLines.join('\n').trim();
+return `${subject}\n\n${body}`;
+```
+
+**Retry Logic with Error Feedback:**
+
+- Max Retries: 3
+- Visibility: **Completely silent** - no user-facing retry indicators
+- Strategy: Feed specific validation error back to model with each retry
+- Error messages guide the model toward correct output (see validation function above)
+- Each retry includes: previous error + instruction to fix
+
+**Success:** Display normalized commit message directly (no success indicator)
+
+**Failure:** After 3 silent retries, show error and offer manual fallback
+
+- Message: `[ERROR] ✗ Failed to generate valid commit message format after multiple attempts.`
+- Options: `[R]egenerate [E]dit manually [C]ancel`
+
+**Key Benefits:**
+
+- Parsing handles chatty preamble (e.g., "Here is your commit:\n\nfeat: ...")
+- Normalization fixes missing blank lines
+- Type enforcement eliminates type hallucination
+- Targeted error feedback improves retry success rate
+- Only truly broken outputs require retries
 
 ### Editor Integration Strategy
 
@@ -466,30 +625,63 @@ async function openEditor(content: string): Promise<string> {
 
 ### Ollama Environment Validation Strategy
 
-**Philosophy:** Fail Fast & Guide. Do not auto-pull during `commit` (keep it fast).
+**Philosophy:** Fail Fast with Clear Remediation - No auto-provisioning during commit
+
+**Validation Levels (executed in order during `commit` command):**
 
 **1. Daemon Check (Connectivity)**
 
 - **Method:** HTTP GET `http://localhost:11434/`
-- **Success:** Status 200 OK.
-- **Failure:** Connection Refused / Timeout.
-- **Action:** Exit Code 3. Display: _"Error: Ollama is not running. Run 'ollama serve' and try again."_
-
-**2. Model Check (Availability)**
-
-- **Method:** `ollama.list()` (via library).
-- **Check:** Does `qwen2.5-coder:1.5b` exist in the tags list?
-- **Failure:** Model missing.
-- **Action:** Exit Code 4.
+- **Success:** Status 200 OK
+- **Failure:** Connection Refused / Timeout
+- **Action:** Exit Code 3
 - **Message:**
-  > Error: Model 'qwen2.5-coder:1.5b' not found.
-  > Action: Run `ollama pull qwen2.5-coder:1.5b` OR `ollatool setup`
 
-**3. Version Check (Optional for MVP)**
+  ```
+  [ERROR] ✗ Ollama is not running.
 
-- **Method:** Check `ollama.version`.
-- **Requirement:** >= 0.1.0.
-- **Action:** Warn if outdated, but attempt to proceed.
+  Start Ollama:
+    ollama serve
+
+  Or install from: https://ollama.com/download
+  Exit code: 3
+  ```
+
+**2. Base Model Check**
+
+- **Method:** `ollama.list()` - check for `qwen2.5-coder:1.5b`
+- **Success:** Model exists in tags list
+- **Failure:** Base model missing
+- **Action:** Exit Code 4
+- **Message:**
+
+  ```
+  [ERROR] ✗ Base model 'qwen2.5-coder:1.5b' not found.
+
+  Run setup to configure Ollama:
+    ollatool setup
+
+  Exit code: 4
+  ```
+
+**3. Custom Model Check**
+
+- **Method:** `ollama.list()` - check for `ollatool-commit`
+- **Success:** Custom model instance exists
+- **Failure:** Custom model missing (edge case - user deleted it)
+- **Action:** Exit Code 4
+- **Message:**
+
+  ```
+  [ERROR] ✗ Custom model 'ollatool-commit' not found.
+
+  Recreate the model:
+    ollatool setup
+
+  Exit code: 4
+  ```
+
+**Critical:** No auto-pull or auto-creation during `commit` command to preserve sub-1s performance target.
 
 **Error Categories:**
 
@@ -587,13 +779,15 @@ DEBUG=ollatool:* ollatool commit
 
 **Post-MVP: Optional Configuration**
 
+> **Note:** Configuration schema validation requires adding `zod` as a dependency (not needed in MVP).
+
 ```typescript
 // src/core/types/commit-config.ts
 export const CommitConfigSchema = z.object({
   ollamaHost: z.string().url().default('http://localhost:11434'),
   modelName: z.string().default('ollatool-commit'),
   temperature: z.number().min(0).max(1).default(0.2),
-  maxRetries: z.number().min(0).max(5).default(3),
+  maxRetries: z.number().min(0).max(5).default(3), // Post-MVP: Configurable retry attempts
   editor: z.string().optional(), // Override $EDITOR
 });
 
@@ -610,58 +804,107 @@ export type CommitConfig = z.infer<typeof CommitConfigSchema>;
 
 ### Validation & Format Compliance
 
-**Conventional Commits Regex:**
+**Note:** This section documents the implementation details for the four-phase validation strategy defined in "Validation & Error Recovery Strategy" above.
 
-```typescript
-// src/features/commit/use-cases/format-validator.ts
-
-// Structural check only (Word + Colon + Space + Text)
-// We do NOT validate the specific type here because we overwrite it programmatically.
-const STRUCTURAL_COMMIT_REGEX = /^\w+: .+$/;
-
-export function validateCommitFormat(message: string): boolean {
-  const lines = message.trim().split('\n');
-  const firstLine = lines[0];
-
-  // Must match "type: description" structure
-  if (!STRUCTURAL_COMMIT_REGEX.test(firstLine)) {
-    return false;
-  }
-
-  // Description should be concise (<72 chars recommended)
-  const [type, ...descParts] = firstLine.split(':');
-  const description = descParts.join(':').trim();
-
-  if (description.length === 0 || description.length > 72) {
-    return false;
-  }
-
-  return true;
-}
-```
-
-**Silent Retry Mechanism:**
+**Complete Implementation Flow:**
 
 ```typescript
 // src/features/commit/use-cases/generate-commit.ts
-const maxFormatRetries = 3;
 
-async function generateWithRetry(): Promise<string> {
-  for (let attempt = 1; attempt <= maxFormatRetries; attempt++) {
-    const message = await llmProvider.generate(/* ... */);
+async function generateCommitMessage(
+  userSelectedType: string,
+  diff: string,
+  status: string,
+): Promise<string> {
+  const maxRetries = 3;
+  let previousError: string | null = null;
 
-    if (validateConventionalCommit(message)) {
-      return message; // Success
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    // Build prompt with error feedback from previous attempt
+    const prompt = buildPrompt(userSelectedType, diff, status, previousError);
+    const rawOutput = await llmProvider.generate(prompt);
+
+    // PHASE 1: Intelligent Parsing (extract commit from potential preamble)
+    const parsed = extractCommitMessage(rawOutput);
+    if (!parsed) {
+      previousError =
+        'ERROR: No valid commit message found. Output must contain a line starting with a commit type (feat:, fix:, docs:, etc.)';
+      continue;
     }
 
-    // Silent retry (don't expose to user unless all retries fail)
-    if (attempt === maxFormatRetries) {
-      throw new ValidationError(
-        `Failed to generate valid commit message format after ${maxFormatRetries} attempts.`,
-        'Try regenerating or edit the message manually.',
-      );
+    // PHASE 2: Structural Validation (returns error string or null)
+    const validationError = validateStructure(parsed);
+    if (validationError) {
+      previousError = validationError;
+      continue;
     }
+
+    // PHASE 3: Type Enforcement (overwrite with user selection)
+    const withCorrectType = enforceType(parsed, userSelectedType);
+
+    // PHASE 4: Normalization (ensure blank line separator)
+    const normalized = normalizeFormat(withCorrectType);
+
+    return normalized; // Success!
   }
+
+  // All retries exhausted
+  throw new ValidationError(
+    'Failed to generate valid commit message format after multiple attempts.',
+    '[R]egenerate [E]dit manually [C]ancel',
+  );
+}
+
+function extractCommitMessage(rawOutput: string): string | null {
+  const commitLineRegex = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):/m;
+  const match = rawOutput.match(commitLineRegex);
+
+  if (!match) return null;
+
+  const startIndex = rawOutput.indexOf(match[0]);
+  return rawOutput.substring(startIndex).trim();
+}
+
+function validateStructure(message: string): string | null {
+  const lines = message.split('\n');
+  const firstLine = lines[0];
+
+  // Must start with valid type and colon
+  if (!/^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):.+/.test(firstLine)) {
+    return "ERROR: First line must start with commit type and colon (e.g., 'feat: description')";
+  }
+
+  // Description must exist and be reasonable length
+  const description = firstLine.split(':').slice(1).join(':').trim();
+  if (description.length === 0) {
+    return "ERROR: Description after colon is empty. Format: 'type: description'";
+  }
+  if (description.length > 72) {
+    return 'ERROR: Description too long (>72 chars). Keep it concise.';
+  }
+
+  // Body MUST exist (not optional)
+  const restOfMessage = lines.slice(1).join('\n').trim();
+  if (restOfMessage.length === 0) {
+    return 'ERROR: Body is missing. You must include a body paragraph after the subject line explaining what and why.';
+  }
+  if (restOfMessage.length < 10) {
+    return `ERROR: Body too short (${restOfMessage.length} chars). Provide meaningful explanation of what changed and why.`;
+  }
+
+  return null; // Valid
+}
+
+function enforceType(message: string, userSelectedType: string): string {
+  const [, ...rest] = message.split(':');
+  const description = rest.join(':').trim();
+  return `${userSelectedType}: ${description}`;
+}
+
+function normalizeFormat(message: string): string {
+  const [subject, ...bodyLines] = message.split('\n');
+  const body = bodyLines.join('\n').trim();
+  return `${subject}\n\n${body}`;
 }
 ```
 

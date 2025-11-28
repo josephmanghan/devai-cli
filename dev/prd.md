@@ -149,6 +149,8 @@ The MVP focuses exclusively on automating git commit message generation with str
 
 - `--all` flag: Auto-stage all changes before generating commit
   - Aligns with zero-config philosophy (convenience)
+- `--all` flag: Auto-stage all changes before generating commit
+  - Aligns with zero-config philosophy (convenience)
   - Lower priority: manual staging is more common workflow
   - Implementation: simple `git add .` before context gathering
   - Decision: Include if time permits, otherwise defer to post-MVP
@@ -162,11 +164,10 @@ The MVP focuses exclusively on automating git commit message generation with str
   - Custom commit types and templates beyond Conventional Commits
   - Locale settings for non-English commit messages
   - Default behavior flags (auto-stage, skip preview, etc.)
+  - Configurable retry logic (max retry attempts for validation failures)
 
 **Advanced Workflow Integration:**
 
-- `--dry-run` flag: Generate message without committing (output to stdout)
-- `--auto` flag: Skip preview and auto-commit (for trusted automation)
 - `--all` flag: Auto-stage all changes before generating commit
 - Git hooks: `prepare-commit-msg` hook installer that automatically intercepts `git commit` to generate messages without explicit CLI invocation.
 - `--hint` flag: Provide manual context hint to guide generation (e.g., `--hint "fixing login bug"`)

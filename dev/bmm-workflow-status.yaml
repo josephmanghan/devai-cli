@@ -85,7 +85,7 @@ workflow_status: 'phases:
   command: "create-architecture"
   output: "System architecture document"
   note: "Complete system design for greenfield projects"
-  status: "required"
+  status: "dev/architecture.md"
 
   - id: "create-epics-and-stories"
   required: true
@@ -114,7 +114,7 @@ workflow_status: 'phases:
   agent: "architect"
   command: "implementation-readiness"
   note: "Validates PRD + UX + Architecture + Epics + Testability cohesion before implementation"
-  status: "required"
+  status: "archive/implementation-readiness-report-2025-11-28.md"
 
   - phase: 3
   name: "Implementation"
