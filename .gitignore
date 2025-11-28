@@ -37,6 +37,7 @@ web-bundles
 .claude/commands/BMad
 .cursor/rules/bmad
 .bmad
+.agent
 .claude/agents/bmad-analysis
 .claude/agents/bmad-planning
 .claude/agents/bmad-research

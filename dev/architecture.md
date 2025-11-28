@@ -162,7 +162,25 @@ ollama create ollatool-commit -f Modelfile
 
 ---
 
-## Project Structure (Hexagonal Architecture)
+## Project Structure (Pragmatic Hexagonal / Ports & Adapters)
+
+### Concept Definition
+
+For developers new to this pattern, think of it as **"Plugs and Sockets"**:
+
+- **Ports (Sockets):** Interfaces defined in the `core/` layer. They describe **WHAT** the application needs (e.g., `LlmProvider` says "I need a way to generate text"). They have no knowledge of external tools.
+- **Adapters (Plugs):** Classes in the `infrastructure/` layer that implement those interfaces. They describe **HOW** it is done (e.g., `OllamaAdapter` says "I will use the Ollama API to generate text").
+
+**Benefit:** We can swap the "plug" (e.g., switch from Ollama to OpenAI) without changing the "socket" or any of the core application logic.
+
+### Pragmatic Deviations (What we are skipping)
+
+To keep the CLI tool lightweight and maintainable, we are intentionally omitting some strict enterprise patterns:
+
+1.  **No IoC Container:** We use manual dependency injection in `main.ts` instead of a heavy container like InversifyJS.
+    - _IoC (Inversion of Control)_ means the class asks for what it needs ("I need an LlmProvider") rather than creating it itself ("new OllamaAdapter()"). We do this manually to keep it simple.
+2.  **No "Primary Ports" Objects:** We don't create separate interface objects for the driving side (CLI commands). The `CommitController` calls the Use Case directly.
+3.  **No Adapter Registration:** We don't need a dynamic plugin system. Adapters are wired up once at startup.
 
 ### Directory Layout
 
@@ -271,6 +289,8 @@ src/
 **Content:** Role definition, format rules, few-shot examples
 **Creation:** `ollama create ollatool-commit -f Modelfile` during setup
 
+> **Note:** The few-shot examples below are a subset example. For the full specification and dataset, see `docs/research/technical/Commit Message Generator Prompt Engineering.md`.
+
 ```dockerfile
 FROM qwen2.5-coder:1.5b
 
@@ -285,26 +305,35 @@ CRITICAL RULES:
 
 FEW-SHOT EXAMPLES:
 
-Input: Added JWT authentication middleware
+Input:
+diff --git a/src/auth.ts b/src/auth.ts
++ const timeout = 5000;
+
 Output:
-feat: add JWT authentication middleware
+fix: increase auth request timeout
 
-Implemented token validation and refresh logic for API security.
-Supports both access and refresh tokens with configurable expiration.
+Increase the default request timeout from 1s to 5s. This addresses user reports of timeouts occurring on high-latency mobile networks.
 
-Input: Fixed null pointer exception in login handler
+Input:
+diff --git a/src/components/LoginForm.tsx b/src/components/LoginForm.tsx
++ import { AuthService } from '../services/AuthService';
++ const handleSubmit = async () => { await AuthService.login(email, password); }
+
 Output:
-fix: handle null token in login service
+feat: connect submit handler to auth service
 
-Added null check before token validation to prevent crashes.
-Returns 401 Unauthorized when token is missing.
+Import the authentication service and invoke the login method within the form submission handler. Add async/await logic to handle the network request.
 
-Input: Updated README with installation steps
+Input:
+diff --git a/README.md b/README.md
++ ## Local Setup
++ 1. Install Node.js 20+
++ 2. Run npm install
+
 Output:
-docs: add installation instructions to README
+docs: add local setup instructions
 
-Documented npm install command and prerequisite requirements.
-Included troubleshooting section for common setup issues.
+Update the README.md file to include a step-by-step guide for setting up the development environment locally. Include details on environment variables.
 """
 
 PARAMETER temperature 0.2
@@ -329,6 +358,31 @@ ${status}
 
 Generate the commit message following the format rules.`;
 }
+
+### Deterministic Type Enforcement
+
+**Strategy:** Force Overwrite
+The user's selection is the absolute source of truth. We do not rely on the model to respect the requested type.
+
+**Logic:**
+1.  User selects type (e.g., `feat`).
+2.  Model generates message (e.g., `fix: add login button`).
+3.  **Application Logic:** Programmatically strip the model's type prefix and replace it with the user's selection.
+    *   Result: `feat: add login button`
+4.  **Benefit:** Eliminates "type hallucination" errors completely. No retry needed for type mismatches.
+
+### Structural Validation & Retry Logic
+
+**Why generate the full message if we overwrite the type?**
+LLMs are trained on full commit messages. Asking for the complete format (`feat: description`) yields higher quality descriptions than asking for fragments.
+
+**Validation Rule:**
+*   **Check:** Does the output match `^\w+: .+`? (Word, colon, text)
+*   **Ignore:** We do NOT check if the type matches the user's selection (we overwrite that).
+*   **Retry Trigger:** Only if the *structure* is broken (e.g., starts with "Here is the commit...").
+
+**Retry Prompt:**
+*"Error: Invalid format. You must output ONLY the commit message starting with a type and colon (e.g., 'feat: ...'). Do not include conversational text."*
 ```
 
 **Rationale:** MVP uses single hard-coded format (Conventional Commits). Template literals are simpler, faster, and require zero dependencies. Handlebars reserved for post-MVP custom templates feature.
@@ -371,6 +425,71 @@ Generate commit message in Conventional Commits format.
 ## Cross-Cutting Concerns
 
 ### Error Handling Strategy
+
+### Error Recovery Strategy
+
+**1. Model Hallucination / Format Violation**
+
+- **Detection:** Regex validation fails (e.g., model adds markdown blocks or conversational text).
+- **Retry Logic:**
+  - Max Retries: 3
+  - Strategy: Feed the error back to the model.
+  - Prompt: _"Error: Invalid format. You must output ONLY the commit message in the format: <type>: <description>\n\n<body>"_
+- **Fallback:** If 3 retries fail, open `$EDITOR` with the raw diff and let the user write it manually.
+
+### Editor Integration Strategy
+
+**Requirement:** Allow users to edit the generated message in their preferred terminal editor (Vim, Nano, Emacs).
+
+**Implementation Pattern:**
+
+1.  **Temp File:** Write the message to `.git/COMMIT_EDITMSG_OLLATOOL`.
+    - _Why .git/?_ It's already ignored by git, keeps the root clean, and is the standard place for commit metadata.
+2.  **Spawn Editor:** Use `execa` to spawn `$EDITOR` (default: `nano`).
+    - **Critical:** Must use `{ stdio: 'inherit' }` to let the editor take over the terminal input/output.
+3.  **Wait & Read:** Await process completion, then read the file content back into memory.
+4.  **Cleanup:** **ALWAYS** delete the temp file (in a `finally` block) to prevent debris, even if the editor crashes.
+
+```typescript
+// Conceptual Implementation
+async function openEditor(content: string): Promise<string> {
+  const tempPath = path.join('.git', 'COMMIT_EDITMSG_OLLATOOL');
+  await fs.writeFile(tempPath, content);
+  try {
+    await execa(process.env.EDITOR || 'nano', [tempPath], { stdio: 'inherit' });
+    return await fs.readFile(tempPath, 'utf-8');
+  } finally {
+    await fs.unlink(tempPath).catch(() => {}); // Ignore cleanup errors
+  }
+}
+```
+
+### Ollama Environment Validation Strategy
+
+**Philosophy:** Fail Fast & Guide. Do not auto-pull during `commit` (keep it fast).
+
+**1. Daemon Check (Connectivity)**
+
+- **Method:** HTTP GET `http://localhost:11434/`
+- **Success:** Status 200 OK.
+- **Failure:** Connection Refused / Timeout.
+- **Action:** Exit Code 3. Display: _"Error: Ollama is not running. Run 'ollama serve' and try again."_
+
+**2. Model Check (Availability)**
+
+- **Method:** `ollama.list()` (via library).
+- **Check:** Does `qwen2.5-coder:1.5b` exist in the tags list?
+- **Failure:** Model missing.
+- **Action:** Exit Code 4.
+- **Message:**
+  > Error: Model 'qwen2.5-coder:1.5b' not found.
+  > Action: Run `ollama pull qwen2.5-coder:1.5b` OR `ollatool setup`
+
+**3. Version Check (Optional for MVP)**
+
+- **Method:** Check `ollama.version`.
+- **Requirement:** >= 0.1.0.
+- **Action:** Warn if outdated, but attempt to proceed.
 
 **Error Categories:**
 
@@ -495,15 +614,17 @@ export type CommitConfig = z.infer<typeof CommitConfigSchema>;
 
 ```typescript
 // src/features/commit/use-cases/format-validator.ts
-const CONVENTIONAL_COMMIT_REGEX =
-  /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):.+/;
 
-export function validateConventionalCommit(message: string): boolean {
+// Structural check only (Word + Colon + Space + Text)
+// We do NOT validate the specific type here because we overwrite it programmatically.
+const STRUCTURAL_COMMIT_REGEX = /^\w+: .+$/;
+
+export function validateCommitFormat(message: string): boolean {
   const lines = message.trim().split('\n');
   const firstLine = lines[0];
 
-  // Must match type: description format
-  if (!CONVENTIONAL_COMMIT_REGEX.test(firstLine)) {
+  // Must match "type: description" structure
+  if (!STRUCTURAL_COMMIT_REGEX.test(firstLine)) {
     return false;
   }
 
@@ -959,7 +1080,7 @@ export class OllamaAdapter implements LlmProvider {
 
 **Context:** Need clean separation between business logic and external dependencies for testability and maintainability.
 
-**Decision:** Implement hexagonal architecture (ports & adapters pattern) with core domain isolated from infrastructure.
+**Decision:** Implement a pragmatic Hexagonal Architecture (Ports & Adapters), effectively a "Clean Architecture" approach, with core domain isolated from infrastructure via interfaces.
 
 **Consequences:**
 

@@ -168,7 +168,7 @@ The MVP focuses exclusively on automating git commit message generation with str
 - `--dry-run` flag: Generate message without committing (output to stdout)
 - `--auto` flag: Skip preview and auto-commit (for trusted automation)
 - `--all` flag: Auto-stage all changes before generating commit
-- Git hooks: `prepare-commit-msg` hook installer for native git integration
+- Git hooks: `prepare-commit-msg` hook installer that automatically intercepts `git commit` to generate messages without explicit CLI invocation.
 - `--hint` flag: Provide manual context hint to guide generation (e.g., `--hint "fixing login bug"`)
 - Auto-start Ollama: Automatically spawn Ollama daemon if installed but not running (simplifies user experience)
 
@@ -448,9 +448,9 @@ These requirements define WHAT capabilities the tool must have to deliver the pr
 
 **FR15**: The tool injects the user-selected commit type into the prompt to guide model generation.
 
-**FR16**: The tool can validate generated commit messages against Conventional Commits format using regex.
+**FR16**: The tool validates generated commit messages using a structural regex (`^\w+: .+`) to ensure they follow the standard format, ignoring the specific type (which is overwritten).
 
-**FR17**: If generated output does not match expected format, the tool silently retries generation (up to a maximum retry limit) without exposing validation failures to the user, ensuring only valid format messages are presented.
+**FR17**: If generated output fails structural validation (e.g., contains conversational text), the tool silently retries generation (up to a maximum retry limit) without exposing failures to the user.
 
 ### Commit Message Generation
 
