@@ -2,10 +2,12 @@
  * Tests for custom error classes and debug logging
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { existsSync, unlinkSync } from 'node:fs';
-import { join } from 'node:path';
 import { homedir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
   AppError,
   SystemError,

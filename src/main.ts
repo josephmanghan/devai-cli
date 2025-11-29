@@ -5,8 +5,9 @@
  * Entry point is src/index.ts (barrel file).
  */
 
-import { Command } from 'commander';
 import { readFileSync } from 'node:fs';
+
+import { Command } from 'commander';
 
 // Package info from package.json
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));

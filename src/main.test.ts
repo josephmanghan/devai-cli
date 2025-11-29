@@ -3,8 +3,9 @@
  * Tests for Commander.js program creation and configuration
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Command } from 'commander';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { createProgram, main } from './main.js';
 
 // Mock console methods to capture output

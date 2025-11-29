@@ -3,10 +3,11 @@
  * Provides typed exit codes and debug serialization
  */
 
-import debug from 'debug';
 import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
 import { homedir } from 'node:os';
+import { join } from 'node:path';
+
+import debug from 'debug';
 
 // Debug logger instances - only output when DEBUG=ollatool:* is set
 const logError = debug('ollatool:error');
@@ -22,7 +23,7 @@ export class AppError extends Error {
     this.name = 'AppError';
 
     // Ensure proper stack trace
-    if (Error.captureStackTrace) {
+    if (Error.captureStackTrace !== undefined) {
       Error.captureStackTrace(this, this.constructor);
     }
   }
@@ -49,7 +50,7 @@ export class AppError extends Error {
     const debugFile = join(debugDir, 'debug.log');
     this.ensureDebugDir(debugDir);
     const logEntry = this.createLogEntry();
-    return this.writeLogEntry(debugFile, logEntry);
+    return await this.writeLogEntry(debugFile, logEntry);
   }
 
   private ensureDebugDir(dir: string): void {
@@ -70,7 +71,7 @@ export class AppError extends Error {
       const stream = createWriteStream(file, { flags: 'a' });
       stream.write(JSON.stringify(entry) + '\n', 'utf8', error => {
         stream.end();
-        if (error) {
+        if (error !== null && error !== undefined) {
           reject(error);
         } else {
           resolve();

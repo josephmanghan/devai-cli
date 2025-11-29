@@ -5,6 +5,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
+
 import { MockLlmProvider } from './mock-llm-provider';
 
 describe('MockLlmProvider', () => {

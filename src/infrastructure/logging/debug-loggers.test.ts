@@ -2,11 +2,12 @@
  * Tests for debug logging functionality
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { spawn } from 'node:child_process';
-import { join } from 'node:path';
 import { existsSync, unlinkSync } from 'node:fs';
+import { join } from 'node:path';
+
 import debug from 'debug';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('debug', () => {
   return {

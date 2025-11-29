@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
-import { ExampleAdapter } from './example-adapter.js';
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import type { ExamplePort } from '../../core/ports/example-port.js';
+import { ExampleAdapter } from './example-adapter.js';
 
 describe('ExampleAdapter', () => {
   let adapter: ExampleAdapter;

@@ -5,6 +5,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
+
 import { PerformanceTracker } from './performance-tracker';
 
 describe('PerformanceTracker', () => {

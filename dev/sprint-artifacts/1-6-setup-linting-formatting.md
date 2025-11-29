@@ -1,6 +1,6 @@
 # Story 1.6: Setup Linting and Formatting
 
-Status: review
+Status: done
 
 ## Story
 
@@ -108,6 +108,11 @@ so that I can maintain consistent code quality and formatting across the codebas
 glm-4.6
 
 ### Debug Log References
+
+### Completion Notes
+
+**Completed:** 2025-11-29
+**Definition of Done:** All acceptance criteria met, code reviewed, tests passing
 
 ### Completion Notes List
 
@@ -222,6 +227,41 @@ No security-related concerns. Basic security patterns covered (no-eval, prefer-c
 - Note: The reported "agent deleted code halfway through" issue may be prevented by strict function size enforcement
 - Note: Consider running lint with `--max-warnings 0` in CI to treat warnings as errors
 
+## Research Reference for Validation
+
+**Critical Research Document:** `docs/research/Node.js ESLint Rules for Quality.md`
+
+This research document contains the definitive modern best practices for Node.js TypeScript ESLint configuration that must be used for validation. Any future modifications to the linting configuration should be validated against this research standard.
+
+**Key Research Findings Implemented:**
+
+- Type-aware parser configuration for production code only
+- Node.js-specific rules (eslint-plugin-n) with proper file mapping
+- Async safety rules: `no-floating-promises`, `no-misused-promises`
+- Boolean expression safety: `strict-boolean-expressions`
+- Import sorting with `simple-import-sort` plugin
+- Clean code enforcement: `max-lines-per-function: 15`, `complexity: 10`
+
+**Validation Requirements:**
+
+- All ESLint rule changes must be validated against research recommendations
+- Type-aware parsing must only apply to production code
+- Test files should use basic parsing (no type checking)
+- CLI-specific considerations (hashbang, bin field mapping)
+
 ## Change Log
 
 **2025-11-29:** Senior Developer Review notes appended - Changes Requested due to missing ESLint rules for clean code enforcement
+
+**2025-11-29:** Research-driven ESLint migration completed
+
+- Implemented modern Node.js TypeScript ESLint best practices
+- Added type-aware parsing for production code only
+- Configured Node.js-specific rules with proper file mapping
+- Added async safety and boolean expression rules
+- Integrated simple-import-sort for better import organization
+- All validation checks passing (format:check, lint, typecheck, test, build)
+
+**Research Source:** `docs/research/Node.js ESLint Rules for Quality.md`
+
+We really should have investigated and implemented linting AT THE START. It's led to a number of unecessary issues that would not have happened if we had.
