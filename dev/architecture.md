@@ -65,6 +65,8 @@
 
 **Integration Pattern:**
 
+_Principles: KISS & YAGNI_
+
 ```typescript
 // Before implementing with any library, agents MUST:
 // 1. Resolve library: mcp__context7__resolve-library-id("library-name")

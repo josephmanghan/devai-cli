@@ -22,12 +22,14 @@ so that I can parse commands and arguments.
 **THIS IS INFRASTRUCTURE SETUP. DO NOT IMPLEMENT FEATURES.**
 
 This story establishes Commander.js framework integration ONLY. The scope is strictly:
+
 - Install and configure Commander.js
 - Create program structure (name, description, version)
 - Prove framework works with minimal test
 - Configure help/version flags
 
 **STRICTLY FORBIDDEN:**
+
 - Implementing placeholder commands for future epics
 - Creating user-facing messaging about "coming soon" features
 - Writing tests for placeholder/throwaway code

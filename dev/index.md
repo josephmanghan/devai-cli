@@ -22,10 +22,13 @@
 ## Subdirectories
 
 ### sprint-artifacts/
+
 Implementation files and story contexts for sprint tracking
 
 ### stories/
+
 Epic files containing detailed implementation requirements
 
 ### styleguides/
+
 Coding standards and development guidelines (contains index.md)

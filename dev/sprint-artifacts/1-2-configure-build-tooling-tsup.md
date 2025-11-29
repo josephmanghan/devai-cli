@@ -100,6 +100,7 @@ glm-4.6
 ### Completion Notes List
 
 ✅ **Build Tooling Configuration Complete**
+
 - Installed tsup dependency (already present in package.json as "latest")
 - Created tsup.config.ts with ESM format, ES2022 target, source maps, and minification
 - Configuration validates all acceptance criteria requirements
@@ -109,15 +110,55 @@ glm-4.6
 ### File List
 
 **New files:**
+
 - tsup.config.ts - Build configuration with ESM format settings
-- src/index.test.ts - Simple config validation test
+- ~~src/index.test.ts~~ - DELETED: Unnecessary config validation test (see Post-Implementation Notes)
 
 **Modified files:**
+
 - dev/sprint-status.yaml - Updated story status to in-progress
 
 ## Change Log
 
 - **2025-11-28**: Senior Developer Review notes appended - Story APPROVED
+- **2025-11-29**: Post-implementation correction - removed src/index.test.ts (architectural anti-pattern)
+
+## Post-Implementation Notes
+
+### Architectural Mistake: src/index.test.ts (DELETED)
+
+**Issue Identified:** src/index.test.ts was testing tsup.config.ts using fragile string matching via readFileSync.
+
+**Why This Was Wrong:**
+
+1. **Misplaced Test Location** - Config validation doesn't belong in src/ test suite
+2. **Wrong Validation Approach** - String matching config files is fragile and breaks on formatting changes
+3. **Infrastructure != Runtime Code** - Build configuration is infrastructure, not application behavior
+4. **Already Validated** - Successful build execution proves config correctness
+
+**Critical Learning: Use Commands for Infrastructure Verification**
+
+For infrastructure stories (build tooling, config files, etc.), verification should use **commands**, not **unit tests**:
+
+✅ **Correct Verification:**
+
+```bash
+npm run build                    # Proves config works
+node dist/index.js --help       # Proves bundle is executable
+ls -la dist/                    # Proves output structure
+```
+
+❌ **Incorrect Verification:**
+
+```typescript
+// DON'T: Test config file string contents
+const config = readFileSync('tsup.config.ts', 'utf-8');
+expect(config).toContain("format: ['esm']");
+```
+
+**General Principle:** If you can verify something by running a command, that's almost always superior to writing a test that duplicates what the command already validates. Save tests for runtime behavior, not build-time configuration.
+
+**File Removed:** src/index.test.ts deleted 2025-11-29
 
 ## Senior Developer Review (AI)
 
@@ -140,37 +181,38 @@ Outstanding implementation of tsup build tooling configuration. The developer ha
 
 ### Acceptance Criteria Coverage
 
-| AC# | Description | Status | Evidence |
-|-----|-------------|--------|----------|
-| AC1 | tsup installed and configured in tsup.config.ts | **IMPLEMENTED** | tsup dependency in package.json:34, tsup.config.ts:1-12 |
-| AC2 | Build outputs to `dist/` directory with ESM format | **IMPLEMENTED** | dist/index.js exists with shebang, proper ESM structure |
-| AC3 | Entry point configured for CLI (src/index.ts) | **IMPLEMENTED** | entry: ['src/index.ts'] in tsup.config.ts:4 |
-| AC4 | Source maps enabled for debugging | **IMPLEMENTED** | sourcemap: true in tsup.config.ts:8, dist/index.js.map exists |
-| AC5 | Build script produces executable bundle | **IMPLEMENTED** | shebang in dist/index.js:1, "build": "tsup" in package.json:13 |
+| AC# | Description                                        | Status          | Evidence                                                       |
+| --- | -------------------------------------------------- | --------------- | -------------------------------------------------------------- |
+| AC1 | tsup installed and configured in tsup.config.ts    | **IMPLEMENTED** | tsup dependency in package.json:34, tsup.config.ts:1-12        |
+| AC2 | Build outputs to `dist/` directory with ESM format | **IMPLEMENTED** | dist/index.js exists with shebang, proper ESM structure        |
+| AC3 | Entry point configured for CLI (src/index.ts)      | **IMPLEMENTED** | entry: ['src/index.ts'] in tsup.config.ts:4                    |
+| AC4 | Source maps enabled for debugging                  | **IMPLEMENTED** | sourcemap: true in tsup.config.ts:8, dist/index.js.map exists  |
+| AC5 | Build script produces executable bundle            | **IMPLEMENTED** | shebang in dist/index.js:1, "build": "tsup" in package.json:13 |
 
 **Summary: 5 of 5 acceptance criteria fully implemented**
 
 ### Task Completion Validation
 
-| Task | Marked As | Verified As | Evidence |
-|------|-----------|-------------|----------|
-| Install tsup dependency | ✅ | **VERIFIED COMPLETE** | tsup: "latest" in package.json:34 |
-| Create tsup.config.ts with ESM configuration | ✅ | **VERIFIED COMPLETE** | tsup.config.ts:1-12 with proper ESM settings |
-| Set output directory to `dist/` | ✅ | **VERIFIED COMPLETE** | outDir: 'dist' in tsup.config.ts:7 |
-| Configure ESM format bundling | ✅ | **VERIFIED COMPLETE** | format: ['esm'] in tsup.config.ts:5 |
-| Enable source maps for debugging | ✅ | **VERIFIED COMPLETE** | sourcemap: true in tsup.config.ts:8 |
-| Enable minification for optimized bundle | ✅ | **VERIFIED COMPLETE** | minify: true in tsup.config.ts:9 |
-| Set entry point to src/index.ts | ✅ | **VERIFIED COMPLETE** | entry: ['src/index.ts'] in tsup.config.ts:4 |
-| Ensure CLI bundle is executable with proper shebang | ✅ | **VERIFIED COMPLETE** | shebang '#!/usr/bin/env node' in dist/index.js:1 |
-| Set build script to use tsup | ✅ | **VERIFIED COMPLETE** | "build": "tsup" in package.json:13 |
-| Test build produces executable bundle | ✅ | **VERIFIED COMPLETE** | dist/index.js exists and is executable |
-| Verify bundle size and performance | ✅ | **VERIFIED COMPLETE** | Bundle is optimized (183 bytes) with minification |
+| Task                                                | Marked As | Verified As           | Evidence                                          |
+| --------------------------------------------------- | --------- | --------------------- | ------------------------------------------------- |
+| Install tsup dependency                             | ✅        | **VERIFIED COMPLETE** | tsup: "latest" in package.json:34                 |
+| Create tsup.config.ts with ESM configuration        | ✅        | **VERIFIED COMPLETE** | tsup.config.ts:1-12 with proper ESM settings      |
+| Set output directory to `dist/`                     | ✅        | **VERIFIED COMPLETE** | outDir: 'dist' in tsup.config.ts:7                |
+| Configure ESM format bundling                       | ✅        | **VERIFIED COMPLETE** | format: ['esm'] in tsup.config.ts:5               |
+| Enable source maps for debugging                    | ✅        | **VERIFIED COMPLETE** | sourcemap: true in tsup.config.ts:8               |
+| Enable minification for optimized bundle            | ✅        | **VERIFIED COMPLETE** | minify: true in tsup.config.ts:9                  |
+| Set entry point to src/index.ts                     | ✅        | **VERIFIED COMPLETE** | entry: ['src/index.ts'] in tsup.config.ts:4       |
+| Ensure CLI bundle is executable with proper shebang | ✅        | **VERIFIED COMPLETE** | shebang '#!/usr/bin/env node' in dist/index.js:1  |
+| Set build script to use tsup                        | ✅        | **VERIFIED COMPLETE** | "build": "tsup" in package.json:13                |
+| Test build produces executable bundle               | ✅        | **VERIFIED COMPLETE** | dist/index.js exists and is executable            |
+| Verify bundle size and performance                  | ✅        | **VERIFIED COMPLETE** | Bundle is optimized (183 bytes) with minification |
 
 **Summary: 12 of 12 completed tasks verified, 0 questionable, 0 falsely marked complete**
 
 ### Test Coverage and Gaps
 
 **Excellent Testing Strategy:**
+
 - ✅ Comprehensive configuration validation test in src/index.test.ts:5-15
 - ✅ Test validates all critical tsup configuration settings
 - ✅ Test passes: `npm test src/index.test.ts` - 1 test passed (1ms)
@@ -179,6 +221,7 @@ Outstanding implementation of tsup build tooling configuration. The developer ha
 ### Architectural Alignment
 
 **Perfect Compliance with Epic 1 Tech Spec:**
+
 - ✅ **ADR-003 Compliance**: tsup configured exactly per architecture decision
 - ✅ **ESM Format**: format: ['esm'] ensures ESM-only output (no CommonJS)
 - ✅ **Target Specification**: target: 'es2022' matches Node.js 20+ requirement
@@ -188,6 +231,7 @@ Outstanding implementation of tsup build tooling configuration. The developer ha
 ### Security Notes
 
 **No security concerns identified:**
+
 - ✅ tsup is industry-standard, secure package from trusted source
 - ✅ Configuration files contain no sensitive data or secrets
 - ✅ Proper file system permissions limited to dist/ output directory
@@ -196,6 +240,7 @@ Outstanding implementation of tsup build tooling configuration. The developer ha
 ### Best-Practices and References
 
 **Implementation follows all established patterns:**
+
 - [Clean Code Standards](./dev/styleguides/clean-code.md) - Configuration is concise and readable
 - [Node.js CLI Setup Patterns](./dev/styleguides/nodejs-cli-setup-patterns.md) - Standard tsup configuration
 - [tsup Documentation](https://tsup.egoist.dev/) - Proper use of all configuration options
@@ -206,6 +251,7 @@ Outstanding implementation of tsup build tooling configuration. The developer ha
 **No action items required.** Implementation is complete and production-ready.
 
 **Advisory Notes:**
+
 - Note: Story is ready for Story 1.3 (testing framework) and Story 1.4 (CLI entry point)
 - Note: Build tooling is properly configured to handle future development needs
 - Note: Configuration follows all architectural decisions and performance requirements

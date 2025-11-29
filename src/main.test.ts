@@ -42,7 +42,9 @@ describe('CLI Program', () => {
 
     it('should have correct program description', () => {
       const helpText = program.helpInformation();
-      expect(helpText).toContain('Local-first CLI tool for AI-powered git commit message generation using Ollama');
+      expect(helpText).toContain(
+        'Local-first CLI tool for AI-powered git commit message generation using Ollama',
+      );
     });
 
     it('should have version option configured', () => {
@@ -53,12 +55,10 @@ describe('CLI Program', () => {
 
     it('should support command registration', () => {
       // Minimal test: prove Commander.js command registration works
-      const testCommand = program
-        .command('test-cmd')
-        .description('Test command');
+      const testCommand = program.command('test-cmd').description('Test command');
 
       expect(testCommand).toBeDefined();
-      expect(program.commands.find(cmd => cmd.name() === 'test-cmd')).toBeDefined();
+      expect(program.commands.find((cmd) => cmd.name() === 'test-cmd')).toBeDefined();
     });
   });
 
@@ -70,7 +70,7 @@ describe('CLI Program', () => {
       const mockHelp = vi.fn();
       program.configureOutput({
         writeOut: mockHelp,
-        writeErr: () => {}
+        writeErr: () => {},
       });
 
       try {
@@ -90,7 +90,7 @@ describe('CLI Program', () => {
       const mockVersionLog = vi.fn();
       program.configureOutput({
         writeOut: (str) => mockVersionLog(str.trim()),
-        writeErr: () => {}
+        writeErr: () => {},
       });
 
       try {
@@ -102,7 +102,6 @@ describe('CLI Program', () => {
       expect(mockVersionLog).toHaveBeenCalled();
     });
   });
-
 
   describe('main function', () => {
     it('should parse command line arguments', () => {

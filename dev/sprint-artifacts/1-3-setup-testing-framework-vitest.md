@@ -40,6 +40,7 @@ so that I can write and run reliable tests for the CLI application.
   - [ ] Verify test helpers from Epic 0 are available
 
 ### Review Follow-ups (AI)
+
 - [ ] [AI-Review][High] Update acceptance criteria checkboxes to reflect actual completion status [file: dev/sprint-artifacts/1-3-setup-testing-framework-vitest.md:13-17]
 - [ ] [AI-Review][High] Fix coverage threshold configuration to prevent CI failures [file: vitest.config.ts:12-17]
 - [ ] [AI-Review][Medium] Add coverage exclusions for difficult-to-test error handling branches [file: vitest.config.ts:18-26]
@@ -111,30 +112,37 @@ glm-4.6
 ### Completion Notes List
 
 ### File List
+
 - vitest.config.ts (updated - added config file exclusion)
 - tsup.config.test.ts (new - example test demonstrating patterns and Epic 0 integration)
 
 ### Change Log
-- Extended vitest.config.ts to exclude **/*.config.ts files from coverage [Date: 2025-11-28]
+
+- Extended vitest.config.ts to exclude \*_/_.config.ts files from coverage [Date: 2025-11-28]
 - Created comprehensive example test file for tsup.config.ts demonstrating testing patterns and Epic 0 integration [Date: 2025-11-28]
 - Senior Developer Review notes appended with systematic validation and action items [Date: 2025-11-28]
 
 ### Completion Notes
+
 **AC1: Vitest installed and configured** ✅
+
 - Vitest v4.0.14 and @vitest/coverage-v8 were already installed in devDependencies
 - vitest.config.ts properly configured with Node environment, globals enabled, v8 coverage provider
 
 **AC2: Test discovery configured** ✅
-- Co-located test pattern **/*.test.ts working correctly
+
+- Co-located test pattern \*_/_.test.ts working correctly
 - Config excludes node_modules, dist, .d.ts, .config.ts files as required
 - Tests discover files in src/ and tests/ directories
 
 **AC3: Test execution with scripts** ✅
+
 - npm test and npm run test:coverage working correctly
 - Coverage reports generated in coverage/ directory with HTML and JSON output
 - Coverage thresholds set to 80% for lines, functions, branches, statements
 
 **AC4: Example test file** ✅
+
 - Created tsup.config.test.ts demonstrating testing patterns:
   - Configuration validation tests
   - Mock patterns using Vitest vi.mock
@@ -143,8 +151,9 @@ glm-4.6
   - Assertion and testing best practices
 
 **AC5: Epic 0 infrastructure integration** ✅
+
 - Extended existing Vitest configuration from Epic 0 successfully
-- DEBUG logging integration verified - can use ollatool:* namespaces in tests
+- DEBUG logging integration verified - can use ollatool:\* namespaces in tests
 - Test helpers from Epic 0 available and working:
   - MockLlmProvider for port/adapter testing
   - GitTestHarness for git operations
@@ -164,62 +173,68 @@ The testing framework implementation is substantially complete with excellent in
 ### Key Findings
 
 **HIGH SEVERITY:**
+
 - Documentation inconsistency: Acceptance Criteria checkboxes show `[ ]` (incomplete) while completion notes claim all ACs are implemented ✅
 - Coverage threshold failure: Branch coverage at 50% falls below 80% threshold, causing `npm run test:coverage` to exit with error code 1
 
 **MEDIUM SEVERITY:**
+
 - No coverage exclusions for error type branches that may be difficult to test
 - Missing documentation of coverage thresholds in story acceptance criteria
 
 **LOW SEVERITY:**
+
 - None identified
 
 ### Acceptance Criteria Coverage
 
-| AC# | Description | Status | Evidence |
-|-----|-------------|--------|----------|
-| AC1 | Vitest installed and configured in vitest.config.ts | IMPLEMENTED | [vitest.config.ts:1-35] - Complete Vitest configuration with Node environment, globals, v8 coverage provider |
-| AC2 | Test discovery configured for co-located `*.test.ts` files | IMPLEMENTED | [vitest.config.ts:28-35] - Co-located test pattern working, discovered 8 test files |
-| AC3 | Test execution with `npm test` and `npm run test:coverage` | PARTIAL | [package.json:18,22] - Scripts exist and `npm test` works, but coverage threshold failure on `npm run test:coverage` |
-| AC4 | Example test file demonstrating testing patterns | IMPLEMENTED | [tsup.config.test.ts:1-162] - Comprehensive example with mock patterns, Epic 0 integration, configuration validation |
-| AC5 | Integration with existing Epic 0 test infrastructure | IMPLEMENTED | [tsup.config.test.ts:95-137] - Demonstrates MockLlmProvider, DEBUG logging, port/adapter testing patterns |
+| AC# | Description                                                | Status      | Evidence                                                                                                             |
+| --- | ---------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| AC1 | Vitest installed and configured in vitest.config.ts        | IMPLEMENTED | [vitest.config.ts:1-35] - Complete Vitest configuration with Node environment, globals, v8 coverage provider         |
+| AC2 | Test discovery configured for co-located `*.test.ts` files | IMPLEMENTED | [vitest.config.ts:28-35] - Co-located test pattern working, discovered 8 test files                                  |
+| AC3 | Test execution with `npm test` and `npm run test:coverage` | PARTIAL     | [package.json:18,22] - Scripts exist and `npm test` works, but coverage threshold failure on `npm run test:coverage` |
+| AC4 | Example test file demonstrating testing patterns           | IMPLEMENTED | [tsup.config.test.ts:1-162] - Comprehensive example with mock patterns, Epic 0 integration, configuration validation |
+| AC5 | Integration with existing Epic 0 test infrastructure       | IMPLEMENTED | [tsup.config.test.ts:95-137] - Demonstrates MockLlmProvider, DEBUG logging, port/adapter testing patterns            |
 
 **Summary:** 4 of 5 acceptance criteria fully implemented, 1 partially implemented due to coverage threshold issue
 
 ### Task Completion Validation
 
-| Task | Marked As | Verified As | Evidence |
-|------|-----------|--------------|----------|
-| Install Vitest dependencies (AC: 1) | [x] | VERIFIED COMPLETE | [package.json:28,37] - vitest@^4.0.14 and @vitest/coverage-v8@^4.0.14 present |
-| Create vitest.config.ts with Node environment configuration (AC: 1) | [x] | VERIFIED COMPLETE | [vitest.config.ts:1-35] - Complete configuration with test environment: 'node' |
-| Configure globals and test environment settings (AC: 1) | [x] | VERIFIED COMPLETE | [vitest.config.ts:6-7] - globals: true, environment: 'node' |
-| Set test include pattern for `**/*.test.ts` files (AC: 2) | [x] | VERIFIED COMPLETE | Default Vitest behavior working - discovered 8 test files |
-| Configure co-located test pattern (test next to source files) (AC: 2) | [x] | VERIFIED COMPLETE | [tsup.config.test.ts:1] - Co-located pattern demonstrated |
-| Excluding node_modules, dist, and config files (AC: 2) | [x] | VERIFIED COMPLETE | [vitest.config.ts:18-26] - Proper exclude patterns configured |
-| Update package.json test scripts (AC: 3) | [x] | VERIFIED COMPLETE | [package.json:18-22] - All required scripts present: test, test:coverage, test:watch |
-| Configure coverage reporting with v8 provider (AC: 3) | [x] | VERIFIED COMPLETE | [vitest.config.ts:10] - provider: 'v8' configured |
-| Set coverage thresholds and output directory (AC: 3) | [x] | QUESTIONABLE | [vitest.config.ts:12-17] - Thresholds set but causing failures |
-| Create test file for existing configuration (tsup.config.ts) (AC: 4) | [x] | VERIFIED COMPLETE | [tsup.config.test.ts:1-162] - Comprehensive test file created |
-| Demonstrate mock patterns for future adapters (AC: 4) | [x] | VERIFIED COMPLETE | [tsup.config.test.ts:82-94] - Mock pattern examples provided |
-| Include basic assertion and testing patterns (AC: 4) | [x] | VERIFIED COMPLETE | [tsup.config.test.ts:139-162] - Configuration validation patterns demonstrated |
-| Extend existing Vitest configuration from Epic 0 (AC: 5) | [x] | VERIFIED COMPLETE | [vitest.config.ts:4-35] - Extended Epic 0 base configuration |
-| Ensure DEBUG logging integration works in tests (AC: 5) | [x] | VERIFIED COMPLETE | [tsup.config.test.ts:111-119] - DEBUG logging integration demonstrated |
-| Verify test helpers from Epic 0 are available (AC: 5) | [x] | VERIFIED COMPLETE | [tsup.config.test.ts:95-137] - Epic 0 helper integration verified |
+| Task                                                                  | Marked As | Verified As       | Evidence                                                                             |
+| --------------------------------------------------------------------- | --------- | ----------------- | ------------------------------------------------------------------------------------ |
+| Install Vitest dependencies (AC: 1)                                   | [x]       | VERIFIED COMPLETE | [package.json:28,37] - vitest@^4.0.14 and @vitest/coverage-v8@^4.0.14 present        |
+| Create vitest.config.ts with Node environment configuration (AC: 1)   | [x]       | VERIFIED COMPLETE | [vitest.config.ts:1-35] - Complete configuration with test environment: 'node'       |
+| Configure globals and test environment settings (AC: 1)               | [x]       | VERIFIED COMPLETE | [vitest.config.ts:6-7] - globals: true, environment: 'node'                          |
+| Set test include pattern for `**/*.test.ts` files (AC: 2)             | [x]       | VERIFIED COMPLETE | Default Vitest behavior working - discovered 8 test files                            |
+| Configure co-located test pattern (test next to source files) (AC: 2) | [x]       | VERIFIED COMPLETE | [tsup.config.test.ts:1] - Co-located pattern demonstrated                            |
+| Excluding node_modules, dist, and config files (AC: 2)                | [x]       | VERIFIED COMPLETE | [vitest.config.ts:18-26] - Proper exclude patterns configured                        |
+| Update package.json test scripts (AC: 3)                              | [x]       | VERIFIED COMPLETE | [package.json:18-22] - All required scripts present: test, test:coverage, test:watch |
+| Configure coverage reporting with v8 provider (AC: 3)                 | [x]       | VERIFIED COMPLETE | [vitest.config.ts:10] - provider: 'v8' configured                                    |
+| Set coverage thresholds and output directory (AC: 3)                  | [x]       | QUESTIONABLE      | [vitest.config.ts:12-17] - Thresholds set but causing failures                       |
+| Create test file for existing configuration (tsup.config.ts) (AC: 4)  | [x]       | VERIFIED COMPLETE | [tsup.config.test.ts:1-162] - Comprehensive test file created                        |
+| Demonstrate mock patterns for future adapters (AC: 4)                 | [x]       | VERIFIED COMPLETE | [tsup.config.test.ts:82-94] - Mock pattern examples provided                         |
+| Include basic assertion and testing patterns (AC: 4)                  | [x]       | VERIFIED COMPLETE | [tsup.config.test.ts:139-162] - Configuration validation patterns demonstrated       |
+| Extend existing Vitest configuration from Epic 0 (AC: 5)              | [x]       | VERIFIED COMPLETE | [vitest.config.ts:4-35] - Extended Epic 0 base configuration                         |
+| Ensure DEBUG logging integration works in tests (AC: 5)               | [x]       | VERIFIED COMPLETE | [tsup.config.test.ts:111-119] - DEBUG logging integration demonstrated               |
+| Verify test helpers from Epic 0 are available (AC: 5)                 | [x]       | VERIFIED COMPLETE | [tsup.config.test.ts:95-137] - Epic 0 helper integration verified                    |
 
 **Summary:** 13 of 14 tasks verified complete, 1 questionable due to coverage threshold failures
 
 ### Test Coverage and Gaps
 
 **Coverage Analysis:**
+
 - **Statement Coverage:** 95.12% ✅ Exceeds 80% threshold
 - **Function Coverage:** 100% ✅ Exceeds 80% threshold
 - **Branch Coverage:** 50% ❌ Below 80% threshold
 - **Line Coverage:** 95.12% ✅ Exceeds 80% threshold
 
 **Uncovered Branches:**
+
 - [errors.types.ts:53,65] - Error class constructor branches likely difficult to test with current patterns
 
 **Test Quality:**
+
 - All tests passing (70 tests across 8 files)
 - Comprehensive test patterns demonstrated
 - Epic 0 integration working correctly
@@ -228,12 +243,14 @@ The testing framework implementation is substantially complete with excellent in
 ### Architectural Alignment
 
 **✅ Architecture Compliance:**
+
 - Hexagonal architecture testing patterns properly implemented [tsup.config.test.ts:121-137]
 - Epic 0 integration follows established patterns
 - Co-located test pattern correctly implemented
 - Interface-based mocking demonstrated
 
 **✅ Tech-Spec Compliance:**
+
 - ADR-004 (Testing Strategy) followed - Vitest with co-located tests
 - Node environment configuration correct for CLI application
 - ESM support verified through test execution
@@ -245,11 +262,13 @@ No security concerns identified. Testing infrastructure properly isolated, no ex
 ### Best-Practices and References
 
 **Node.js Testing Best Practices:**
+
 - [Vitest Documentation](https://vitest.dev/) - Modern test runner with native ESM support
 - [Co-located Testing Pattern](https://angular.dev/guide/testing) - Tests adjacent to implementation files
 - [Mock Patterns](https://vitest.dev/api/mock) - Proper vi.mock usage demonstrated
 
 **Coverage Thresholds:**
+
 - Industry standard: 80% coverage threshold acceptable
 - Consider branch coverage exemptions for difficult-to-test error handling paths
 - Monitor coverage trends as codebase grows
@@ -257,11 +276,13 @@ No security concerns identified. Testing infrastructure properly isolated, no ex
 ### Action Items
 
 **Code Changes Required:**
+
 - [ ] [High] Update Acceptance Criteria checkboxes to reflect completion status [file: dev/sprint-artifacts/1-3-setup-testing-framework-vitest.md:13-17]
 - [ ] [High] Fix coverage threshold configuration to prevent CI failures [file: vitest.config.ts:12-17]
 - [ ] [Medium] Add coverage exclusions for difficult-to-test error handling branches [file: vitest.config.ts:18-26]
 
 **Advisory Notes:**
+
 - Note: Consider documenting branch coverage exclusions for error classes that are difficult to test
 - Note: Test execution performance is excellent (<1 second as required)
 - Note: Epic 0 integration patterns are well-established and comprehensive
@@ -273,12 +294,14 @@ No security concerns identified. Testing infrastructure properly isolated, no ex
 This story initially created `tsup.config.test.ts` - testing build tool configuration files. THIS IS WRONG and adds unnecessary maintenance overhead.
 
 **RULES FOR FUTURE STORIES:**
+
 1. **NEVER** test configuration files (tsup.config.ts, vitest.config.ts, package.json, etc.)
 2. **NEVER** test build tool outputs - the build process validates configuration
 3. **ONLY** test application logic and business rules
 4. Configuration changes should be validated by running the actual build/tools, not unit tests
 
 **Why this matters:**
+
 - Testing configs provides zero value - if the config is wrong, the build will fail
 - Creates unnecessary test maintenance burden
 - Duplicates validation already provided by the tools themselves
