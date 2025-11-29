@@ -160,7 +160,7 @@ The MVP focuses exclusively on automating git commit message generation with str
 **Configuration & Customization:**
 
 - Configuration file support (`~/.config/[tool-name]/config.json`)
-  - Model selection (switch between qwen2.5-coder, llama3.2, codellama)
+  - Model selection (switch between qwen2.5-coder, llama3.2, codellama, qwen2.5 (not coder))
   - Custom commit types and templates beyond Conventional Commits
   - Locale settings for non-English commit messages
   - Default behavior flags (auto-stage, skip preview, etc.)

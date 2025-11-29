@@ -34,6 +34,44 @@
 
 - **[dev/styleguides/clean-code.md](./styleguides/clean-code.md)**
 
+**ENTERPRISE-GRADE CODE VALIDATION: Context7 MCP Integration**
+
+**CRITICAL:** Context7 MCP server is available and MUST be used for enterprise-grade code quality validation, particularly starting with Epic 2 implementation. Context7 provides up-to-date documentation and best practices for all Node.js libraries and frameworks used in this project.
+
+**Context7 Usage Requirements:**
+
+1. **Library Integration Validation** - Before implementing any new library or framework, agents MUST:
+   - Use `mcp__context7__resolve-library-id` to locate the authoritative documentation
+   - Retrieve latest best practices via `mcp__context7__get-library-docs`
+   - Validate implementation patterns against current industry standards
+
+2. **Code Quality Assurance** - Context7 MCP serves as the authoritative source for:
+   - Node.js best practices and coding standards
+   - Library-specific implementation patterns
+   - Framework usage guidelines (Commander.js, Vitest, TypeScript, etc.)
+   - Security and performance optimization patterns
+
+3. **Epic 2+ Implementation** - Starting Epic 2, all agents MUST:
+   - Cross-reference implementation decisions with Context7 documentation
+   - Validate code patterns against library-specific best practices
+   - Use Context7 for architectural decision validation
+
+**Available Context7 Libraries for This Project:**
+
+- `/goldbergyoni/nodebestpractices` - Node.js coding standards (80.2 benchmark score)
+- `/nodejs/node` - Official Node.js API documentation
+- `/websites/nodejs_api` - Complete Node.js API reference
+- Library-specific docs for Commander.js, Vitest, TypeScript, Ollama SDK
+
+**Integration Pattern:**
+
+```typescript
+// Before implementing with any library, agents MUST:
+// 1. Resolve library: mcp__context7__resolve-library-id("library-name")
+// 2. Get docs: mcp__context7__get-library-docs("/org/project", "mode", "topic")
+// 3. Validate patterns against authoritative source
+```
+
 Key requirements enforced during implementation:
 
 - **Function Size:** Maximum 15 lines per function
@@ -41,6 +79,7 @@ Key requirements enforced during implementation:
 - **Class Member Ordering:** Constructor → Private Properties → Public Properties → Public Methods → Private Methods
 - **DRY Principle:** No duplicated logic or error messages
 - **Self-Documenting Code:** Comments for "why" only, not "what"
+- **Context7 Validation:** All library usage validated against current best practices
 
 ---
 
@@ -1596,6 +1635,7 @@ This architecture document defines:
 - Hexagonal architecture enables parallel development
 - Test strategy supports TDD workflow
 - Error handling provides clear user guidance
+- Context7 MCP integration defined for code quality validation
 
 ### Validation Checklist
 

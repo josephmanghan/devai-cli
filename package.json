@@ -20,7 +20,8 @@
     "test:integration": "vitest run --dir tests",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "validate:setup": "tsx scripts/validate-setup.ts"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
@@ -44,5 +45,8 @@
     "prompt-engineering",
     "context-engineering"
   ],
-  "author": "Dr Joe (Joseph Manghan)"
+  "author": "Dr Joe (Joseph Manghan)",
+  "dependencies": {
+    "ollama": "^0.6.3"
+  }
 }
