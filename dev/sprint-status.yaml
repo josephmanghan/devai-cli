@@ -50,7 +50,7 @@ development_status:
   1-1-initialize-typescript-project-with-esm: done
   1-2-configure-build-tooling-tsup: done
   1-3-setup-testing-framework-vitest: done
-  1-4-setup-cli-framework-commander-js: ready-for-dev
+  1-4-setup-cli-framework-commander-js: review
   1-5-setup-hexagonal-architecture-structure: backlog
   1-6-setup-linting-formatting: backlog
   epic-1-retrospective: optional

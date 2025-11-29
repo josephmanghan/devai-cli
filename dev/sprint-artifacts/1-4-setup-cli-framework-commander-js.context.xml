@@ -1,0 +1,117 @@
+<story-context id="dev/sprint-artifacts/1-4-setup-cli-framework-commander-js.context.xml" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>4</storyId>
+    <title>Setup CLI Framework (Commander.js)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>dev/sprint-artifacts/1-4-setup-cli-framework-commander-js.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>Commander.js integrated with basic CLI structure</iWant>
+    <soThat>I can parse commands and arguments</soThat>
+    <tasks>
+- [ ] Install Commander.js dependency (AC: 1)
+  - [ ] Add commander@14.0.2 to dependencies in package.json
+  - [ ] Import types and verify TypeScript compatibility
+- [ ] Create minimal barrel entry point (AC: 2, 6)
+  - [ ] Create src/index.ts as barrel file with shebang: `#!/usr/bin/env node`
+  - [ ] Import and execute main.ts (no logic in index.ts - just a barrel file)
+  - [ ] Configure package.json bin field mapping ollatool to "./dist/index.js"
+- [ ] Create CLI bootstrap file (AC: 3, 4)
+  - [ ] Create src/main.ts with Commander.js setup
+  - [ ] Export createProgram() function for testability
+  - [ ] Set program name, description, and version
+  - [ ] Register placeholder commit command with console.log implementation
+  - [ ] Add conditional execution: only run if main module
+- [ ] Create tests for CLI logic (AC: 5)
+  - [ ] Create src/main.test.ts for CLI program tests
+  - [ ] Test program name, version, and description
+  - [ ] Test --help and --version flags work correctly
+  - [ ] Test commit command registration
+- [ ] Verify CLI functionality end-to-end
+  - [ ] Run `npm run build && node dist/index.js --help`
+  - [ ] Run `npm run build && node dist/index.js --version`
+  - [ ] Run `npm run build && node dist/index.js commit`
+</tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. [ ] Commander.js installed (v14.0.2)
+2. [ ] src/index.ts created as CLI entry point
+3. [ ] Basic program structure with version and description
+4. [ ] Placeholder `commit` command registered
+5. [ ] `--help` and `--version` flags work (FR47, FR48)
+6. [ ] Shebang and executable permissions configured
+</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <item path="dev/prd.md" title="Product Requirements Document" section="Configuration & Extensibility" snippet="FR47: Provide --help flag for usage information. FR48: Provide --version flag for version number." />
+      <item path="dev/architecture.md" title="Architecture Document" section="Technology Stack" snippet="CLI Framework: Commander.js 14.0.2 - Industry standard (50M+ weekly downloads), stable API, minimal API surface." />
+      <item path="dev/architecture.md" title="Architecture Document" section="Project Structure" snippet="src/index.ts - Barrel file with shebang (NO logic - imports main.ts). src/main.ts - CLI bootstrap and Commander.js setup." />
+      <item path="dev/architecture.md" title="Architecture Document" section="Implementation Patterns" snippet="Barrel File Pattern: src/index.ts - Minimal barrel file with shebang, NO logic, just imports main.ts." />
+      <item path="dev/architecture.md" title="Architecture Document" section="Testing Patterns" snippet="Co-located tests (adjacent .test.ts) - One test file per source file. Angular-style familiarity, clear 1:1 relationship." />
+      <item path="dev/styleguides/unit-test-patterns.md" title="Unit Test Patterns" section="" snippet="Vitest testing patterns, CLI testing, async testing for Node.js CLI - MUST REVIEW when injecting content" />
+      <item path="dev/styleguides/nodejs-cli-setup-patterns.md" title="Node.js CLI Setup Patterns" section="" snippet="Commander.js configuration, CLI framework patterns, ESM setup - MUST REVIEW when injecting content" />
+      <item path="dev/styleguides/index.md" title="Style Guides Index" section="" snippet="Comprehensive overview and navigation for all project style guides - MUST REVIEW when injecting content" />
+    </docs>
+    <code>
+      <item path="src/index.ts" kind="barrel-file" symbol="barrel-entry" lines="1-8" reason="CLI entry point with shebang - imports main.ts, contains no logic" />
+      <item path="src/main.ts" kind="bootstrap-file" symbol="main" lines="12-34" reason="Current placeholder main function - needs to be replaced with Commander.js implementation" />
+      <item path="src/main.ts" kind="bootstrap-file" symbol="createProgram" lines="12-34" reason="Function to be created - CLI program creation and configuration for testability" />
+      <item path="package.json" kind="dependency-file" symbol="commander" lines="29" reason="Commander.js dependency already in devDependencies - needs to be verified for version 14.0.2" />
+      <item path="package.json" kind="dependency-file" symbol="bin" lines="6-8" reason="CLI binary mapping already configured to dist/index.js" />
+      <item path="src/core/types/errors.types.ts" kind="type-definitions" symbol="AppError" lines="1-20" reason="Error handling infrastructure exists for proper CLI error management" />
+    </code>
+    <dependencies>
+      <ecosystem name="node" packages="commander@14.0.2, typescript, tsup, vitest" />
+      <ecosystem name="dev" packages="@types/node, execa, prettier" />
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Must use Commander.js v14.0.2 per architecture decisions [Source: dev/architecture.md#Technology-Stack]</constraint>
+    <constraint type="project-structure">CLI entry point: src/index.ts (maps to dist/index.js after build) [Source: dev/architecture.md#Project-Structure]</constraint>
+    <constraint type="configuration">Package name: ollatool with bin field pointing to ./dist/index.js [Source: dev/stories/epic-1-foundation.md#Story-1.4]</constraint>
+    <constraint type="integration">Must integrate with existing tsup build configuration from Story 1.2</constraint>
+    <constraint type="version">Commander.js version: 14.0.2 (verified compatible with Node 20+)</constraint>
+    <constraint type="program-config">Program name: ollatool, Entry point shebang: #!/usr/bin/env node</constraint>
+    <constraint type="version-source">Version from package.json version field, Description from PRD executive summary</constraint>
+    <constraint type="typescript">Must support strict mode and NodeNext resolution [Source: dev/sprint-artifacts/1-1-initialize-typescript-project-with-esm.md]</constraint>
+    <constraint type="testing">CLI logic tests will follow co-located pattern from Story 1.3 [Source: dev/sprint-artifacts/1-3-setup-testing-framework-vitest.md]</constraint>
+    <constraint type="barrel-pattern">src/index.ts: Minimal barrel file with shebang - NO logic, just imports main.ts</constraint>
+    <constraint type="main-location">src/main.ts: CLI bootstrap and Commander.js setup - THIS contains the logic</constraint>
+    <constraint type="test-location">src/main.test.ts: Tests for CLI logic (NOT index.ts - barrel files don't need tests)</constraint>
+    <constraint type="clean-code">All CLI code must follow dev/styleguides/clean-code.md standards (≤15 lines per function, 0-2 arguments)</constraint>
+    <constraint type="testing-patterns">Tests must follow unit-test-patterns.md guidelines for Vitest co-located pattern [Source: dev/styleguides/unit-test-patterns.md]</constraint>
+    <constraint type="cli-patterns">CLI setup must follow nodejs-cli-setup-patterns.md guidelines [Source: dev/styleguides/nodejs-cli-setup-patterns.md]</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="CLI Program" kind="Commander.js Program" signature="createProgram(): Command" path="src/main.ts" />
+    <interface name="Package Configuration" kind="NPM bin field" signature='"ollatool": "./dist/index.js"' path="package.json" />
+    <interface name="Build Output" kind="Executable" signature="dist/index.js" path="dist/index.js" />
+  </interfaces>
+
+  <tests>
+    <standards>
+Vitest configured with co-located pattern - CLI logic tests will use src/main.test.ts. Follow existing test patterns from Story 1.3. Tests must cover program creation, command registration, help/version flags, and CLI bootstrap functionality. Maintain clean code standards with maximum 15 lines per function and clear test descriptions.
+    </standards>
+    <locations>
+src/main.test.ts (co-located with main.ts), following the pattern established in Story 1.3. Tests should use Vitest with mocking capabilities for Commander.js methods.
+    </locations>
+    <ideas>
+- test_createProgram_returns_configured_Commander_instance: Verify createProgram() returns proper Commander instance with name, version, description
+- test_program_help_flag_displays_usage: Test --help flag shows program information and available commands
+- test_program_version_flag_shows_package_version: Test --version flag displays version from package.json
+- test_commit_command_registration: Verify placeholder commit command is properly registered
+- test_conditional_execution_only_runs_as_main: Test main() only executes when run directly, not when imported
+- test_shebang_line_present: Verify #!/usr/bin/env node shebang exists in built output
+- test_bin_field_executable: Test CLI can be executed via npm run build && node dist/index.js
+    </ideas>
+  </tests>
+</story-context>

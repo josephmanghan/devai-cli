@@ -4,4 +4,7 @@
  * CLI Entry Point - Barrel File
  */
 
-import './main.js';
+import { main } from './main.js';
+
+// Execute the CLI
+main();

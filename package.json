@@ -14,20 +14,20 @@
     "dev": "tsx src/index.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "fix": "npm run format",
     "test": "vitest run",
     "test:unit": "vitest run --dir src",
     "test:integration": "vitest run --dir tests",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "validate:setup": "tsx scripts/validate-setup.ts"
+    "validate:setup": "tsx scripts/validate-setup.ts",
+    "build:link": "npm run build && npm link",
+    "unlink": "npm unlink ollatool"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
     "@types/node": "^24.10.1",
     "@vitest/coverage-v8": "^4.0.14",
-    "commander": "14.0.2",
     "debug": "^4.4.3",
     "execa": "^9.6.0",
     "prettier": "^3.0.0",
@@ -37,16 +37,9 @@
     "typescript": "^5.9.3",
     "vitest": "^4.0.14"
   },
-  "keywords": [
-    "ai-agents",
-    "flash",
-    "gems",
-    "gemini",
-    "prompt-engineering",
-    "context-engineering"
-  ],
   "author": "Dr Joe (Joseph Manghan)",
   "dependencies": {
+    "commander": "14.0.2",
     "ollama": "^0.6.3"
   }
 }

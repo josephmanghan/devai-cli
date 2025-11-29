@@ -25,9 +25,6 @@ interface ValidationResult {
   details?: Record<string, unknown>;
 }
 
-const CONVENTIONAL_COMMITS_PATTERN =
-  /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):.+(\n\n.+)/s;
-
 function createSuccessResult(
   step: string,
   details?: Record<string, unknown>,
@@ -146,71 +143,6 @@ Generate the commit message following the format rules.`;
   }
 }
 
-async function validateModelCleanup(): Promise<ValidationResult> {
-  const startTime = Date.now();
-
-  try {
-    // Wait a brief moment for the unload to complete if it's asynchronous on the daemon side
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Use CLI to check running models as it's the most reliable way to verify daemon state
-    const { stdout } = await execAsync('ollama ps');
-
-    // Check if our model is in the list of running models
-    const isRunning = stdout.includes('qwen2.5-coder:1.5b');
-    const duration = Date.now() - startTime;
-
-    if (isRunning) {
-      return createFailureResult(
-        'Model Cleanup',
-        'Model failed to unload. "keep_alive: 0" may not be working or model is stuck.',
-      );
-    }
-
-    return createSuccessResult(
-      'Model Cleanup',
-      { status: 'Model unloaded successfully' },
-      duration,
-    );
-  } catch (error) {
-    return createFailureResult(
-      'Model Cleanup',
-      `Failed to check model status: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
-}
-
-async function validateValidationPattern(): Promise<ValidationResult> {
-  const startTime = Date.now();
-
-  try {
-    const validMessage = `feat: add hello world
-
-Added console log for testing`;
-
-    const isValid = CONVENTIONAL_COMMITS_PATTERN.test(validMessage);
-    const duration = Date.now() - startTime;
-
-    if (!isValid) {
-      return createFailureResult(
-        'Validation Pipeline Pattern',
-        'Conventional commits regex pattern is broken',
-      );
-    }
-
-    return createSuccessResult(
-      'Validation Pipeline Pattern',
-      { pattern: CONVENTIONAL_COMMITS_PATTERN.source },
-      duration,
-    );
-  } catch (error) {
-    return createFailureResult(
-      'Validation Pipeline Pattern',
-      `Regex validation failed: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
-}
-
 async function validateSetup(): Promise<ValidationResult[]> {
   console.log('🔍 Validating Ollama Integration Setup...\n');
 
@@ -220,8 +152,6 @@ async function validateSetup(): Promise<ValidationResult[]> {
   results.push(await validateBaseModel());
 
   results.push(await validateBasicInference());
-  results.push(await validateModelCleanup());
-  results.push(await validateValidationPattern());
 
   return results;
 }

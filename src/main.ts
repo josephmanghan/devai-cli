@@ -1,34 +1,39 @@
 /**
  * Ollama CLI Tool - Local-first git commit message generation
  *
- * This is the main application bootstrap file.
+ * CLI bootstrap file with Commander.js setup
  * Entry point is src/index.ts (barrel file).
  */
 
+import { Command } from 'commander';
+import { readFileSync } from 'node:fs';
+
+// Package info from package.json
+const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
+
 /**
- * Main application entry point
- * Contains CLI initialization logic
+ * Create and configure the CLI program
+ * @returns Configured Commander instance
  */
-export function main(): void {
-  // Placeholder implementation - will be replaced with Commander.js in Story 1.4
-  console.log('🚀 ollatool - Local-first AI commit messages');
+export function createProgram(): Command {
+  const program = new Command();
 
-  // Show help by default
-  console.log(`
-Usage: ollatool <command>
+  // Configure program basics
+  program
+    .name('ollatool')
+    .description('Local-first CLI tool for AI-powered git commit message generation using Ollama')
+    .version(pkg.version, '--version', 'Show version number');
 
-Commands:
-  commit    Generate AI-powered commit messages (coming soon)
-
-Options:
-  --help     Show this help message
-  --version  Show version number
-
-For more information, visit: https://github.com/your-repo/ollatool
-`);
+  return program;
 }
 
-// Only execute if this is the main module
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
+/**
+ * Main application entry point
+ * Executes the CLI program
+ */
+export function main(): void {
+  const program = createProgram();
+
+  // Parse command line arguments
+  program.parse();
 }
