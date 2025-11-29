@@ -56,12 +56,12 @@ This architecture draws upon several comprehensive reference documents that prov
 ### Testing & Quality Assurance
 
 - **[System-Level Test Design](./test-design-system.md)** - Comprehensive testing strategy including unit, integration, E2E, and manual acceptance testing protocols
-- **[Unit Test Patterns](./styleguides/unit-test-patterns.md)** - Specific testing patterns and conventions for unit tests
+- **[Unit Test Patterns](./styleguides/unit-test-patterns.md)** - Specific testing patterns and conventions for unit tests. For complete testing patterns including CLI-specific testing, async testing, and mock strategies, see **[dev/styleguides/unit-test-patterns.md](./styleguides/unit-test-patterns.md)** - MUST REVIEW when generating story contexts.
 
 ### Development Standards
 
-- **[Clean Code Standards](./styleguides/clean-code.md)** - Complete coding standards, naming conventions, and implementation patterns
-- **[Node.js CLI Setup Patterns](./styleguides/nodejs-cli-setup-patterns.md)** - Modern ESM, TypeScript, and CLI-specific tooling configurations
+- **[Clean Code Standards](./styleguides/clean-code.md)** - Complete coding standards, naming conventions, and implementation patterns. For complete coding standards, naming conventions, and architectural patterns, see **[dev/styleguides/clean-code.md](./styleguides/clean-code.md)** and **[dev/styleguides/index.md](./styleguides/index.md)** - MUST REVIEW when generating story contexts.
+- **[Node.js CLI Setup Patterns](./styleguides/nodejs-cli-setup-patterns.md)** - Modern ESM, TypeScript, and CLI-specific tooling configurations. For CLI framework setup patterns, Commander.js configuration, and ESM integration, see **[dev/styleguides/nodejs-cli-setup-patterns.md](./styleguides/nodejs-cli-setup-patterns.md)** - MUST REVIEW when generating story contexts.
 
 ### Complete Style Guide Reference
 

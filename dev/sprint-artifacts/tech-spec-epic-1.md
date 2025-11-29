@@ -157,6 +157,8 @@ export class ExampleAdapter implements ExamplePort {
 
 **Epic 1 Data Model Strategy:** This section establishes configuration contracts and example patterns. Real domain models (CommitMessage, GitContext, OllamaConfig) will be defined in Epics 2-4 with full entity relationships, validation rules, and business logic constraints. The example port/adapter pattern in Story 1.5 demonstrates how domain models will integrate with the hexagonal architecture.
 
+**Story 1.5 Style Guide References:** For complete coding standards, class member ordering, and implementation patterns, see **[dev/styleguides/clean-code.md](./styleguides/clean-code.md)** and **[dev/styleguides/index.md](./styleguides/index.md)** - MUST REVIEW when generating story contexts. Also reference the **"Code Quality Standards Reference"** section in **[dev/architecture.md](./architecture.md#code-quality-standards-reference)** for comprehensive standards alignment.
+
 ### APIs and Interfaces
 
 **CLI Command Interface (Story 1.4):**
@@ -493,6 +495,8 @@ User executes: ollatool <command>
    - `npm run format` formats code using Prettier
    - All linting and formatting rules pass on foundation code
    - Kebab-case file naming convention enforced
+
+**Story 1.6 Style Guide References:** For comprehensive code quality standards, linting rule justification, and formatting patterns, see **[dev/styleguides/clean-code.md](./styleguides/clean-code.md)** and **[dev/styleguides/index.md](./styleguides/index.md)** - MUST REVIEW when generating story contexts. Also reference the **"Development Standards"** section in **[dev/architecture.md](./architecture.md#development-standards)** for complete tooling alignment.
 
 **Story-Level Acceptance Criteria:** (See dev/stories/epic-1-foundation.md for detailed AC per story)
 
