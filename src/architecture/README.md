@@ -144,7 +144,7 @@ export class NewAdapter implements NewService {
 // src/feature/new-feature/use-case.ts
 export class NewUseCase {
   constructor(
-    private readonly service: NewService, // Depends on interface, not adapter
+    private readonly service: NewService // Depends on interface, not adapter
   ) {}
 
   async execute(input: string): Promise<string> {

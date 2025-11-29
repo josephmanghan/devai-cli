@@ -294,7 +294,12 @@ const getInstance = (config?: InstanceConfig) => {
     }),
   };
 
-  const useCase = new GenerateCommitMessage(mockGit, mockLLM, mockTemplate, mockConfig);
+  const useCase = new GenerateCommitMessage(
+    mockGit,
+    mockLLM,
+    mockTemplate,
+    mockConfig
+  );
 
   return { useCase, mockGit, mockLLM, mockTemplate, mockConfig };
 };
@@ -311,7 +316,7 @@ const getInstance = (config?: { baseUrl?: string }) => {
 
   const provider = new OllamaProvider(
     mockOllamaClient,
-    config?.baseUrl ?? 'http://localhost:11434',
+    config?.baseUrl ?? 'http://localhost:11434'
   );
 
   return { provider, mockOllamaClient };
@@ -418,7 +423,7 @@ it('should call LLM with correct prompt', async () => {
       expect.objectContaining({ role: 'system' }),
       expect.objectContaining({ role: 'user' }),
     ]),
-    expect.any(Object),
+    expect.any(Object)
   );
 });
 ```
@@ -442,10 +447,10 @@ const getInstance = () => {
   return { mockProvider, isHealthy$$ };
 };
 
-it('should emit health status', (done) => {
+it('should emit health status', done => {
   const { mockProvider, isHealthy$$ } = getInstance();
 
-  mockProvider.health$.subscribe((status) => {
+  mockProvider.health$.subscribe(status => {
     expect(status).toBe(true);
     done();
   });
@@ -516,10 +521,10 @@ it('should emit value from observable', async () => {
   expect(value).toBeDefined();
 });
 
-it('should complete observable after emission', (done) => {
+it('should complete observable after emission', done => {
   const { service } = getInstance();
   service.data$.subscribe({
-    next: (value) => expect(value).toBeDefined(),
+    next: value => expect(value).toBeDefined(),
     complete: () => done(),
   });
 });
@@ -568,10 +573,17 @@ describe('GenerateCommitMessage', () => {
     };
 
     const mockConfig = {
-      get: jest.fn((key) => ({ model: 'llama3.2:1b', template: 'conventional' })[key]),
+      get: jest.fn(
+        key => ({ model: 'llama3.2:1b', template: 'conventional' })[key]
+      ),
     };
 
-    const useCase = new GenerateCommitMessage(mockGit, mockLLM, mockTemplate, mockConfig);
+    const useCase = new GenerateCommitMessage(
+      mockGit,
+      mockLLM,
+      mockTemplate,
+      mockConfig
+    );
 
     return { useCase, mockGit, mockLLM, mockTemplate, mockConfig };
   };
@@ -595,7 +607,7 @@ describe('GenerateCommitMessage', () => {
 
       expect(mockTemplate.renderFile).toHaveBeenCalledWith(
         'templates/conventional.hbs',
-        expect.objectContaining({ diff: expect.any(String) }),
+        expect.objectContaining({ diff: expect.any(String) })
       );
 
       expect(mockLLM.generate).toHaveBeenCalledWith(
@@ -603,7 +615,7 @@ describe('GenerateCommitMessage', () => {
           expect.objectContaining({ role: 'system' }),
           expect.objectContaining({ role: 'user' }),
         ]),
-        expect.objectContaining({ model: 'llama3.2:1b' }),
+        expect.objectContaining({ model: 'llama3.2:1b' })
       );
     });
   });
@@ -730,9 +742,14 @@ describe('Commit Workflow Integration', () => {
     const gitService = new ShellGitService();
     const llmProvider = new MockLLMProvider(['feat: integration test commit']);
     const templateEngine = new HandlebarsEngine();
-    const config = { get: (key) => ({ model: 'llama3.2:1b' })[key] };
+    const config = { get: key => ({ model: 'llama3.2:1b' })[key] };
 
-    const useCase = new GenerateCommitMessage(gitService, llmProvider, templateEngine, config);
+    const useCase = new GenerateCommitMessage(
+      gitService,
+      llmProvider,
+      templateEngine,
+      config
+    );
 
     // Mock git to avoid actual file system changes
     jest.spyOn(gitService, 'getStagedDiff').mockResolvedValue('diff content');

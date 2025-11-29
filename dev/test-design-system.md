@@ -209,7 +209,10 @@ describe('Real Ollama E2E Tests', () => {
   describe('Four-Phase Validation Pipeline', () => {
     it('should strip chatty preamble from model output', async () => {
       // Setup: Create a diff that historically causes chatty output
-      await harness.writeFile('README.md', '# New Project\n\nSetup instructions');
+      await harness.writeFile(
+        'README.md',
+        '# New Project\n\nSetup instructions'
+      );
       await harness.add();
       const diff = await harness.getDiff();
 
@@ -294,7 +297,8 @@ describe('Real Ollama E2E Tests', () => {
       }
 
       // Verify no unexpected performance degradation
-      const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
+      const avgDuration =
+        durations.reduce((a, b) => a + b, 0) / durations.length;
       expect(avgDuration).toBeLessThan(5000);
     });
   });
@@ -303,11 +307,19 @@ describe('Real Ollama E2E Tests', () => {
     it('should generate valid Conventional Commits for 20+ scenarios', async () => {
       const testCases = [
         // feat scenarios
-        { file: 'src/feature.ts', content: 'export function newFeature() {}', type: 'feat' },
+        {
+          file: 'src/feature.ts',
+          content: 'export function newFeature() {}',
+          type: 'feat',
+        },
         // fix scenarios
         { file: 'src/bug.ts', content: 'if (x === null) return;', type: 'fix' },
         // docs scenarios
-        { file: 'README.md', content: '## Setup\nRun npm install', type: 'docs' },
+        {
+          file: 'README.md',
+          content: '## Setup\nRun npm install',
+          type: 'docs',
+        },
         // ... 17 more diverse scenarios
       ];
 
@@ -338,7 +350,7 @@ describe('Real Ollama E2E Tests', () => {
 
       // Log failures for debugging
       if (acceptanceRate < 0.9) {
-        const failures = results.filter((r) => !r.isValid);
+        const failures = results.filter(r => !r.isValid);
         console.error('Failed test cases:', failures);
       }
     });
@@ -355,7 +367,7 @@ async function checkOllamaRunning(): Promise<boolean> {
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 ```
 
@@ -426,7 +438,11 @@ SKIP_OLLAMA_TESTS=true npm test
 export class PerformanceTracker {
   private metrics: PerformanceMetric[] = [];
 
-  recordInference(operation: string, duration: number, metadata?: Record<string, unknown>) {
+  recordInference(
+    operation: string,
+    duration: number,
+    metadata?: Record<string, unknown>
+  ) {
     this.metrics.push({
       operation,
       duration,
@@ -438,11 +454,11 @@ export class PerformanceTracker {
   getReport(): PerformanceReport {
     return {
       totalTests: this.metrics.length,
-      averageDuration: this.average(this.metrics.map((m) => m.duration)),
+      averageDuration: this.average(this.metrics.map(m => m.duration)),
       p50: this.percentile(this.metrics, 50),
       p95: this.percentile(this.metrics, 95),
       p99: this.percentile(this.metrics, 99),
-      failures: this.metrics.filter((m) => m.duration > 1000).length,
+      failures: this.metrics.filter(m => m.duration > 1000).length,
     };
   }
 
@@ -922,9 +938,11 @@ async function evaluateModels() {
 
     // Generate report
     console.log(
-      `Format compliance: ${results.filter((r) => r.formatValid).length}/${results.length}`,
+      `Format compliance: ${results.filter(r => r.formatValid).length}/${results.length}`
     );
-    console.log(`Average inference: ${average(results.map((r) => r.duration))}ms`);
+    console.log(
+      `Average inference: ${average(results.map(r => r.duration))}ms`
+    );
     console.log(`\nOutputs:\n`, results);
   }
 }
@@ -1103,7 +1121,9 @@ For true integration tests (local development only):
 // Only runs when environment variable is set
 const useRealOllama = process.env.TEST_REAL_OLLAMA === 'true';
 
-const createLlmProvider = useRealOllama ? () => new OllamaAdapter() : () => new MockLlmProvider();
+const createLlmProvider = useRealOllama
+  ? () => new OllamaAdapter()
+  : () => new MockLlmProvider();
 ```
 
 In CI: Always use mock. Real Ollama testing happens on developer machines locally.
@@ -1147,7 +1167,7 @@ export class AppError extends Error {
   constructor(
     public code: number,
     message: string,
-    public context?: Record<string, unknown>,
+    public context?: Record<string, unknown>
   ) {
     super(message);
   }
@@ -1436,8 +1456,12 @@ Required status checks before merge:
 import { readFileSync } from 'fs';
 
 // Load current and previous performance metrics
-const current = JSON.parse(readFileSync('test-results/performance.json', 'utf-8'));
-const baseline = JSON.parse(readFileSync('test-results/baseline-performance.json', 'utf-8'));
+const current = JSON.parse(
+  readFileSync('test-results/performance.json', 'utf-8')
+);
+const baseline = JSON.parse(
+  readFileSync('test-results/baseline-performance.json', 'utf-8')
+);
 
 // Check for regressions
 if (current.p95 > baseline.p95 * 1.2) {

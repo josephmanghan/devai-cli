@@ -40,7 +40,7 @@ interface Message {
 class ResponseError extends Error {
   constructor(
     public error: string,
-    public status_code: number,
+    public status_code: number
   ) {
     super(error);
     this.name = 'ResponseError';

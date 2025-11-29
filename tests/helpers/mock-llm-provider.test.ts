@@ -4,7 +4,7 @@
  * Validates that MockLlmProvider returns mocked strings when called.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { MockLlmProvider } from './mock-llm-provider';
 
 describe('MockLlmProvider', () => {
@@ -35,7 +35,7 @@ describe('MockLlmProvider', () => {
     provider.mockError(testError);
 
     await expect(provider.generateCommitMessage('Test prompt')).rejects.toThrow(
-      'Mock service unavailable',
+      'Mock service unavailable'
     );
     expect(provider.getCallCount()).toBe(1);
   });
@@ -87,7 +87,9 @@ describe('MockLlmProvider', () => {
     // Setup some state
     provider.mockResponse('Test response');
     provider.mockError(new Error('Test error'));
-    await expect(provider.generateCommitMessage('Test prompt')).rejects.toThrow();
+    await expect(
+      provider.generateCommitMessage('Test prompt')
+    ).rejects.toThrow();
 
     // Verify state exists BEFORE reset
     expect(provider.getCallCount()).toBe(1);

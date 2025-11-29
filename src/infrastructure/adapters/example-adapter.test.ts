@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { ExampleAdapter } from './example-adapter.js';
 import type { ExamplePort } from '../../core/ports/example-port.js';
 

@@ -68,7 +68,10 @@ const messages = [
   { role: 'system', content: SYSTEM_PROMPT },
   { role: 'user', content: 'Diff: package.json version 1.0.0 to 1.1.0' },
   { role: 'assistant', content: 'chore(release): bump version to 1.1.0' },
-  { role: 'user', content: 'Diff: function login() {...} added to src/auth.js' },
+  {
+    role: 'user',
+    content: 'Diff: function login() {...} added to src/auth.js',
+  },
   { role: 'assistant', content: 'feat(auth): add user login function' },
   { role: 'user', content: actualDiff },
 ];

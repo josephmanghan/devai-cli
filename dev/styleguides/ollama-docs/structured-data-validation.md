@@ -8,7 +8,16 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 
 // Define schema for structured outputs
 const CommitMessageSchema = z.object({
-  type: z.enum(['feat', 'fix', 'chore', 'docs', 'style', 'refactor', 'test', 'perf']),
+  type: z.enum([
+    'feat',
+    'fix',
+    'chore',
+    'docs',
+    'style',
+    'refactor',
+    'test',
+    'perf',
+  ]),
   scope: z.string().optional(),
   description: z.string(),
   body: z.string().optional(),
@@ -25,7 +34,9 @@ const response = await ollama.chat({
   format: commitSchema,
 });
 
-const commitMessage = CommitMessageSchema.parse(JSON.parse(response.message.content));
+const commitMessage = CommitMessageSchema.parse(
+  JSON.parse(response.message.content)
+);
 ```
 
 ## JSON Schema Pattern
@@ -38,7 +49,16 @@ const conventionalCommitSchema = {
   properties: {
     type: {
       type: 'string',
-      enum: ['feat', 'fix', 'chore', 'docs', 'style', 'refactor', 'test', 'perf'],
+      enum: [
+        'feat',
+        'fix',
+        'chore',
+        'docs',
+        'style',
+        'refactor',
+        'test',
+        'perf',
+      ],
     },
     scope: { type: 'string' },
     description: { type: 'string' },
@@ -68,5 +88,8 @@ function validateResponse<T>(schema: z.ZodSchema<T>, response: string): T {
 }
 
 // Usage example
-const commitMessage = validateResponse(CommitMessageSchema, response.message.content);
+const commitMessage = validateResponse(
+  CommitMessageSchema,
+  response.message.content
+);
 ```

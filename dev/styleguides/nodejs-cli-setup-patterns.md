@@ -134,7 +134,7 @@ await execa('git', ['commit', '-m', message]);
 class AppError extends Error {
   constructor(
     message: string,
-    public code: string,
+    public code: string
   ) {
     super(message);
     this.name = 'AppError';

@@ -21,7 +21,9 @@ export function createProgram(): Command {
   // Configure program basics
   program
     .name('ollatool')
-    .description('Local-first CLI tool for AI-powered git commit message generation using Ollama')
+    .description(
+      'Local-first CLI tool for AI-powered git commit message generation using Ollama'
+    )
     .version(pkg.version, '--version', 'Show version number');
 
   return program;

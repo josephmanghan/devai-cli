@@ -2,11 +2,17 @@
  * Tests for custom error classes and debug logging
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { existsSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
-import { AppError, UserError, SystemError, ValidationError, UnexpectedError } from './errors.types';
+import {
+  AppError,
+  SystemError,
+  UnexpectedError,
+  UserError,
+  ValidationError,
+} from './errors.types';
 
 // Mock debug module
 vi.mock('debug', () => {
@@ -76,7 +82,9 @@ describe('AppError', () => {
         timestamp: expect.any(String),
       });
 
-      expect(serialized.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/);
+      expect(serialized.timestamp).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/
+      );
     });
 
     it('should serialize error without remediation', () => {
@@ -145,7 +153,10 @@ describe('AppError', () => {
 
 describe('UserError', () => {
   it('should create UserError with exit code 2', () => {
-    const error = new UserError('User input invalid', 'Check your input and try again');
+    const error = new UserError(
+      'User input invalid',
+      'Check your input and try again'
+    );
 
     expect(error.name).toBe('UserError');
     expect(error.message).toBe('User input invalid');
@@ -158,7 +169,10 @@ describe('UserError', () => {
 
 describe('SystemError', () => {
   it('should create SystemError with exit code 3', () => {
-    const error = new SystemError('Ollama not running', 'Start Ollama with: ollama serve');
+    const error = new SystemError(
+      'Ollama not running',
+      'Start Ollama with: ollama serve'
+    );
 
     expect(error.name).toBe('SystemError');
     expect(error.message).toBe('Ollama not running');
@@ -171,7 +185,10 @@ describe('SystemError', () => {
 
 describe('ValidationError', () => {
   it('should create ValidationError with exit code 4', () => {
-    const error = new ValidationError('Invalid commit format', 'Use conventional commit format');
+    const error = new ValidationError(
+      'Invalid commit format',
+      'Use conventional commit format'
+    );
 
     expect(error.name).toBe('ValidationError');
     expect(error.message).toBe('Invalid commit format');
@@ -193,7 +210,10 @@ describe('ValidationError', () => {
 
 describe('UnexpectedError', () => {
   it('should create UnexpectedError with exit code 5', () => {
-    const error = new UnexpectedError('Database connection failed', 'Contact support');
+    const error = new UnexpectedError(
+      'Database connection failed',
+      'Contact support'
+    );
 
     expect(error.name).toBe('UnexpectedError');
     expect(error.message).toBe('Database connection failed');
@@ -204,7 +224,10 @@ describe('UnexpectedError', () => {
   });
 
   it('should log unexpected errors to debug file automatically', async () => {
-    const error = new UnexpectedError('Unexpected error occurred', 'Contact support');
+    const error = new UnexpectedError(
+      'Unexpected error occurred',
+      'Contact support'
+    );
 
     await error.logToDebugFile();
 

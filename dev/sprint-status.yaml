@@ -52,7 +52,7 @@ development_status:
   1-3-setup-testing-framework-vitest: done
   1-4-setup-cli-framework-commander-js: done
   1-5-setup-hexagonal-architecture-structure: done
-  1-6-setup-linting-formatting: ready-for-dev
+  1-6-setup-linting-formatting: in-progress
   epic-1-retrospective: optional
 
   # Epic 2: Ollama Integration & Model Management (6 stories)

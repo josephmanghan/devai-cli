@@ -5,7 +5,7 @@
 
 import debug from 'debug';
 import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join } from 'node:path';
 import { homedir } from 'node:os';
 
 // Debug logger instances - only output when DEBUG=ollatool:* is set
@@ -16,7 +16,7 @@ export class AppError extends Error {
   constructor(
     message: string,
     public readonly code: number,
-    public readonly remediation?: string,
+    public readonly remediation?: string
   ) {
     super(message);
     this.name = 'AppError';
@@ -47,26 +47,34 @@ export class AppError extends Error {
   async writeToDebugLog(): Promise<void> {
     const debugDir = join(homedir(), '.ollatool');
     const debugFile = join(debugDir, 'debug.log');
+    this.ensureDebugDir(debugDir);
+    const logEntry = this.createLogEntry();
+    return this.writeLogEntry(debugFile, logEntry);
+  }
 
-    // Ensure debug directory exists
-    if (!existsSync(debugDir)) {
-      mkdirSync(debugDir, { recursive: true });
+  private ensureDebugDir(dir: string): void {
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
     }
+  }
 
-    const logEntry = {
+  private createLogEntry() {
+    return {
       ...this.serializeToDebugObject(),
       pid: process.pid,
     };
+  }
 
+  private writeLogEntry(file: string, entry: object): Promise<void> {
     return new Promise((resolve, reject) => {
-      const stream = createWriteStream(debugFile, { flags: 'a' });
-      stream.write(JSON.stringify(logEntry) + '\n', 'utf8', (error) => {
+      const stream = createWriteStream(file, { flags: 'a' });
+      stream.write(JSON.stringify(entry) + '\n', 'utf8', error => {
+        stream.end();
         if (error) {
           reject(error);
         } else {
           resolve();
         }
-        stream.end();
       });
     });
   }

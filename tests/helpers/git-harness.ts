@@ -121,7 +121,9 @@ export class TestGitHarness implements GitTestHarness {
   /**
    * Execute git command in repository
    */
-  private async execGit(args: string[]): Promise<{ stdout: string; stderr: string }> {
+  private async execGit(
+    args: string[]
+  ): Promise<{ stdout: string; stderr: string }> {
     if (!this.repoPath) {
       throw new Error('Repository not initialized. Call init() first.');
     }

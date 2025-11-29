@@ -2,12 +2,12 @@
  * Tests for debug logging functionality
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
-import { existsSync, unlinkSync, readFileSync } from 'node:fs';
+import { existsSync, unlinkSync } from 'node:fs';
+import debug from 'debug';
 
-// Mock debug module before importing
 vi.mock('debug', () => {
   return {
     default: vi.fn(() => vi.fn(() => {})),
@@ -15,12 +15,12 @@ vi.mock('debug', () => {
 });
 
 import {
+  debugLogger,
+  errorLogger,
   gitLogger,
   llmLogger,
   perfLogger,
   validationLogger,
-  errorLogger,
-  debugLogger,
 } from './debug-loggers';
 
 // Store original DEBUG environment
@@ -45,7 +45,9 @@ describe('Debug Loggers', () => {
     it('should produce no output when DEBUG is not set', () => {
       // Mock console methods to capture any output
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       // Test all loggers
       gitLogger('Git operation started');
@@ -91,10 +93,6 @@ describe('Debug Loggers', () => {
       // Set DEBUG environment variable
       process.env.DEBUG = 'ollatool:*';
 
-      // Since the debug module was already mocked, we need to re-import
-      // In a real scenario, these would be enabled
-      const debug = require('debug');
-
       const gitLog = debug('ollatool:git');
       const llmLog = debug('ollatool:llm');
       const perfLog = debug('ollatool:perf');
@@ -107,7 +105,6 @@ describe('Debug Loggers', () => {
     it('should enable individual namespace when specific DEBUG is set', () => {
       process.env.DEBUG = 'ollatool:git';
 
-      const debug = require('debug');
       const gitLog = debug('ollatool:git');
       const llmLog = debug('ollatool:llm');
 
@@ -118,10 +115,7 @@ describe('Debug Loggers', () => {
 
   describe('logger namespace separation', () => {
     it('should create loggers with correct namespaces', () => {
-      // Test that we can create loggers with different namespaces
       expect(() => {
-        // Since debug is mocked, we need to import it properly
-        const debug = require('debug').default;
         debug('ollatool:git');
         debug('ollatool:llm');
         debug('ollatool:perf');
@@ -143,7 +137,7 @@ describe('Integration with Child Process', () => {
   });
 
   it('should produce no output when running in separate process without DEBUG', async () => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const testScript = `
         const { gitLogger } = require('./src/infrastructure/logging/debug-loggers.ts');
         gitLogger('test message');
@@ -156,14 +150,14 @@ describe('Integration with Child Process', () => {
       });
 
       let output = '';
-      child.stdout?.on('data', (data) => {
+      child.stdout?.on('data', data => {
         output += data.toString();
       });
-      child.stderr?.on('data', (data) => {
+      child.stderr?.on('data', data => {
         output += data.toString();
       });
 
-      child.on('close', (code) => {
+      child.on('close', code => {
         expect(code).toBe(0);
         expect(output).toBe('');
         resolve(undefined);

@@ -297,7 +297,7 @@ async function validateDaemonConnectivity(): Promise<ValidationResult> {
   } catch (error) {
     return createFailureResult(
       'Ollama Daemon Connectivity',
-      'Ollama not running. Start with: ollama serve',
+      'Ollama not running. Start with: ollama serve'
     );
   }
 }
@@ -305,12 +305,12 @@ async function validateDaemonConnectivity(): Promise<ValidationResult> {
 async function validateBaseModel(): Promise<ValidationResult> {
   const client = new Ollama();
   const models = await client.list();
-  const hasModel = models.models.some((m) => m.name === 'qwen2.5-coder:1.5b');
+  const hasModel = models.models.some(m => m.name === 'qwen2.5-coder:1.5b');
 
   if (!hasModel) {
     return createFailureResult(
       'Base Model Present',
-      'Base model not found. Run: ollama pull qwen2.5-coder:1.5b',
+      'Base model not found. Run: ollama pull qwen2.5-coder:1.5b'
     );
   }
 
@@ -318,7 +318,10 @@ async function validateBaseModel(): Promise<ValidationResult> {
 }
 
 // Helper functions (≤15 lines each)
-function createSuccessResult(step: string, details?: Record<string, unknown>): ValidationResult {
+function createSuccessResult(
+  step: string,
+  details?: Record<string, unknown>
+): ValidationResult {
   return { step, status: 'PASS', details };
 }
 

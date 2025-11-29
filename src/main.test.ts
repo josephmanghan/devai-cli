@@ -3,13 +3,15 @@
  * Tests for Commander.js program creation and configuration
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Command } from 'commander';
 import { createProgram, main } from './main.js';
 
 // Mock console methods to capture output
 const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
-const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+const mockConsoleError = vi
+  .spyOn(console, 'error')
+  .mockImplementation(() => {});
 
 // Mock process.argv for testing
 const originalArgv = process.argv;
@@ -43,7 +45,7 @@ describe('CLI Program', () => {
     it('should have correct program description', () => {
       const helpText = program.helpInformation();
       expect(helpText).toContain(
-        'Local-first CLI tool for AI-powered git commit message generation using Ollama',
+        'Local-first CLI tool for AI-powered git commit message generation using Ollama'
       );
     });
 
@@ -55,10 +57,14 @@ describe('CLI Program', () => {
 
     it('should support command registration', () => {
       // Minimal test: prove Commander.js command registration works
-      const testCommand = program.command('test-cmd').description('Test command');
+      const testCommand = program
+        .command('test-cmd')
+        .description('Test command');
 
       expect(testCommand).toBeDefined();
-      expect(program.commands.find((cmd) => cmd.name() === 'test-cmd')).toBeDefined();
+      expect(
+        program.commands.find(cmd => cmd.name() === 'test-cmd')
+      ).toBeDefined();
     });
   });
 
@@ -75,7 +81,7 @@ describe('CLI Program', () => {
 
       try {
         program.parse();
-      } catch (e) {
+      } catch {
         // Commander exits when help is displayed
       }
 
@@ -89,13 +95,13 @@ describe('CLI Program', () => {
 
       const mockVersionLog = vi.fn();
       program.configureOutput({
-        writeOut: (str) => mockVersionLog(str.trim()),
+        writeOut: str => mockVersionLog(str.trim()),
         writeErr: () => {},
       });
 
       try {
         program.parse();
-      } catch (e) {
+      } catch {
         // Commander exits when version is displayed
       }
 
@@ -106,7 +112,6 @@ describe('CLI Program', () => {
   describe('main function', () => {
     it('should parse command line arguments', () => {
       const mockParse = vi.fn();
-      const mockProgram = { parse: mockParse } as unknown as Command;
 
       vi.spyOn(Command.prototype, 'parse').mockImplementation(mockParse);
 

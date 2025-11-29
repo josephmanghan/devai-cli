@@ -4,9 +4,8 @@
  * Validates that GitTestHarness creates and cleans up temporary repositories successfully.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestGitHarness } from './git-harness';
-import fs from 'fs/promises';
 
 describe('GitTestHarness', () => {
   let harness: TestGitHarness;
@@ -75,11 +74,17 @@ describe('GitTestHarness', () => {
   it('throws error when operations called before init', async () => {
     const uninitializedHarness = new TestGitHarness();
 
-    await expect(uninitializedHarness.writeFile('test.txt', 'content')).rejects.toThrow(
-      'Repository not initialized',
+    await expect(
+      uninitializedHarness.writeFile('test.txt', 'content')
+    ).rejects.toThrow('Repository not initialized');
+    await expect(uninitializedHarness.add()).rejects.toThrow(
+      'Repository not initialized'
     );
-    await expect(uninitializedHarness.add()).rejects.toThrow('Repository not initialized');
-    await expect(uninitializedHarness.getDiff()).rejects.toThrow('Repository not initialized');
-    await expect(uninitializedHarness.getStatus()).rejects.toThrow('Repository not initialized');
+    await expect(uninitializedHarness.getDiff()).rejects.toThrow(
+      'Repository not initialized'
+    );
+    await expect(uninitializedHarness.getStatus()).rejects.toThrow(
+      'Repository not initialized'
+    );
   });
 });

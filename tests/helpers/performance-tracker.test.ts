@@ -4,7 +4,7 @@
  * Validates that PerformanceTracker records operation timing correctly.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { PerformanceTracker } from './performance-tracker';
 
 describe('PerformanceTracker', () => {
@@ -19,7 +19,7 @@ describe('PerformanceTracker', () => {
     tracker.startOperation('test-operation');
 
     // Simulate some work
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise(resolve => setTimeout(resolve, 10));
 
     // End timing
     tracker.endOperation('test-operation');
@@ -34,7 +34,7 @@ describe('PerformanceTracker', () => {
 
   it('times operations automatically with timeOperation method', async () => {
     const testFunction = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 5));
+      await new Promise(resolve => setTimeout(resolve, 5));
       return 'test result';
     };
 
@@ -50,7 +50,10 @@ describe('PerformanceTracker', () => {
 
   it('includes metadata in recorded metrics', async () => {
     tracker.startOperation('operation-with-metadata');
-    tracker.endOperation('operation-with-metadata', { testValue: 42, testName: 'test' });
+    tracker.endOperation('operation-with-metadata', {
+      testValue: 42,
+      testName: 'test',
+    });
 
     const metric = tracker.getLatestMetric('operation-with-metadata');
     expect(metric).toBeDefined();
@@ -59,13 +62,13 @@ describe('PerformanceTracker', () => {
 
   it('handles errors in timeOperation correctly', async () => {
     const errorFunction = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 5));
+      await new Promise(resolve => setTimeout(resolve, 5));
       throw new Error('Test error');
     };
 
-    await expect(tracker.timeOperation('failing-operation', errorFunction)).rejects.toThrow(
-      'Test error',
-    );
+    await expect(
+      tracker.timeOperation('failing-operation', errorFunction)
+    ).rejects.toThrow('Test error');
 
     const metric = tracker.getLatestMetric('failing-operation');
     expect(metric).toBeDefined();
@@ -74,7 +77,7 @@ describe('PerformanceTracker', () => {
 
   it('throws error when ending operation that was not started', () => {
     expect(() => tracker.endOperation('non-existent-operation')).toThrow(
-      "Operation 'non-existent-operation' was not started. Call startOperation() first.",
+      "Operation 'non-existent-operation' was not started. Call startOperation() first."
     );
   });
 
@@ -95,19 +98,19 @@ describe('PerformanceTracker', () => {
     expect(op1Metrics).toHaveLength(2);
     expect(op2Metrics).toHaveLength(1);
 
-    expect(op1Metrics.every((m) => m.operation === 'op1')).toBe(true);
-    expect(op2Metrics.every((m) => m.operation === 'op2')).toBe(true);
+    expect(op1Metrics.every(m => m.operation === 'op1')).toBe(true);
+    expect(op2Metrics.every(m => m.operation === 'op2')).toBe(true);
   });
 
   it('calculates average durations correctly', async () => {
     // Record operations with known durations
     await tracker.timeOperation('test-op-1', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 10));
       return 'done';
     });
 
     await tracker.timeOperation('test-op-2', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await new Promise(resolve => setTimeout(resolve, 20));
       return 'done';
     });
 
@@ -145,7 +148,7 @@ describe('PerformanceTracker', () => {
 
     expect(tracker.getActiveOperationsCount()).toBe(2);
     expect(tracker.getActiveOperations()).toEqual(
-      expect.arrayContaining(['active-op-1', 'active-op-2']),
+      expect.arrayContaining(['active-op-1', 'active-op-2'])
     );
 
     tracker.endOperation('active-op-1');

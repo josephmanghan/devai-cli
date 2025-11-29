@@ -612,7 +612,8 @@ Generate commit message in Conventional Commits format.
 
 ```typescript
 // Look for FIRST line matching commit type pattern
-const commitLineRegex = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):/m;
+const commitLineRegex =
+  /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):/m;
 const match = rawOutput.match(commitLineRegex);
 
 if (match) {
@@ -804,7 +805,7 @@ export class AppError extends Error {
   constructor(
     message: string,
     public readonly code: number,
-    public readonly remediation?: string,
+    public readonly remediation?: string
   ) {
     super(message);
     this.name = 'AppError';
@@ -925,7 +926,7 @@ export class GenerateCommit {
   // Constructor
   constructor(
     private readonly llm: LlmProvider,
-    private readonly promptBuilder: PromptBuilder,
+    private readonly promptBuilder: PromptBuilder
   ) {}
 
   // Private Properties
@@ -934,7 +935,11 @@ export class GenerateCommit {
     /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):/m;
 
   // Public Methods
-  public async execute(userSelectedType: string, diff: string, status: string): Promise<string> {
+  public async execute(
+    userSelectedType: string,
+    diff: string,
+    status: string
+  ): Promise<string> {
     let previousError: string | null = null;
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
@@ -942,7 +947,7 @@ export class GenerateCommit {
         userSelectedType,
         diff,
         status,
-        previousError,
+        previousError
       );
       if (success) return result!;
       previousError = error!;
@@ -950,7 +955,7 @@ export class GenerateCommit {
 
     throw new ValidationError(
       'Failed to generate valid commit message format after multiple attempts.',
-      '[R]egenerate [E]dit manually [C]ancel',
+      '[R]egenerate [E]dit manually [C]ancel'
     );
   }
 
@@ -963,7 +968,11 @@ export class GenerateCommit {
   }
 
   private validateTypeAndColon(firstLine: string): string | null {
-    if (!/^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):.+/.test(firstLine)) {
+    if (
+      !/^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):.+/.test(
+        firstLine
+      )
+    ) {
       return "ERROR: First line must start with commit type and colon (e.g., 'feat: description')";
     }
     return null;
@@ -973,7 +982,8 @@ export class GenerateCommit {
     const description = firstLine.split(':').slice(1).join(':').trim();
     if (description.length === 0)
       return "ERROR: Description after colon is empty. Format: 'type: description'";
-    if (description.length > 72) return 'ERROR: Description too long (>72 chars). Keep it concise.';
+    if (description.length > 72)
+      return 'ERROR: Description too long (>72 chars). Keep it concise.';
     return null;
   }
 
@@ -1014,9 +1024,14 @@ export class GenerateCommit {
     userSelectedType: string,
     diff: string,
     status: string,
-    previousError: string | null,
+    previousError: string | null
   ): Promise<{ success: boolean; result?: string; error?: string }> {
-    const prompt = this.promptBuilder.build(userSelectedType, diff, status, previousError);
+    const prompt = this.promptBuilder.build(
+      userSelectedType,
+      diff,
+      status,
+      previousError
+    );
     const rawOutput = await this.llm.generate(prompt);
 
     // PHASE 1: Intelligent Parsing (extract commit from potential preamble)
@@ -1161,7 +1176,7 @@ export class GenerateCommit {
   // 1. Constructor
   constructor(
     private readonly llm: LlmProvider,
-    private readonly git: GitService,
+    private readonly git: GitService
   ) {}
 
   // 2. Private Properties
@@ -1198,7 +1213,10 @@ export class GenerateCommit {
 throw new Error('Ollama not running'); // ❌
 
 // Use typed errors with remediation
-throw new SystemError('Ollama is not running.', 'Start Ollama with: ollama serve'); // ✅
+throw new SystemError(
+  'Ollama is not running.',
+  'Start Ollama with: ollama serve'
+); // ✅
 ```
 
 **Catch at boundaries, not everywhere:**
@@ -1248,7 +1266,7 @@ class GenerateCommit {
 class GenerateCommit {
   constructor(
     private llm: LlmProvider,
-    private git: GitService,
+    private git: GitService
   ) {}
 
   async execute() {
@@ -1271,9 +1289,9 @@ const useCase = new GenerateCommit(llm, git);
 function generate() {
   return llm
     .generate(prompt)
-    .then((result) => validate(result))
-    .then((validated) => format(validated))
-    .catch((err) => handleError(err));
+    .then(result => validate(result))
+    .then(validated => format(validated))
+    .catch(err => handleError(err));
 }
 
 // ✅ Good: async/await
@@ -1321,7 +1339,7 @@ describe('CommitController', () => {
     expect(result).toBe('feat: add feature');
     expect(mockGit.getStagedDiff).toHaveBeenCalled();
     expect(mockLlm.generateCommitMessage).toHaveBeenCalledWith(
-      expect.stringContaining('diff content'),
+      expect.stringContaining('diff content')
     );
   });
 });
@@ -1410,7 +1428,7 @@ export class CommitMessage {
     public readonly commitType: string,
     public readonly description: string,
     public readonly body?: string,
-    public readonly scope?: string,
+    public readonly scope?: string
   ) {
     this.validate();
   }
@@ -1509,7 +1527,7 @@ import { SystemError, ValidationError } from '@/core/types/errors.types';
 export class OllamaAdapter implements LlmProvider {
   constructor(
     private client: Ollama,
-    private modelName: string = 'ollatool-commit',
+    private modelName: string = 'ollatool-commit'
   ) {}
 
   async generateCommitMessage(prompt: string): Promise<string> {
@@ -1523,7 +1541,10 @@ export class OllamaAdapter implements LlmProvider {
       return response.response.trim();
     } catch (error) {
       if (error.code === 'ECONNREFUSED') {
-        throw new SystemError('Ollama is not running.', 'Start Ollama with: ollama serve');
+        throw new SystemError(
+          'Ollama is not running.',
+          'Start Ollama with: ollama serve'
+        );
       }
       throw new ValidationError('Failed to generate commit message');
     }

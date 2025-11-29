@@ -33,24 +33,34 @@ export class PerformanceTracker {
    * End timing an operation and record the metric
    */
   endOperation(operation: string, metadata?: Record<string, unknown>): void {
+    const startTime = this.getStartTime(operation);
+    const duration = performance.now() - startTime;
+    const metric = this.createMetric(operation, duration, metadata);
+    this.metrics.push(metric);
+    this.operations.delete(operation);
+  }
+
+  private getStartTime(operation: string): number {
     const startTime = this.operations.get(operation);
-
     if (startTime === undefined) {
-      throw new Error(`Operation '${operation}' was not started. Call startOperation() first.`);
+      throw new Error(
+        `Operation '${operation}' was not started. Call startOperation() first.`
+      );
     }
+    return startTime;
+  }
 
-    const endTime = performance.now();
-    const duration = endTime - startTime;
-
-    const metric: PerformanceMetric = {
+  private createMetric(
+    operation: string,
+    duration: number,
+    metadata?: Record<string, unknown>
+  ): PerformanceMetric {
+    return {
       operation,
       duration,
       timestamp: Date.now(),
       metadata,
     };
-
-    this.metrics.push(metric);
-    this.operations.delete(operation);
   }
 
   /**
@@ -59,7 +69,7 @@ export class PerformanceTracker {
   async timeOperation<T>(
     operation: string,
     fn: () => T | Promise<T>,
-    metadata?: Record<string, unknown>,
+    metadata?: Record<string, unknown>
   ): Promise<T> {
     this.startOperation(operation);
 
@@ -85,7 +95,7 @@ export class PerformanceTracker {
    * Get metrics for a specific operation
    */
   getMetricsByOperation(operation: string): PerformanceMetric[] {
-    return this.metrics.filter((metric) => metric.operation === operation);
+    return this.metrics.filter(metric => metric.operation === operation);
   }
 
   /**
@@ -122,7 +132,8 @@ export class PerformanceTracker {
       return 0;
     }
     return (
-      operationMetrics.reduce((sum, metric) => sum + metric.duration, 0) / operationMetrics.length
+      operationMetrics.reduce((sum, metric) => sum + metric.duration, 0) /
+      operationMetrics.length
     );
   }
 
@@ -140,7 +151,7 @@ export class PerformanceTracker {
         metrics: this.metrics,
       },
       null,
-      2,
+      2
     );
   }
 

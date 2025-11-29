@@ -74,10 +74,16 @@ export interface ILLMProvider {
   readonly providerId: string;
 
   // Non-streaming generation
-  generate(messages: ChatMessage[], options: GenerationOptions): Promise<string>;
+  generate(
+    messages: ChatMessage[],
+    options: GenerationOptions
+  ): Promise<string>;
 
   // Streaming generation (CRITICAL for CLI UX)
-  stream(messages: ChatMessage[], options: GenerationOptions): AsyncGenerator<string>;
+  stream(
+    messages: ChatMessage[],
+    options: GenerationOptions
+  ): AsyncGenerator<string>;
 
   // Health check (fail fast if Ollama not running)
   checkHealth(): Promise<boolean>;
@@ -122,7 +128,7 @@ export class CommitMessage {
     public readonly subject: string,
     public readonly scope?: string,
     public readonly body?: string,
-    public readonly breaking?: boolean,
+    public readonly breaking?: boolean
   ) {}
 
   toString(): string {
@@ -152,7 +158,7 @@ export class GenerateCommitMessage {
     private gitService: IGitService,
     private llmProvider: ILLMProvider,
     private templateEngine: ITemplateEngine,
-    private config: IConfigService,
+    private config: IConfigService
   ) {}
 
   async execute(): Promise<string> {
@@ -168,7 +174,10 @@ export class GenerateCommitMessage {
 
     // 3. Render template
     const template = this.config.get('template');
-    const prompt = await this.templateEngine.renderFile(`templates/${template}.hbs`, context);
+    const prompt = await this.templateEngine.renderFile(
+      `templates/${template}.hbs`,
+      context
+    );
 
     // 4. Generate with LLM
     const messages: ChatMessage[] = [
@@ -193,7 +202,9 @@ Output ONLY the commit message. No markdown, no code blocks.`;
   }
 
   private truncateDiff(diff: string, maxLength = 4000): string {
-    return diff.length > maxLength ? diff.substring(0, maxLength) + '\n... (truncated)' : diff;
+    return diff.length > maxLength
+      ? diff.substring(0, maxLength) + '\n... (truncated)'
+      : diff;
   }
 
   private sanitize(output: string): string {
@@ -212,17 +223,24 @@ Output ONLY the commit message. No markdown, no code blocks.`;
 ```typescript
 // src/infrastructure/llm/ollama-provider.ts
 import { Ollama } from 'ollama';
-import { ILLMProvider, ChatMessage, GenerationOptions } from '../../core/interfaces/llm-provider';
+import {
+  ILLMProvider,
+  ChatMessage,
+  GenerationOptions,
+} from '../../core/interfaces/llm-provider';
 
 export class OllamaProvider implements ILLMProvider {
   readonly providerId = 'ollama';
 
   constructor(
     private client: Ollama,
-    private baseUrl = 'http://localhost:11434',
+    private baseUrl = 'http://localhost:11434'
   ) {}
 
-  async generate(messages: ChatMessage[], options: GenerationOptions): Promise<string> {
+  async generate(
+    messages: ChatMessage[],
+    options: GenerationOptions
+  ): Promise<string> {
     const response = await this.client.chat({
       model: options.model,
       messages,
@@ -235,7 +253,10 @@ export class OllamaProvider implements ILLMProvider {
     return response.message.content;
   }
 
-  async *stream(messages: ChatMessage[], options: GenerationOptions): AsyncGenerator<string> {
+  async *stream(
+    messages: ChatMessage[],
+    options: GenerationOptions
+  ): AsyncGenerator<string> {
     const response = await this.client.chat({
       model: options.model,
       messages,
@@ -281,7 +302,9 @@ export async function bootstrap() {
   await configService.load();
 
   // Instantiate adapters
-  const llmProvider = new OllamaProvider(new Ollama({ host: configService.get('ollamaUrl') }));
+  const llmProvider = new OllamaProvider(
+    new Ollama({ host: configService.get('ollamaUrl') })
+  );
   const gitService = new ShellGitService();
   const templateEngine = new HandlebarsEngine();
 
@@ -290,7 +313,7 @@ export async function bootstrap() {
     gitService,
     llmProvider,
     templateEngine,
-    configService,
+    configService
   );
 
   // Instantiate controllers
@@ -316,7 +339,7 @@ export class CommitController {
       .command('commit')
       .description('Generate AI commit message')
       .option('--dry-run', 'Generate without committing')
-      .action(async (options) => {
+      .action(async options => {
         try {
           const message = await this.generateCommitMessage.execute();
 
@@ -433,7 +456,12 @@ describe('GenerateCommitMessage', () => {
     });
     const mockLLM = new MockLLMProvider(['feat: add new feature']);
 
-    const useCase = new GenerateCommitMessage(mockGit, mockLLM, mockTemplate, mockConfig);
+    const useCase = new GenerateCommitMessage(
+      mockGit,
+      mockLLM,
+      mockTemplate,
+      mockConfig
+    );
 
     const result = await useCase.execute();
 
@@ -467,7 +495,7 @@ export class HandlebarsEngine implements ITemplateEngine {
 
     Handlebars.registerHelper('fileList', (diff: string) => {
       const matches = diff.match(/diff --git a\/([^\s]+)/g) || [];
-      return matches.map((m) => m.split('/').pop()).join(', ');
+      return matches.map(m => m.split('/').pop()).join(', ');
     });
   }
 
@@ -476,7 +504,10 @@ export class HandlebarsEngine implements ITemplateEngine {
     return compiled(data);
   }
 
-  async renderFile(filePath: string, data: Record<string, any>): Promise<string> {
+  async renderFile(
+    filePath: string,
+    data: Record<string, any>
+  ): Promise<string> {
     const template = await fs.readFile(filePath, 'utf8');
     return this.render(template, data);
   }
