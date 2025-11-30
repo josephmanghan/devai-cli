@@ -53,7 +53,7 @@ development_status:
   1-4-setup-cli-framework-commander-js: done
   1-5-setup-hexagonal-architecture-structure: done
   1-6-setup-linting-formatting: done
-  epic-1-retrospective: optional
+  epic-1-retrospective: done
 
   # Epic 2: Ollama Integration & Model Management (6 stories)
   epic-2: backlog

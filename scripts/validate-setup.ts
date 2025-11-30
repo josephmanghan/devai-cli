@@ -12,10 +12,6 @@
  */
 
 import { Ollama } from 'ollama';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
 
 interface ValidationResult {
   step: string;
