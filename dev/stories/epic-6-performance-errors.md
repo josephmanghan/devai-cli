@@ -6,41 +6,7 @@
 
 ---
 
-## Story 6.1: Implement Performance Benchmarking
-
-**As a** developer
-**I want** performance benchmarks for critical operations
-**So that** I can verify sub-1s latency target is met
-
-**Acceptance Criteria:**
-
-- [ ] Benchmark suite created in `tests/benchmarks/`
-- [ ] Measures: git diff read, AI generation, total commit flow
-- [ ] Target: total flow <1000ms on M1/M2
-- [ ] Reports: p50, p95, p99 latencies
-- [ ] Runs on real hardware (not mocked)
-- [ ] Code adheres to dev/styleguides/clean-code.md standards
-
-**Technical Notes:**
-
-- Architecture specifies sub-1s end-to-end latency
-- Breakdown targets: git diff <50ms, generation <500ms, UI <100ms
-- Benchmark tool: simple console.time or dedicated library
-- Run manually (not in CI for MVP)
-- Test data: various diff sizes (small, medium, large)
-
-**Testing Deliverables:**
-
-- Benchmark script: `npm run benchmark`
-- Results logged to console (p50, p95, p99)
-- Document baseline performance in dev/performance-baseline.md
-- Manual execution on M1/M2 hardware
-
-**FRs Covered:** FR34 (sub-1s latency target)
-
----
-
-## Story 6.2: Implement Spinner for AI Generation
+## Story 6.1: Implement Spinner for AI Generation
 
 **As a** user
 **I want** visual feedback during AI generation
@@ -74,7 +40,7 @@
 
 ---
 
-## Story 6.3: Implement Typed Error Classes
+## Story 6.2: Implement Typed Error Classes
 
 **As a** developer
 **I want** typed error classes for all failure modes
@@ -110,7 +76,7 @@
 
 ---
 
-## Story 6.4: Implement Error Message Formatting
+## Story 6.3: Implement Error Message Formatting
 
 **As a** user
 **I want** clear, actionable error messages
@@ -155,7 +121,7 @@
 
 ---
 
-## Story 6.5: Implement Global Error Handler
+## Story 6.4: Implement Global Error Handler
 
 **As a** developer
 **I want** a global error handler for the CLI
@@ -191,7 +157,7 @@
 
 ---
 
-## Story 6.6: Implement Resource Cleanup on Exit
+## Story 6.5: Implement Resource Cleanup on Exit
 
 **As a** developer
 **I want** proper resource cleanup on exit
@@ -226,7 +192,7 @@
 
 ---
 
-## Story 6.7: Add Context Window Overflow Detection
+## Story 6.6: Add Context Window Overflow Detection
 
 **As a** developer
 **I want** to detect when git diff exceeds context window
@@ -261,7 +227,7 @@
 
 ---
 
-## Story 6.8: Implement Performance Monitoring (Optional)
+## Story 6.7: Implement Performance Monitoring (Optional)
 
 **As a** developer
 **I want** optional performance telemetry
@@ -295,17 +261,21 @@
 
 ---
 
+### REMOVED - Story creation error: Performance benchmarking was a QA validation ticket for performance that should already be achieved by the other implementations in this epic. This story was incorrectly created as process waste.
+
+---
+
 ## Epic 6 Summary
 
-**Total Stories:** 8
+**Total Stories:** 7
 **Estimated Complexity:** Medium (polish and robustness work)
 **Dependencies:** All other epics (this polishes the complete system)
 **Output:** Sub-1s performance, clear error messages, graceful failure handling, resource cleanup
 
 **Completion Criteria:**
 
-- All 8 stories pass acceptance criteria
-- Performance benchmarks confirm <1s latency on M1/M2
+- All 7 stories pass acceptance criteria
+- Sub-1s latency achieved on M1/M2 (measured manually as needed)
 - All error types have clear messages and remediation
 - Spinner shows during AI generation
 - Resource cleanup works on success, failure, and cancellation
