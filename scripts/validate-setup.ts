@@ -146,7 +146,6 @@ async function validateSetup(): Promise<ValidationResult[]> {
 
   results.push(await validateDaemonConnectivity());
   results.push(await validateBaseModel());
-
   results.push(await validateBasicInference());
 
   return results;
