@@ -71,6 +71,24 @@
         <section>Interface Design & TypeScript Patterns</section>
         <snippet>Use explicit type definitions, prefer const for immutable values, follow naming conventions (UpperCamelCase for interfaces, lowerCamelCase for methods), and avoid deep imports - use index files as public entry points.</snippet>
       </doc>
+      <doc>
+        <path>/sindresorhus/execa</path>
+        <title>Execa Shell Execution Patterns (Context7 MCP)</title>
+        <section>Error Handling & Command Execution</section>
+        <snippet>Use try/catch with ExecaError for proper error handling. Access error.shortMessage for clean error output, error.originalMessage for root cause, and error.exitCode for system exit codes. Shell command failures should be caught and converted to domain-specific error types.</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>System Architecture Document - Prompt Engineering Examples</title>
+        <section>User Prompt Template Pattern (lines 519-563)</section>
+        <snippet>Example of clean template literal pattern for building prompts: simple string concatenation, clear structure, no external dependencies. This demonstrates the same pattern to apply for LLM port interface design - keep dependencies minimal and interfaces clean.</snippet>
+      </doc>
+      <doc>
+        <path>dev/sprint-artifacts/epic-1-retro-2025-11-29.md</path>
+        <title>Epic 1 Retrospective Learnings</title>
+        <section>Process Discipline & Testing Focus (lines 72-100)</section>
+        <snippet>Key learning: "Test business logic, not infrastructure" - focus testing efforts on actual business value rather than infrastructure setup. Research should precede implementation, and quality standards should be established at the start of epics, not the end.</snippet>
+      </doc>
     </docs>
     <code>
       <code>
