@@ -768,43 +768,23 @@ All dependencies already installed during Epic 1 foundation setup. Epic 2 only a
 - ESLint + Prettier configured (Epic 1)
 - No compilation errors introduced
 
-### Open Questions
+### Implementation Decisions (Resolved)
 
-**QUESTION-2.1: Modelfile Location**
+**DECISION-2.1: Modelfile Location**
+- **Decision:** Modelfile placed in src/assets/conventional-commit-modelfile
+- **Rationale:** Cleaner project structure, descriptive naming for future template additions
 
-- **Question:** Should Modelfile be in project root or src/ directory?
-- **Options:**
-  - A) Project root (simpler, user-visible)
-  - B) src/assets/ (cleaner project structure)
-- **Decision Needed By:** Story 2.4 implementation
-- **Recommendation:** Project root (simpler for MVP, easier to edit)
+**DECISION-2.2: Model Creation Progress Feedback**
+- **Decision:** Simple spinner during model creation
+- **Rationale:** Faster to implement, sufficient for MVP user experience
 
-**QUESTION-2.2: Model Creation Progress Feedback**
+**DECISION-2.3: Retry Logic for API Calls**
+- **Decision:** No retry - fail immediately on API failures
+- **Rationale:** Local localhost calls have minimal failure opportunities; fail-fast principle applies
 
-- **Question:** Should model creation display progress bar or just spinner?
-- **Options:**
-  - A) Simple spinner (faster to implement)
-  - B) Progress bar with percentage (better UX)
-- **Decision Needed By:** Story 2.4 implementation
-- **Recommendation:** Spinner for MVP (progress bar requires streaming SDK response)
-
-**QUESTION-2.3: Retry Logic for Failed Model Creation**
-
-- **Question:** Should setup auto-retry if model creation fails transiently?
-- **Options:**
-  - A) No retry (fail fast, user re-runs setup)
-  - B) Retry 3x with exponential backoff
-- **Decision Needed By:** Story 2.6 implementation
-- **Recommendation:** No retry for MVP (fail fast principle, most failures are configuration errors)
-
-**QUESTION-2.4: Validation Use Case Separation**
-
-- **Question:** Should ValidateSetup and ProvisionModel be separate classes or combined?
-- **Options:**
-  - A) Separate classes (cleaner SRP, more files)
-  - B) Single SetupService class (simpler, fewer abstractions)
-- **Decision Needed By:** Story 2.5 implementation
-- **Recommendation:** Separate classes per hexagonal architecture patterns (use cases should be focused)
+**DECISION-2.4: Validation Use Case Separation**
+- **Decision:** Separate ValidateSetup and ProvisionModel classes
+- **Rationale:** Follows hexagonal architecture patterns with clean single-responsibility use cases
 
 ## Test Strategy Summary
 
