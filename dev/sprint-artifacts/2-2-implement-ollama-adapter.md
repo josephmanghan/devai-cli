@@ -70,11 +70,13 @@ so that the application can communicate with Ollama for model operations.
 ### Ollama SDK Integration
 
 **Official SDK Usage**: Use verified Ollama SDK v0.6.3 with these methods:
+
 - `client.list()` - for connection and model checking
 - `client.create()` - for custom model creation
 - `client.generate()` - for inference requests
 
 **Connection Parameters**: Default model `ollatool-commit`, parameters per architecture:
+
 - `temperature: 0.2` - low randomness for deterministic output
 - `num_ctx: 131072` - full context window capacity
 - `keep_alive: 0` - unload model after execution
@@ -82,17 +84,20 @@ so that the application can communicate with Ollama for model operations.
 ### Interface Implementation Context
 
 **Port Contract**: Must implement LlmPort interface defined in 2-1 story:
+
 - `checkConnection(): Promise<boolean>`
 - `checkModel(modelName: string): Promise<boolean>`
 - `createModel(modelName: string, modelfileContent: string): Promise<void>`
 - `generate(prompt: string, options: GenerationOptions): Promise<string>`
 
 **Import Requirements**:
+
 - Import `LlmPort` from `@/core/ports/llm-port.js`
 - Import `GenerationOptions` from `@/core/types/llm-types.js`
 - Import error classes from `@/core/types/errors.types.js`
 
 **Error Categories**: Use appropriate error types per architecture:
+
 - UserError (exit code 2) - for user-resolvable issues
 - SystemError (exit code 3) - for Ollama/system failures
 - ValidationError (exit code 4) - for format/validation issues
@@ -137,17 +142,20 @@ so that the application can communicate with Ollama for model operations.
 ### Implementation Requirements
 
 **Ollama SDK Usage**:
+
 - Import from official 'ollama' package v0.6.3
 - Use async/await patterns for all SDK operations
 - Handle SDK-specific error codes appropriately
 - Follow Context7-validated best practices for SDK usage
 
 **Error Message Quality**:
+
 - Include actionable remediation steps in all error messages
 - Use consistent error formatting: "[ERROR_TYPE] ✗ message + remediation"
 - Distinguish between user-resolvable and system-level issues
 
 **Testing Strategy**:
+
 - Mock Ollama client completely (no real Ollama calls in tests)
 - Test both success and error paths for each method
 - Verify error types and messages match expected patterns
@@ -156,16 +164,19 @@ so that the application can communicate with Ollama for model operations.
 ### Validation Requirements
 
 **TypeScript Compilation**: Must pass with strict mode:
+
 - All method implementations properly typed
 - Error handling covers all async operations
 - Interface compliance verified by compiler
 
 **ESLint Validation**: Must pass all clean code rules:
+
 - Method lengths under 15 lines
 - Constructor dependency injection pattern
 - Proper import grouping and organization
 
 **Test Coverage**: Aim for ≥90% coverage of adapter logic:
+
 - All public methods tested with success scenarios
 - Error handling paths tested with mock failures
 - Edge cases covered (connection timeouts, missing models)

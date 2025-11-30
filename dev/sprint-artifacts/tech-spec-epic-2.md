@@ -71,14 +71,14 @@ This epic implements the "Ports & Adapters" pattern as defined in dev/architectu
 
 ### Services and Modules
 
-| Module | Responsibility | Inputs | Outputs | Owner/Location |
-|--------|---------------|--------|---------|----------------|
-| **LlmPort Interface** | Define contract for LLM provider operations | N/A (interface definition) | TypeScript interface | `src/core/ports/llm-port.ts` |
-| **OllamaAdapter** | Implement LlmPort using official Ollama SDK | Ollama client instance, configuration | Implementation of checkConnection(), checkModel(), createModel(), generate() | `src/infrastructure/adapters/ollama-adapter.ts` |
-| **SetupCommand** | Orchestrate setup workflow: validate → provision → confirm | Commander.js program instance | Registered setup command | `src/features/setup/setup-command.ts` |
-| **SetupValidator** | 3-tier validation: daemon → base model → custom model | OllamaAdapter instance | Validation result with specific error type | `src/features/setup/use-cases/validate-setup.ts` |
-| **ModelProvisioner** | Create custom model from Modelfile if missing | Modelfile content, OllamaAdapter | Success/failure status | `src/features/setup/use-cases/provision-model.ts` |
-| **Error Classes** | Typed errors with exit codes and remediation | Error context (message, code, remediation) | SystemError, ValidationError instances | `src/core/types/errors.types.ts` |
+| Module                | Responsibility                                             | Inputs                                     | Outputs                                                                      | Owner/Location                                    |
+| --------------------- | ---------------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------- |
+| **LlmPort Interface** | Define contract for LLM provider operations                | N/A (interface definition)                 | TypeScript interface                                                         | `src/core/ports/llm-port.ts`                      |
+| **OllamaAdapter**     | Implement LlmPort using official Ollama SDK                | Ollama client instance, configuration      | Implementation of checkConnection(), checkModel(), createModel(), generate() | `src/infrastructure/adapters/ollama-adapter.ts`   |
+| **SetupCommand**      | Orchestrate setup workflow: validate → provision → confirm | Commander.js program instance              | Registered setup command                                                     | `src/features/setup/setup-command.ts`             |
+| **SetupValidator**    | 3-tier validation: daemon → base model → custom model      | OllamaAdapter instance                     | Validation result with specific error type                                   | `src/features/setup/use-cases/validate-setup.ts`  |
+| **ModelProvisioner**  | Create custom model from Modelfile if missing              | Modelfile content, OllamaAdapter           | Success/failure status                                                       | `src/features/setup/use-cases/provision-model.ts` |
+| **Error Classes**     | Typed errors with exit codes and remediation               | Error context (message, code, remediation) | SystemError, ValidationError instances                                       | `src/core/types/errors.types.ts`                  |
 
 ### Data Models and Contracts
 
@@ -223,7 +223,10 @@ export class OllamaAdapter implements LlmPort {
     }
   }
 
-  async createModel(modelName: string, modelfileContent: string): Promise<void> {
+  async createModel(
+    modelName: string,
+    modelfileContent: string
+  ): Promise<void> {
     try {
       debug('Creating model %s from Modelfile', modelName);
       await this.client.create({
@@ -275,7 +278,10 @@ export class SetupCommand {
           await validator.execute();
 
           // Provisioning phase
-          await provisioner.execute('ollatool-commit:latest', this.modelfileContent);
+          await provisioner.execute(
+            'ollatool-commit:latest',
+            this.modelfileContent
+          );
 
           console.log('✓ Setup complete. Run "ollatool commit" to start.');
         } catch (error) {
@@ -491,22 +497,22 @@ Exit code: 3
 
 ### Runtime Dependencies
 
-| Package | Version | Purpose | Epic 2 Usage | Verification Source |
-|---------|---------|---------|-------------|---------------------|
-| `ollama` | 0.6.3 | Official Ollama JavaScript SDK | Core integration - daemon communication, model management, generation API | [npm](https://www.npmjs.com/package/ollama) |
-| `commander` | 14.0.2 | CLI framework for command parsing | Register `setup` command, handle arguments | [npm](https://www.npmjs.com/package/commander) |
-| `debug` | ^4.4.3 | Namespaced logging for development | `ollatool:ollama` namespace for diagnostic logs | [npm](https://www.npmjs.com/package/debug) |
+| Package     | Version | Purpose                            | Epic 2 Usage                                                              | Verification Source                            |
+| ----------- | ------- | ---------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------- |
+| `ollama`    | 0.6.3   | Official Ollama JavaScript SDK     | Core integration - daemon communication, model management, generation API | [npm](https://www.npmjs.com/package/ollama)    |
+| `commander` | 14.0.2  | CLI framework for command parsing  | Register `setup` command, handle arguments                                | [npm](https://www.npmjs.com/package/commander) |
+| `debug`     | ^4.4.3  | Namespaced logging for development | `ollatool:ollama` namespace for diagnostic logs                           | [npm](https://www.npmjs.com/package/debug)     |
 
 ### Development Dependencies (Epic 2 Relevant)
 
-| Package | Version | Purpose | Epic 2 Usage |
-|---------|---------|---------|-------------|
-| `@types/node` | ^24.10.1 | TypeScript definitions for Node.js | Type safety for Node APIs |
-| `@types/debug` | ^4.1.12 | TypeScript definitions for debug | Type safety for debug module |
-| `typescript` | ^5.9.3 | TypeScript compiler | Compile Epic 2 code with strict mode |
-| `vitest` | ^4.0.14 | Modern test runner | Unit tests for OllamaAdapter, setup command |
-| `execa` | ^9.6.0 | Process execution (git commands) | Not used in Epic 2, deferred to Epic 3 |
-| `tsup` | latest | Build tool for TypeScript ESM | Compile Epic 2 code to dist/ |
+| Package        | Version  | Purpose                            | Epic 2 Usage                                |
+| -------------- | -------- | ---------------------------------- | ------------------------------------------- |
+| `@types/node`  | ^24.10.1 | TypeScript definitions for Node.js | Type safety for Node APIs                   |
+| `@types/debug` | ^4.1.12  | TypeScript definitions for debug   | Type safety for debug module                |
+| `typescript`   | ^5.9.3   | TypeScript compiler                | Compile Epic 2 code with strict mode        |
+| `vitest`       | ^4.0.14  | Modern test runner                 | Unit tests for OllamaAdapter, setup command |
+| `execa`        | ^9.6.0   | Process execution (git commands)   | Not used in Epic 2, deferred to Epic 3      |
+| `tsup`         | latest   | Build tool for TypeScript ESM      | Compile Epic 2 code to dist/                |
 
 ### External Service Integrations
 
@@ -648,48 +654,48 @@ All dependencies already installed during Epic 1 foundation setup. Epic 2 only a
 
 ## Traceability Mapping
 
-| AC# | Epic 2 Story | Spec Section | Component/API | Test Idea |
-|-----|--------------|--------------|---------------|-----------|
-| AC-2.1.1 | Story 2.1 | Data Models (lines 85-128) | `src/core/ports/llm-port.ts` | Verify file exists with interface definition |
-| AC-2.1.2 | Story 2.1 | APIs & Interfaces (lines 89-120) | `LlmPort.checkConnection()`, `checkModel()`, `createModel()`, `generate()` | TypeScript compilation verifies all methods present |
-| AC-2.1.3 | Story 2.1 | Data Models (lines 122-127) | `GenerationOptions` interface | Verify interface has all required fields |
-| AC-2.1.4 | Story 2.1 | APIs & Interfaces (lines 90-119) | JSDoc comments on interface methods | Code review: JSDoc explains @param, @returns, @throws |
-| AC-2.1.5 | Story 2.1 | System Architecture Alignment (lines 48-55) | Core layer zero external deps | Import analysis: no ollama, execa, fs in core/ |
-| AC-2.1.6 | Story 2.1 | Clean Code Standards | Function size, naming | ESLint validation, code review |
-| AC-2.2.1 | Story 2.2 | APIs & Interfaces (lines 183-247) | `src/infrastructure/adapters/ollama-adapter.ts` | Verify file exists with class definition |
-| AC-2.2.2 | Story 2.2 | APIs & Interfaces (line 194) | `OllamaAdapter implements LlmPort` | TypeScript compilation enforces interface |
-| AC-2.2.3 | Story 2.2 | Dependencies (line 496) | `import { Ollama } from 'ollama'` | Verify import statement, package.json dependency |
-| AC-2.2.4 | Story 2.2 | APIs & Interfaces (lines 195-198) | Constructor with `private readonly client: Ollama` | Unit test: inject mocked Ollama instance |
-| AC-2.2.5 | Story 2.2 | APIs & Interfaces (lines 200-241) | Error handling with SystemError, ValidationError | Unit test: verify typed errors thrown |
-| AC-2.2.6 | Story 2.2 | External Service Integrations (line 516) | `baseUrl = 'http://localhost:11434'` | Unit test: verify default URL |
-| AC-2.2.7 | Story 2.2 | Observability (lines 449-454) | `debug('ollatool:ollama')` | Manual test: DEBUG=ollatool:ollama shows logs |
-| AC-2.3.1 | Story 2.3 | APIs & Interfaces (lines 211-224) | `async checkModel(modelName: string)` | Unit test: method exists and returns boolean |
-| AC-2.3.2 | Story 2.3 | Workflows (line 323) | Base model check logic | Unit test: mock ollama.list() with base model present |
-| AC-2.3.3 | Story 2.3 | Workflows (line 336) | Custom model check logic | Unit test: mock ollama.list() with custom model present |
-| AC-2.3.4 | Story 2.3 | APIs & Interfaces (line 213) | `await this.client.list()` | Unit test: verify SDK method called |
-| AC-2.3.5 | Story 2.3 | APIs & Interfaces (lines 217-223) | Error handling on list failure | Unit test: mock SDK error, verify SystemError thrown |
-| AC-2.3.6 | Story 2.3 | Testing Coverage (NFR-R4) | Unit test suite | Co-located test file with mock scenarios |
-| AC-2.4.1 | Story 2.4 | Data Models (lines 158-179) | Modelfile in project root | Verify file exists with FROM, SYSTEM, PARAMETER |
-| AC-2.4.2 | Story 2.4 | APIs & Interfaces (lines 226-241) | `async createModel(modelName, modelfileContent)` | Unit test: method exists and calls SDK |
-| AC-2.4.3 | Story 2.4 | APIs & Interfaces (lines 228-232) | `await this.client.create({...})` | Unit test: verify SDK create() called with params |
-| AC-2.4.4 | Story 2.4 | Workflows (line 336) | Custom model name constant | Verify model name matches 'ollatool-commit:latest' |
-| AC-2.4.5 | Story 2.4 | Workflows (line 338) | Idempotent check before create | Unit test: verify checkModel() called before createModel() |
-| AC-2.4.6 | Story 2.4 | Data Models (lines 164-174) | Modelfile SYSTEM prompt content | Code review: Conventional Commits rules present |
-| AC-2.4.7 | Story 2.4 | Data Models (lines 177-178) | Modelfile PARAMETER directives | Verify temperature 0.2, num_ctx 131072 in Modelfile |
-| AC-2.5.1 | Story 2.5 | APIs & Interfaces (lines 265-266) | `program.command('setup')` | Manual test: ollatool setup --help shows command |
-| AC-2.5.2 | Story 2.5 | Services & Modules (line 78) | `src/features/setup/setup-command.ts` | Verify file exists with SetupCommand class |
-| AC-2.5.3 | Story 2.5 | Workflows (lines 302-360) | 3-tier validation flow | Integration test: verify all phases execute |
-| AC-2.5.4 | Story 2.5 | Workflows (line 339) | Conditional model creation | Unit test: createModel() called only if missing |
-| AC-2.5.5 | Story 2.5 | Observability (lines 462-488) | Status feedback messages | Manual test: verify ✓/✗ indicators display |
-| AC-2.5.6 | Story 2.5 | Reliability (lines 420-425) | Idempotent design | Manual test: run setup twice, second run skips creation |
-| AC-2.5.7 | Story 2.5 | Workflows (line 359) | Success message | Manual test: verify exact message displayed |
-| AC-2.6.1 | Story 2.6 | Data Models (lines 130-156) | SystemError, ValidationError classes | Verify classes exist with correct inheritance |
-| AC-2.6.2 | Story 2.6 | Data Models (line 138) | `public readonly remediation` field | Unit test: verify error instances have remediation |
-| AC-2.6.3 | Story 2.6 | Data Models (lines 145, 151) | Exit code 3 for SystemError, 4 for ValidationError | Unit test: verify error.code values |
-| AC-2.6.4 | Story 2.6 | Observability (lines 475-487) | Error messages with URLs | Manual test: verify https://ollama.com/download link |
-| AC-2.6.5 | Story 2.6 | Out of Scope | Commit command (Epic 4) | Deferred: commit validation in Epic 4 |
-| AC-2.6.6 | Story 2.6 | Observability (lines 482-484) | DaemonNotRunning remediation | Unit test: verify "ollama serve" in remediation |
-| AC-2.6.7 | Story 2.6 | Testing Coverage (NFR-R4) | Error code mapping tests | Unit test: verify all error types have correct codes |
+| AC#      | Epic 2 Story | Spec Section                                | Component/API                                                              | Test Idea                                                  |
+| -------- | ------------ | ------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| AC-2.1.1 | Story 2.1    | Data Models (lines 85-128)                  | `src/core/ports/llm-port.ts`                                               | Verify file exists with interface definition               |
+| AC-2.1.2 | Story 2.1    | APIs & Interfaces (lines 89-120)            | `LlmPort.checkConnection()`, `checkModel()`, `createModel()`, `generate()` | TypeScript compilation verifies all methods present        |
+| AC-2.1.3 | Story 2.1    | Data Models (lines 122-127)                 | `GenerationOptions` interface                                              | Verify interface has all required fields                   |
+| AC-2.1.4 | Story 2.1    | APIs & Interfaces (lines 90-119)            | JSDoc comments on interface methods                                        | Code review: JSDoc explains @param, @returns, @throws      |
+| AC-2.1.5 | Story 2.1    | System Architecture Alignment (lines 48-55) | Core layer zero external deps                                              | Import analysis: no ollama, execa, fs in core/             |
+| AC-2.1.6 | Story 2.1    | Clean Code Standards                        | Function size, naming                                                      | ESLint validation, code review                             |
+| AC-2.2.1 | Story 2.2    | APIs & Interfaces (lines 183-247)           | `src/infrastructure/adapters/ollama-adapter.ts`                            | Verify file exists with class definition                   |
+| AC-2.2.2 | Story 2.2    | APIs & Interfaces (line 194)                | `OllamaAdapter implements LlmPort`                                         | TypeScript compilation enforces interface                  |
+| AC-2.2.3 | Story 2.2    | Dependencies (line 496)                     | `import { Ollama } from 'ollama'`                                          | Verify import statement, package.json dependency           |
+| AC-2.2.4 | Story 2.2    | APIs & Interfaces (lines 195-198)           | Constructor with `private readonly client: Ollama`                         | Unit test: inject mocked Ollama instance                   |
+| AC-2.2.5 | Story 2.2    | APIs & Interfaces (lines 200-241)           | Error handling with SystemError, ValidationError                           | Unit test: verify typed errors thrown                      |
+| AC-2.2.6 | Story 2.2    | External Service Integrations (line 516)    | `baseUrl = 'http://localhost:11434'`                                       | Unit test: verify default URL                              |
+| AC-2.2.7 | Story 2.2    | Observability (lines 449-454)               | `debug('ollatool:ollama')`                                                 | Manual test: DEBUG=ollatool:ollama shows logs              |
+| AC-2.3.1 | Story 2.3    | APIs & Interfaces (lines 211-224)           | `async checkModel(modelName: string)`                                      | Unit test: method exists and returns boolean               |
+| AC-2.3.2 | Story 2.3    | Workflows (line 323)                        | Base model check logic                                                     | Unit test: mock ollama.list() with base model present      |
+| AC-2.3.3 | Story 2.3    | Workflows (line 336)                        | Custom model check logic                                                   | Unit test: mock ollama.list() with custom model present    |
+| AC-2.3.4 | Story 2.3    | APIs & Interfaces (line 213)                | `await this.client.list()`                                                 | Unit test: verify SDK method called                        |
+| AC-2.3.5 | Story 2.3    | APIs & Interfaces (lines 217-223)           | Error handling on list failure                                             | Unit test: mock SDK error, verify SystemError thrown       |
+| AC-2.3.6 | Story 2.3    | Testing Coverage (NFR-R4)                   | Unit test suite                                                            | Co-located test file with mock scenarios                   |
+| AC-2.4.1 | Story 2.4    | Data Models (lines 158-179)                 | Modelfile in project root                                                  | Verify file exists with FROM, SYSTEM, PARAMETER            |
+| AC-2.4.2 | Story 2.4    | APIs & Interfaces (lines 226-241)           | `async createModel(modelName, modelfileContent)`                           | Unit test: method exists and calls SDK                     |
+| AC-2.4.3 | Story 2.4    | APIs & Interfaces (lines 228-232)           | `await this.client.create({...})`                                          | Unit test: verify SDK create() called with params          |
+| AC-2.4.4 | Story 2.4    | Workflows (line 336)                        | Custom model name constant                                                 | Verify model name matches 'ollatool-commit:latest'         |
+| AC-2.4.5 | Story 2.4    | Workflows (line 338)                        | Idempotent check before create                                             | Unit test: verify checkModel() called before createModel() |
+| AC-2.4.6 | Story 2.4    | Data Models (lines 164-174)                 | Modelfile SYSTEM prompt content                                            | Code review: Conventional Commits rules present            |
+| AC-2.4.7 | Story 2.4    | Data Models (lines 177-178)                 | Modelfile PARAMETER directives                                             | Verify temperature 0.2, num_ctx 131072 in Modelfile        |
+| AC-2.5.1 | Story 2.5    | APIs & Interfaces (lines 265-266)           | `program.command('setup')`                                                 | Manual test: ollatool setup --help shows command           |
+| AC-2.5.2 | Story 2.5    | Services & Modules (line 78)                | `src/features/setup/setup-command.ts`                                      | Verify file exists with SetupCommand class                 |
+| AC-2.5.3 | Story 2.5    | Workflows (lines 302-360)                   | 3-tier validation flow                                                     | Integration test: verify all phases execute                |
+| AC-2.5.4 | Story 2.5    | Workflows (line 339)                        | Conditional model creation                                                 | Unit test: createModel() called only if missing            |
+| AC-2.5.5 | Story 2.5    | Observability (lines 462-488)               | Status feedback messages                                                   | Manual test: verify ✓/✗ indicators display                 |
+| AC-2.5.6 | Story 2.5    | Reliability (lines 420-425)                 | Idempotent design                                                          | Manual test: run setup twice, second run skips creation    |
+| AC-2.5.7 | Story 2.5    | Workflows (line 359)                        | Success message                                                            | Manual test: verify exact message displayed                |
+| AC-2.6.1 | Story 2.6    | Data Models (lines 130-156)                 | SystemError, ValidationError classes                                       | Verify classes exist with correct inheritance              |
+| AC-2.6.2 | Story 2.6    | Data Models (line 138)                      | `public readonly remediation` field                                        | Unit test: verify error instances have remediation         |
+| AC-2.6.3 | Story 2.6    | Data Models (lines 145, 151)                | Exit code 3 for SystemError, 4 for ValidationError                         | Unit test: verify error.code values                        |
+| AC-2.6.4 | Story 2.6    | Observability (lines 475-487)               | Error messages with URLs                                                   | Manual test: verify https://ollama.com/download link       |
+| AC-2.6.5 | Story 2.6    | Out of Scope                                | Commit command (Epic 4)                                                    | Deferred: commit validation in Epic 4                      |
+| AC-2.6.6 | Story 2.6    | Observability (lines 482-484)               | DaemonNotRunning remediation                                               | Unit test: verify "ollama serve" in remediation            |
+| AC-2.6.7 | Story 2.6    | Testing Coverage (NFR-R4)                   | Error code mapping tests                                                   | Unit test: verify all error types have correct codes       |
 
 ## Risks, Assumptions, Open Questions
 
@@ -771,18 +777,22 @@ All dependencies already installed during Epic 1 foundation setup. Epic 2 only a
 ### Implementation Decisions (Resolved)
 
 **DECISION-2.1: Modelfile Location**
+
 - **Decision:** Modelfile placed in src/assets/conventional-commit-modelfile
 - **Rationale:** Cleaner project structure, descriptive naming for future template additions
 
 **DECISION-2.2: Model Creation Progress Feedback**
+
 - **Decision:** Simple spinner during model creation
 - **Rationale:** Faster to implement, sufficient for MVP user experience
 
 **DECISION-2.3: Retry Logic for API Calls**
+
 - **Decision:** No retry - fail immediately on API failures
 - **Rationale:** Local localhost calls have minimal failure opportunities; fail-fast principle applies
 
 **DECISION-2.4: Validation Use Case Separation**
+
 - **Decision:** Separate ValidateSetup and ProvisionModel classes
 - **Rationale:** Follows hexagonal architecture patterns with clean single-responsibility use cases
 
@@ -894,12 +904,14 @@ ollatool setup  # Skips creation, shows "Already present"
 ### Testing Anti-Patterns to Avoid (Epic 1 Retro Learning)
 
 ❌ **Don't Test:**
+
 - Interface definitions (TypeScript enforces)
 - Constructor parameter assignment
 - Simple getters/setters
 - DEBUG log statements
 
 ✅ **Do Test:**
+
 - Error handling paths
 - Business logic (validation sequences)
 - Error code mapping
