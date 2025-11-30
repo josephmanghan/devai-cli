@@ -64,10 +64,23 @@ so that the core domain doesn't depend on the Ollama SDK implementation.
   - Parameter examples made generic (removed specific model names)
 - **Lesson:** Port interfaces should be completely implementation-agnostic with generic terminology
 
+**Issue #3: Incorrect file organization - types mixed with port interfaces**
+- **Problem:** `GenerationOptions` interface was defined in `src/core/ports/llm-port.ts` alongside the port interface
+- **Impact:** Violated clean architecture separation of concerns - port interfaces should be separate from type definitions
+- **Fix Applied:**
+  - Created `src/core/types/llm-types.ts` for LLM-related type definitions
+  - Moved `GenerationOptions` to the new types file
+  - Updated port file to import the type from `../types/llm-types.js`
+  - Added export to `src/core/types/index.ts` barrel file
+- **Lesson:** Follow established project structure: ports for interfaces, types for data structures
+- **Organization Principle:** Group related types by domain (e.g., `llm-types.ts` for all LLM-related types) rather than one file per type
+
 **Future Prevention:**
 - Review all interface documentation to ensure it describes WHAT, not WHERE it's used
 - Use generic terminology throughout port interfaces (service, model, configuration vs specific tech terms)
 - Implementation-specific details belong in adapter implementations, not core ports
+- Follow project structure: `src/core/ports/` for interfaces, `src/core/types/` for type definitions
+- Group related types by domain to avoid file-per-type explosion
 
 ### Architecture Requirements
 

@@ -6,3 +6,4 @@
  */
 
 export * from './errors.types.js';
+export * from './llm-types.js';
