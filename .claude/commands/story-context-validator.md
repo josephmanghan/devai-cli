@@ -1,6 +1,7 @@
 Enhance existing story context with comprehensive context injection validation including architecture, styleguides, Context7 MCP, retrospectives, and cross-story patterns.
 
 This command runs the custom BMAD story-context-validator agent to:
+
 - Validate architecture.md context opportunities are fully captured
 - Ensure all relevant styleguides are integrated
 - Fill knowledge gaps with Context7 MCP external knowledge

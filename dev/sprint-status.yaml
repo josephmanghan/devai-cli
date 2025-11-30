@@ -58,8 +58,8 @@ development_status:
   # Epic 2: Ollama Integration & Model Management (6 stories)
   epic-2: backlog
   2-1-create-ollama-port-interface: done
-  2-2-implement-ollama-adapter: ready-for-dev
-  2-3-implement-model-existence-check: backlog
+  2-2-implement-ollama-adapter: done
+  2-3-implement-model-existence-check: drafted
   2-4-implement-custom-model-creation: backlog
   2-5-implement-setup-command: backlog
   2-6-implement-setup-validation-error-handling: backlog
