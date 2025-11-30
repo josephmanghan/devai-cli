@@ -1,10 +1,10 @@
 import type { OllamaModelConfig } from '../../core/types/llm-types.js';
 
 /**
- * Configuration for commit-specific model creation.
+ * Configuration for conventional commit-specific model creation.
  * Extracts commit-specific logic from OllamaAdapter to maintain generic reusability.
  */
-export const COMMIT_MODEL_CONFIG: OllamaModelConfig = {
+export const CONVENTIONAL_COMMIT_MODEL_CONFIG: OllamaModelConfig = {
   model: 'ollatool-commit:latest',
   baseModel: 'qwen2.5-coder:1.5b',
   systemPrompt: `You are a Conventional Commits expert who generates clear, structured commit messages. Your output must follow the exact format:
