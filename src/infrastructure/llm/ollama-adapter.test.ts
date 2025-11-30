@@ -5,14 +5,21 @@ import type {
   Ollama,
   ProgressResponse,
 } from 'ollama';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  SystemError,
-  UserError,
-  ValidationError,
-} from '../../core/types/errors.types.js';
+import { SystemError, UserError } from '../../core/types/errors.types.js';
 import { OllamaAdapter } from './ollama-adapter.js';
+
+// Mock ora
+vi.mock('ora', () => ({
+  default: vi.fn().mockReturnValue({
+    start: vi.fn().mockReturnValue({
+      succeed: vi.fn(),
+      fail: vi.fn(),
+      text: '',
+    }),
+  }),
+}));
 
 describe('OllamaAdapter', () => {
   const getData = () => {
@@ -90,6 +97,9 @@ describe('OllamaAdapter', () => {
     shouldListError?: boolean;
     shouldCreateError?: boolean;
     shouldGenerateError?: boolean;
+    baseModel?: string;
+    systemPrompt?: string;
+    parameters?: Record<string, unknown>;
   }
 
   const getInstance = (config?: InstanceConfig) => {
@@ -105,7 +115,12 @@ describe('OllamaAdapter', () => {
         .mockResolvedValue(config?.generateResponse ?? mockGenerateResponse),
     } as unknown as Ollama;
 
-    const adapter = new OllamaAdapter(mockOllamaClient);
+    const adapter = new OllamaAdapter(
+      mockOllamaClient,
+      config?.baseModel,
+      config?.systemPrompt,
+      config?.parameters
+    );
 
     return { adapter, mockOllamaClient };
   };
@@ -187,40 +202,145 @@ describe('OllamaAdapter', () => {
   });
 
   describe('createModel', () => {
-    it('should create model successfully', async () => {
-      const { mockProgressResponse } = getData();
+    // Mock console.log to capture idempotency messages
+    beforeEach(() => {
+      vi.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('should skip creation when model already exists (idempotency)', async () => {
+      const { mockModels } = getData();
       const { adapter, mockOllamaClient } = getInstance({
-        createResponse: mockProgressResponse,
+        listResponse: mockModels,
       });
 
+      await expect(adapter.createModel('custom-model')).resolves.not.toThrow();
+
+      // Should not call create since model exists
+      expect(mockOllamaClient.create).not.toHaveBeenCalled();
+      expect(console.log).toHaveBeenCalledWith(
+        "✓ Model 'custom-model' already exists, skipping creation"
+      );
+    });
+
+    it('should create model with direct SDK parameters', async () => {
+      const baseModel = 'qwen2.5-coder:1.5b';
+      const systemPrompt = 'You are a commit expert';
+      const parameters = { temperature: 0.2, num_ctx: 131072, keep_alive: 0 };
+
+      const { adapter, mockOllamaClient } = getInstance({
+        baseModel,
+        systemPrompt,
+        parameters,
+      });
+
+      // Mock async iterator for streaming
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          yield { status: 'reading model definition' };
+          yield { status: 'creating model' };
+          yield { status: 'success' };
+        },
+      };
+
+      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream);
+
+      await expect(adapter.createModel('test-model')).resolves.not.toThrow();
+
+      expect(mockOllamaClient.create).toHaveBeenCalledWith({
+        model: 'test-model',
+        from: baseModel,
+        system: systemPrompt,
+        parameters,
+        stream: true,
+      });
+    });
+
+    it('should throw SystemError when model creation fails with SDK error', async () => {
+      const { adapter, mockOllamaClient } = getInstance({
+        baseModel: 'qwen2.5-coder:1.5b',
+        systemPrompt: 'You are a commit expert',
+        parameters: { temperature: 0.2 },
+      });
+
+      // Mock SDK error
+      const createError = new Error('Invalid model definition');
+      vi.mocked(mockOllamaClient.create).mockRejectedValue(createError);
+
+      await expect(adapter.createModel('test-model')).rejects.toThrow(
+        SystemError
+      );
+    });
+
+    it('should throw SystemError when daemon is unavailable during creation', async () => {
+      const { adapter, mockOllamaClient } = getInstance({
+        baseModel: 'qwen2.5-coder:1.5b',
+        systemPrompt: 'You are a commit expert',
+        parameters: { temperature: 0.2 },
+      });
+
+      // Mock connection error
+      const connectionError = new Error('ECONNREFUSED');
+      vi.mocked(mockOllamaClient.create).mockRejectedValue(connectionError);
+
+      await expect(adapter.createModel('test-model')).rejects.toThrow(
+        SystemError
+      );
+    });
+
+    it('should work with minimal constructor (generic adapter)', async () => {
+      const { adapter, mockOllamaClient } = getInstance();
+
+      // Mock async iterator for streaming
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          yield { status: 'success' };
+        },
+      };
+
+      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream);
+
+      await expect(adapter.createModel('test-model')).resolves.not.toThrow();
+
+      expect(mockOllamaClient.create).toHaveBeenCalledWith({
+        model: 'test-model',
+        from: undefined,
+        system: undefined,
+        parameters: undefined,
+        stream: true,
+      });
+    });
+
+    it('should create model with constructor-injected configuration', async () => {
+      const { adapter, mockOllamaClient } = getInstance({
+        baseModel: 'qwen2.5-coder:1.5b',
+        systemPrompt: 'You are a commit expert',
+        parameters: { temperature: 0.2 },
+      });
+
+      // Mock async iterator for streaming
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          yield { status: 'success' };
+        },
+      };
+
+      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream);
+
       await expect(
-        adapter.createModel('test-model', 'FROM base\nSYSTEM custom system')
+        adapter.createModel('test-model')
       ).resolves.not.toThrow();
 
       expect(mockOllamaClient.create).toHaveBeenCalledWith({
         model: 'test-model',
-        stream: false,
+        from: 'qwen2.5-coder:1.5b',
+        system: 'You are a commit expert',
+        parameters: { temperature: 0.2 },
+        stream: true,
       });
-    });
-
-    it('should throw ValidationError when model creation fails', async () => {
-      const createError = new Error('Invalid model definition');
-      const { adapter, mockOllamaClient } = getInstance();
-      vi.mocked(mockOllamaClient.create).mockRejectedValue(createError);
-
-      await expect(
-        adapter.createModel('test-model', 'invalid')
-      ).rejects.toThrow(ValidationError);
-    });
-
-    it('should throw SystemError when daemon is unavailable during creation', async () => {
-      const connectionError = new Error('ECONNREFUSED');
-      const { adapter, mockOllamaClient } = getInstance();
-      vi.mocked(mockOllamaClient.create).mockRejectedValue(connectionError);
-
-      await expect(
-        adapter.createModel('test-model', 'FROM base')
-      ).rejects.toThrow(SystemError);
     });
   });
 

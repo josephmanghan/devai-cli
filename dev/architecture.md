@@ -222,47 +222,56 @@ The first implementation story will execute manual npm project setup following t
 
 **Custom Model Instance:** `ollatool-commit`
 **Base Model:** `qwen2.5-coder:1.5b` (quantized)
-**Creation Method:** Modelfile-based instance creation
+**Creation Method:** Direct SDK parameter configuration (NOT Modelfile parsing)
 
-**Modelfile Structure:**
+**🔴 CRITICAL ARCHITECTURAL LEARNING (Epic 2 Story 2.4):**
 
-```dockerfile
-# Base model selection
-FROM qwen2.5-coder:1.5b
+**CLI vs JS SDK Fundamental Difference:**
+- **Ollama CLI**: Uses Modelfile parsing (`ollama create -f Modelfile`)
+- **Ollama JS SDK**: Uses direct parameter passing (`ollama.create({ model, from, system, parameters })`)
 
-# System prompt (behavioral instructions)
-SYSTEM """You are a git commit message generator specialized in Conventional Commits format.
+**Planning Error Averted:**
+Original story incorrectly planned Modelfile parsing implementation for JS SDK usage. The JS SDK doesn't support Modelfile content like the CLI tool. Attempting to parse Modelfile content for the SDK would have resulted in ~200 lines of unnecessary parsing code with architectural mismatch.
 
-Rules:
-- Output ONLY the commit message, no conversational text
-- Format: <type>: <description>\n\n<body>
-- Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
-- Description: imperative mood, lowercase, no period, <50 chars
-- Body: explain what and why, not how
-
-Examples:
-[Few-shot examples will be included here]
-"""
-
-# Model configuration parameters (NOT part of system prompt)
-PARAMETER temperature 0.2
-PARAMETER num_ctx 131072
+**Correct Implementation Pattern:**
+```typescript
+// ✅ CORRECT: Direct SDK parameters
+await ollamaClient.create({
+  model: 'ollatool-commit:latest',
+  from: 'qwen2.5-coder:1.5b',
+  system: 'Conventional Commits expert system prompt...',
+  parameters: { temperature: 0.2, num_ctx: 131072, keep_alive: 0 },
+  stream: true
+});
 ```
 
-**Setup Command:**
+**Configuration Architecture:**
+- **Generic OllamaAdapter**: Reusable via constructor injection
+- **Specific Config Files**: `commit-model-config.ts` for domain-specific setup
+- **Type Safety**: `OllamaModelConfig` interface prevents runtime errors
+- **Separation of Concerns**: Generic vs specific logic properly separated
 
-```bash
-ollama create ollatool-commit -f Modelfile
+**CLI vs SDK Usage Patterns:**
+- **CLI**: `ollama create ollatool-commit -f Modelfile` (file-based)
+- **JS SDK**: Direct parameter passing (configuration-based)
+- **Learning**: Always validate SDK capabilities before planning implementation
+
+**System Prompt Configuration (via config files):**
+```
+System Prompt: Conventional Commits expert role with few-shot examples
+Parameters: temperature=0.2, num_ctx=131072, keep_alive=0
+Base Model: qwen2.5-coder:1.5b
+Model Name: ollatool-commit:latest
 ```
 
 ### Prompt Architecture
 
-**System Prompt (Modelfile - Static):**
+**System Prompt (Configuration-Based - Static):**
 
-- Role definition and behavioral constraints
-- Conventional Commits format rules
-- Few-shot examples demonstrating ideal outputs
+- Role definition and behavioral constraints (stored in `commit-model-config.ts`)
+- Conventional Commits format rules and few-shot examples
 - Output format constraints (no conversational filler)
+- Applied at model creation time via SDK parameters
 
 **User Prompt (Per-Request - Dynamic):**
 
@@ -271,7 +280,18 @@ ollama create ollatool-commit -f Modelfile
 - Git status output (`git status --short`)
 - File paths and change indicators (M/A/D)
 
-**Rationale:** The system prompt is static (lives in Modelfile), while the diff/status are dynamic (sent per-request). This separation means we iterate on the system prompt by recreating the model instance (`ollama create`), not by changing code.
+**Configuration Pattern:**
+```typescript
+// commit-model-config.ts - Static configuration
+export const COMMIT_MODEL_CONFIG: OllamaModelConfig = {
+  model: 'ollatool-commit:latest',
+  baseModel: 'qwen2.5-coder:1.5b',
+  systemPrompt: 'Conventional Commits expert role with examples...',
+  parameters: { temperature: 0.2, num_ctx: 131072, keep_alive: 0 }
+};
+```
+
+**Rationale:** The system prompt is static (configuration-based), while the diff/status are dynamic (sent per-request). This separation means we iterate on the system prompt by updating configuration and recreating the model instance (`ollama.create` with new parameters), not by changing application code.
 
 ### Ollama Integration Parameters
 

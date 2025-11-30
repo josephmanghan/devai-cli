@@ -1,11 +1,11 @@
 import type { Ollama } from 'ollama';
+import ora from 'ora';
 
 import { LlmPort } from '../../core/ports/llm-port.js';
 import {
   AppError,
   SystemError,
   UserError,
-  ValidationError,
 } from '../../core/types/errors.types.js';
 import type { GenerationOptions } from '../../core/types/llm-types.js';
 
@@ -17,8 +17,16 @@ export class OllamaAdapter implements LlmPort {
   /**
    * Creates a new Ollama adapter instance.
    * @param ollamaClient - The Ollama SDK client instance
+   * @param baseModel - Optional base model for custom model creation
+   * @param systemPrompt - Optional system prompt for custom model creation
+   * @param parameters - Optional model parameters for custom model creation
    */
-  constructor(private readonly ollamaClient: Ollama) {}
+  constructor(
+    private readonly ollamaClient: Ollama,
+    private readonly baseModel?: string,
+    private readonly systemPrompt?: string,
+    private readonly parameters?: Record<string, unknown>
+  ) {}
 
   /**
    * Checks if the Ollama daemon is running and accessible.
@@ -49,23 +57,29 @@ export class OllamaAdapter implements LlmPort {
   }
 
   /**
-   * Creates a new model in Ollama from a model definition.
+   * Creates a new model in Ollama using constructor-injected configuration.
    * @param modelName - The name for the new model
-   * @param _modelDefinition - The model definition (currently unused)
    * @throws {AppError} When model creation fails or daemon is unavailable
    */
-  async createModel(
-    modelName: string,
-    _modelDefinition: string
-  ): Promise<void> {
+  async createModel(modelName: string): Promise<void> {
     try {
-      await this.ollamaClient.create({
-        model: modelName,
-        stream: false,
-      });
+      if (await this.modelAlreadyExists(modelName)) {
+        return;
+      }
+
+      await this.executeCreateModel(modelName);
     } catch (error) {
-      throw this.wrapOllamaError(error, 'Failed to create model', 'validation');
+      throw this.wrapOllamaError(error, 'Failed to create model');
     }
+  }
+
+  private async modelAlreadyExists(modelName: string): Promise<boolean> {
+    const modelExists = await this.checkModel(modelName);
+    if (modelExists) {
+      console.log(`✓ Model '${modelName}' already exists, skipping creation`);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -99,7 +113,7 @@ export class OllamaAdapter implements LlmPort {
   private wrapOllamaError(
     error: unknown,
     defaultMessage: string,
-    defaultType?: 'system' | 'validation' | 'user'
+    defaultType?: 'system' | 'user'
   ): AppError {
     if (error instanceof Error) {
       const specificError = this.getSpecificOllamaError(error);
@@ -112,7 +126,7 @@ export class OllamaAdapter implements LlmPort {
   private createDefaultError(
     error: unknown,
     defaultMessage: string,
-    defaultType?: 'system' | 'validation' | 'user'
+    defaultType?: 'system' | 'user'
   ): AppError {
     const errorClass = getErrorClass(defaultType);
     return new errorClass(
@@ -145,6 +159,40 @@ export class OllamaAdapter implements LlmPort {
       error.message.includes('timeout') || error.message.includes('TIMEOUT')
     );
   }
+
+  private async executeCreateModel(modelName: string): Promise<void> {
+    const spinner = ora(`Creating model '${modelName}'...`).start();
+
+    try {
+      const stream = await this.createModelStream(modelName);
+      await this.processCreationStream(stream, spinner);
+      spinner.succeed(`✓ Model '${modelName}' created successfully`);
+    } catch (error) {
+      spinner.fail(`✗ Failed to create model '${modelName}'`);
+      throw this.wrapOllamaError(error, 'Failed to create model');
+    }
+  }
+
+  private async createModelStream(modelName: string) {
+    return await this.ollamaClient.create({
+      model: modelName,
+      from: this.baseModel,
+      system: this.systemPrompt,
+      parameters: this.parameters,
+      stream: true as const,
+    });
+  }
+
+  private async processCreationStream(
+    stream: AsyncIterable<{ status?: string }>,
+    spinner: { text: string }
+  ): Promise<void> {
+    for await (const progress of stream) {
+      if (progress.status !== undefined && progress.status.length > 0) {
+        spinner.text = progress.status;
+      }
+    }
+  }
 }
 
 /**
@@ -170,9 +218,5 @@ const ERROR_MAP: Record<string, () => AppError> = {
  * @param defaultType - The type of error to return
  * @returns The error class constructor
  */
-const getErrorClass = (defaultType?: 'system' | 'validation' | 'user') =>
-  defaultType === 'validation'
-    ? ValidationError
-    : defaultType === 'user'
-      ? UserError
-      : SystemError;
+const getErrorClass = (defaultType?: 'system' | 'user') =>
+  defaultType === 'user' ? UserError : SystemError;

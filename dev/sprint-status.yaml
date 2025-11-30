@@ -59,9 +59,9 @@ development_status:
   epic-2: backlog
   2-1-create-ollama-port-interface: done
   2-2-implement-ollama-adapter: done
-  2-3-implement-model-existence-check: drafted
-  2-4-implement-custom-model-creation: backlog
-  2-5-implement-setup-command: backlog
+  2-3-implement-model-existence-check: closed
+  2-4-implement-custom-model-creation: done
+  2-5-implement-setup-command: ready-for-dev
   2-6-implement-setup-validation-error-handling: backlog
   epic-2-retrospective: optional
 
@@ -101,14 +101,13 @@ development_status:
 
   # Epic 6: Performance & Error Handling (8 stories)
   epic-6: backlog
-  6-1-implement-performance-benchmarking: backlog
-  6-2-implement-spinner-for-ai-generation: backlog
-  6-3-implement-typed-error-classes: backlog
-  6-4-implement-error-message-formatting: backlog
-  6-5-implement-global-error-handler: backlog
-  6-6-implement-resource-cleanup-on-exit: backlog
-  6-7-add-context-window-overflow-detection: backlog
-  6-8-implement-performance-monitoring-optional: backlog
+  6-1-implement-spinner-for-ai-generation: backlog
+  6-2-implement-typed-error-classes: backlog
+  6-3-implement-error-message-formatting: backlog
+  6-4-implement-global-error-handler: backlog
+  6-5-implement-resource-cleanup-on-exit: backlog
+  6-6-add-context-window-overflow-detection: backlog
+  6-7-implement-performance-monitoring-optional: backlog
   epic-6-retrospective: optional
 
   # Epic 7: Model Validation & Manual Acceptance Testing (5 stories)

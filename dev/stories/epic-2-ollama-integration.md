@@ -172,6 +172,8 @@
 
 **FRs Covered:** FR45 (`ollatool setup` command)
 
+_Critical note: implementation change in 2.4. No longer using ModelFile. Now calling create() with appropriate args via model config file_.
+
 ---
 
 ## Story 2.6: Implement Setup Validation Error Handling

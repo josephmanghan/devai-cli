@@ -22,15 +22,13 @@ export interface LlmPort {
   checkModel(modelName: string): Promise<boolean>;
 
   /**
-   * Create a custom model instance from configuration.
+   * Create a custom model instance from constructor-injected configuration.
    *
    * @param modelName - Name for the custom model instance
-   * @param modelDefinition - Complete model configuration definition
    * @returns Promise that resolves when model creation is complete
-   * @throws {ValidationError} When modelDefinition is malformed or invalid
    * @throws {SystemError} When service is unavailable during creation
    */
-  createModel(modelName: string, modelDefinition: string): Promise<void>;
+  createModel(modelName: string): Promise<void>;
 
   /**
    * Generate text using specified model and parameters.

@@ -31,3 +31,18 @@ export interface GenerationOptions {
    */
   keep_alive?: number;
 }
+
+/**
+ * Configuration for creating custom Ollama models.
+ * Defines model parameters and behavioral characteristics.
+ */
+export interface OllamaModelConfig {
+  readonly model: string;
+  readonly baseModel: string;
+  readonly systemPrompt: string;
+  readonly parameters: {
+    readonly temperature: number;
+    readonly num_ctx: number;
+    readonly keep_alive: number;
+  };
+}
