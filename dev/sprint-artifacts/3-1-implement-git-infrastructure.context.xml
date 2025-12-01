@@ -1,0 +1,101 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>1</storyId>
+    <title>Implement Git Infrastructure (Port & Adapter)</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>dev/sprint-artifacts/3-1-implement-git-infrastructure.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>As an application developer,</asA>
+    <iWant>I want clean interfaces and adapters for Git operations,</iWant>
+    <soThat>I can enable commit generation functionality while maintaining testability and architectural cleanliness.</soThat>
+    <tasks>- [ ] Task 1: Create GitPort interface (AC: 1)
+  - [ ] Subtask 1.1: Define interface with proper TypeScript types
+  - [ ] Subtask 1.2: Add comprehensive JSDoc for public interface
+- [ ] Task 2: Implement ShellGitAdapter (AC: 2,3,4)
+  - [ ] Subtask 2.1: Implement isGitRepository() using git rev-parse
+  - [ ] Subtask 2.2: Implement getStagedDiff() using git diff --cached
+  - [ ] Subtask 2.3: Implement getBranchName() using git branch --show-current
+  - [ ] Subtask 2.4: Implement commitChanges() using git commit with message
+  - [ ] Subtask 2.5: Add error mapping to domain types
+- [ ] Task 3: Create comprehensive unit tests (AC: 5)
+  - [ ] Subtask 3.1: Mock execa with vi.mock
+  - [ ] Subtask 3.2: Test success scenarios for all methods
+  - [ ] Subtask 3.3: Test error scenarios and error mapping
+- [ ] Task 4: Code quality validation (AC: 6,7)
+  - [ ] Subtask 4.1: Run npm run format and npm run lint
+  - [ ] Subtask 4.2: Run npm run pr to validate complete quality gate</tasks>
+  </story>
+
+  <acceptanceCriteria>1. GitPort interface defined with methods: isGitRepository(), getStagedDiff(), getBranchName(), commitChanges(message)
+2. ShellGitAdapter implements GitPort using execa library
+3. ShellGitAdapter handles errors correctly (git not installed, not a repo, etc.)
+4. ShellGitAdapter maps shell errors to UserError/SystemError domain types
+5. Unit tests with proper mocking of execa (100% coverage for use case)
+6. Code follows clean code standards (no JSDoc on private methods, functions &lt;15 lines)
+7. npm run pr passes with zero warnings</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="dev/prd.md" title="Product Requirements Document" section="Functional Requirements FR1-49" snippet="ollatool is a privacy-first CLI tool for git commit generation using local Ollama models with sub-1s response times"/>
+      <doc path="dev/sprint-artifacts/tech-spec-epic-3.md" title="Epic 3 Technical Specification" section="Interface Definitions" snippet="GitPort interface with methods: isGitRepository(), getStagedDiff(), getBranchName(), commitChanges(message)"/>
+      <doc path="dev/architecture.md" title="System Architecture" section="Hexagonal Architecture Pattern" snippet="Core layer contains ports and types, Infrastructure layer contains adapters and external implementations"/>
+      <doc path="dev/ux-design-specification.md" title="UX Specification" section="Error Handling" snippet="UserError (Exit 2) for user-correctable issues, SystemError (Exit 3) for system-level failures"/>
+    </docs>
+    <code>
+      <code path="src/core/ports/llm-port.ts" kind="interface" symbol="LlmPort" lines="1-45" reason="Reference pattern for port interface design with JSDoc and error documentation"/>
+      <code path="src/infrastructure/llm/ollama-adapter.ts" kind="adapter" symbol="OllamaAdapter" lines="15-85" reason="Reference pattern for adapter implementation with error mapping and constructor injection"/>
+      <code path="src/core/types/errors.types.ts" kind="types" symbol="AppError, UserError, SystemError" lines="8-32" reason="Error hierarchy and exit code mapping for git error handling"/>
+      <code path="tests/helpers/git-harness.ts" kind="test" symbol="execGit" lines="45-52" reason="Existing execa usage pattern for git commands"/>
+    </code>
+    <dependencies>
+      <ecosystem name="Node.js">
+        <package name="execa" version="9.6.0" type="devDependency" usage="Shell command execution for git operations"/>
+        <package name="typescript" version="^5.7.2" type="devDependency" usage="Type safety and interface definitions"/>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+  <constraint type="architecture">Hexagonal Architecture - Core layer only contains interfaces and types, Infrastructure layer contains implementations and external dependencies</constraint>
+  <constraint type="code-quality">Functions must be ≤15 lines, no JSDoc on private methods, no implementation comments</constraint>
+  <constraint type="testing">Co-located test files with 100% coverage, use vi.mock for execa mocking, no console noise in tests</constraint>
+  <constraint type="error-handling">Map git command errors to domain types: UserError (code 2) for user-correctable issues, SystemError (code 3) for system failures</constraint>
+  <constraint type="dependency">Use execa v9.6.0 for shell execution, already installed as devDependency</constraint>
+</constraints>
+  <interfaces>
+    <interface name="GitPort" kind="port" signature="interface GitPort {
+  isGitRepository(): Promise<boolean>;
+  getStagedDiff(): Promise<string>;
+  getBranchName(): Promise<string>;
+  commitChanges(message: string): Promise<void>;
+}" path="src/core/ports/git-port.ts"/>
+    <interface name="ShellGitAdapter" kind="adapter" signature="class ShellGitAdapter implements GitPort {
+  constructor(private readonly workingDirectory?: string) {}
+  async isGitRepository(): Promise<boolean>
+  async getStagedDiff(): Promise<string>
+  async getBranchName(): Promise<string>
+  async commitChanges(message: string): Promise<void>
+}" path="src/infrastructure/adapters/git/shell-git-adapter.ts"/>
+  <interface name="Git Commands" kind="external" signature="git rev-parse --is-inside-work-tree
+git diff --cached
+git branch --show-current (fallback: git rev-parse HEAD)
+git commit -m &lt;message&gt;" path="external git binary"/>
+</interfaces>
+  <tests>
+    <standards>Use Vitest with vi.mock for execa mocking. Follow factory pattern for test data with getData() and getInstance() functions. Test both success and error scenarios with 100% coverage. No console output noise in test results. Use structured test organization with describe blocks for each method.</standards>
+    <locations>Test files co-located with implementation: src/infrastructure/adapters/git/shell-git-adapter.test.ts. Additional integration tests can be placed in tests/integration/ directory if needed.</locations>
+    <ideas>
+      <test idea="isGitRepository() success: Mock git rev-parse --is-inside-work-tree to return 'true' and verify method returns true" acceptance-criteria="1"/>
+      <test idea="isGitRepository() not a repo: Mock git rev-parse to fail with exit code 128 and verify UserError is thrown" acceptance-criteria="3,4"/>
+      <test idea="getStagedDiff() with changes: Mock git diff --cached to return sample diff content" acceptance-criteria="1,2"/>
+      <test idea="getStagedDiff() no changes: Mock git diff --cached to return empty string" acceptance-criteria="2,3"/>
+      <test idea="commitChanges() success: Mock git commit -m to succeed and verify no errors thrown" acceptance-criteria="2"/>
+      <test idea="error mapping: Test various git command failures and verify correct error types (UserError/SystemError)" acceptance-criteria="3,4"/>
+    </ideas>
+  </tests>
+</story-context>
