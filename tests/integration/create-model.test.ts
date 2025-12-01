@@ -4,15 +4,15 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { OllamaAdapter } from '../../src/infrastructure/llm/ollama-adapter.js';
 
 describe('createModel Integration Tests', () => {
-  const TEST_MODEL_NAME = 'ollatool-test-integration:latest';
-  const TEST_MODEL_BASE = 'ollatool-test-integration';
-  const ollama = new Ollama();
+  const TEST_MODEL_NAME = 'ollatool-commit-test:latest';
+  const TEST_MODEL_BASE = 'ollatool-commit-test';
 
-  // Adapter with commit-specific configuration
-  const adapter = new OllamaAdapter(
-    ollama,
-    'qwen2.5-coder:1.5b',
-    `You are a Conventional Commits expert who generates clear, structured commit messages. Your output must follow the exact format:
+  const getInstance = () => {
+    const ollama = new Ollama();
+    const adapter = new OllamaAdapter(
+      ollama,
+      'qwen2.5-coder:1.5b',
+      `You are a Conventional Commits expert who generates clear, structured commit messages. Your output must follow the exact format:
 
 <type>: <description>
 
@@ -33,21 +33,24 @@ This enables secure user sessions and protects sensitive routes.
 fix: resolve memory leak in data processing
 Close database connections properly after query completion.
 Prevents memory growth during long-running batch operations.`,
-    {
-      temperature: 0.2,
-      num_ctx: 131072,
-      keep_alive: 0,
-    }
-  );
+      {
+        temperature: 0.2,
+        num_ctx: 131072,
+        keep_alive: 0,
+      }
+    );
+
+    return { ollama, adapter };
+  };
+
+  const { ollama, adapter } = getInstance();
 
   beforeAll(async () => {
-    // Ensure Ollama daemon is running
     const isConnected = await adapter.checkConnection();
     if (!isConnected) {
       throw new Error('Ollama daemon is not running. Start with: ollama serve');
     }
 
-    // Clean up any existing test model
     try {
       const modelExists = await adapter.checkModel(TEST_MODEL_NAME);
       if (modelExists) {
@@ -60,7 +63,6 @@ Prevents memory growth during long-running batch operations.`,
   });
 
   afterAll(async () => {
-    // Clean up test model after tests
     try {
       const modelExists = await adapter.checkModel(TEST_MODEL_NAME);
       if (modelExists) {
@@ -74,7 +76,6 @@ Prevents memory growth during long-running batch operations.`,
 
   describe('Model Creation Integration', () => {
     it('should create custom model with direct SDK parameters', async () => {
-      // Check if base model exists, skip test if not available
       const baseModelExists = await adapter.checkModel('qwen2.5-coder:1.5b');
       if (!baseModelExists) {
         console.log(
@@ -86,14 +87,11 @@ Prevents memory growth during long-running batch operations.`,
         return;
       }
 
-      // Create the test model
       await expect(adapter.createModel(TEST_MODEL_BASE)).resolves.not.toThrow();
 
-      // Verify model was created
       const modelExists = await adapter.checkModel(TEST_MODEL_NAME);
       expect(modelExists).toBe(true);
 
-      // Test model generation
       const generateResponse = await ollama.generate({
         model: TEST_MODEL_NAME,
         prompt: 'Generate a commit message for: fix typo in README',
@@ -101,10 +99,9 @@ Prevents memory growth during long-running batch operations.`,
       });
 
       expect(generateResponse.response).toMatch(/^fix:/);
-    }, 120000); // 2 minutes timeout for model creation
+    }, 120000);
 
     it('should be idempotent (safe to run multiple times)', async () => {
-      // Check if base model exists, skip test if not available
       const baseModelExists = await adapter.checkModel('qwen2.5-coder:1.5b');
       if (!baseModelExists) {
         console.log(
@@ -113,27 +110,21 @@ Prevents memory growth during long-running batch operations.`,
         return;
       }
 
-      // First creation should work (model already exists from previous test)
+      await expect(adapter.createModel(TEST_MODEL_BASE)).resolves.not.toThrow();
       await expect(adapter.createModel(TEST_MODEL_BASE)).resolves.not.toThrow();
 
-      // Second creation should also work (idempotency)
-      await expect(adapter.createModel(TEST_MODEL_BASE)).resolves.not.toThrow();
-
-      // Model should still exist
       const modelExists = await adapter.checkModel(TEST_MODEL_NAME);
       expect(modelExists).toBe(true);
-    }, 60000); // 1 minute timeout
+    }, 60000);
   });
 
   describe('Error Handling Integration', () => {
     it('should handle missing constructor parameters gracefully', async () => {
-      // Create adapter with no parameters (should handle undefined values gracefully)
       const minimalAdapter = new OllamaAdapter(ollama);
 
-      // This should not throw, but may fail at the Ollama SDK level
       await expect(minimalAdapter.createModel('test-minimal')).rejects.toThrow(
         'Failed to create model'
       );
-    }, 10000); // 10 second timeout
+    }, 10000);
   });
 });

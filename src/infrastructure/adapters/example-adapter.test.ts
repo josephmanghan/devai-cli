@@ -13,7 +13,6 @@ describe('ExampleAdapter', () => {
   it('should implement ExamplePort interface', () => {
     expect(adapter).toBeInstanceOf(ExampleAdapter);
 
-    // Verify it implements the interface
     const isPortImplementation = (obj: unknown): obj is ExamplePort => {
       return typeof obj === 'object' && obj !== null && 'process' in obj;
     };

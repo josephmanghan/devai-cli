@@ -1,7 +1,3 @@
-/**
- * Tests for debug logging functionality
- */
-
 import { spawn } from 'node:child_process';
 import { existsSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
@@ -9,11 +5,9 @@ import { join } from 'node:path';
 import debug from 'debug';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('debug', () => {
-  return {
-    default: vi.fn(() => vi.fn(() => {})),
-  };
-});
+vi.mock('debug', () => ({
+  default: vi.fn(() => vi.fn(() => {})),
+}));
 
 import {
   debugLogger,
@@ -24,17 +18,14 @@ import {
   validationLogger,
 } from './debug-loggers';
 
-// Store original DEBUG environment
 const originalDebug = process.env.DEBUG;
 
 describe('Debug Loggers', () => {
   beforeEach(() => {
-    // Clean up any existing DEBUG environment variable
     delete process.env.DEBUG;
   });
 
   afterEach(() => {
-    // Restore original DEBUG environment
     if (originalDebug) {
       process.env.DEBUG = originalDebug;
     } else {
@@ -44,13 +35,11 @@ describe('Debug Loggers', () => {
 
   describe('zero console output in normal operation', () => {
     it('should produce no output when DEBUG is not set', () => {
-      // Mock console methods to capture any output
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});
 
-      // Test all loggers
       gitLogger('Git operation started');
       llmLogger('LLM request sent');
       perfLogger('Operation took 100ms');
@@ -58,11 +47,9 @@ describe('Debug Loggers', () => {
       errorLogger('Error occurred');
       debugLogger('Debug message');
 
-      // Verify no console output
       expect(consoleSpy).not.toHaveBeenCalled();
       expect(consoleErrorSpy).not.toHaveBeenCalled();
 
-      // Restore console methods
       consoleSpy.mockRestore();
       consoleErrorSpy.mockRestore();
     });
@@ -79,8 +66,6 @@ describe('Debug Loggers', () => {
     });
 
     it('should handle disabled debug gracefully', () => {
-      // With mocked debug, the enabled property should be undefined (not implemented in mock)
-      // The important part is that calling the logger doesn't throw
       expect(() => {
         gitLogger('test message');
         llmLogger('test message');
@@ -91,7 +76,6 @@ describe('Debug Loggers', () => {
 
   describe('output when DEBUG flag is set', () => {
     it('should enable loggers when DEBUG=ollatool:* is set', () => {
-      // Set DEBUG environment variable
       process.env.DEBUG = 'ollatool:*';
 
       const gitLog = debug('ollatool:git');
@@ -130,7 +114,6 @@ describe('Debug Loggers', () => {
 
 describe('Integration with Child Process', () => {
   afterEach(() => {
-    // Clean up any created files
     const testLogPath = join(process.cwd(), 'test-output.log');
     if (existsSync(testLogPath)) {
       unlinkSync(testLogPath);

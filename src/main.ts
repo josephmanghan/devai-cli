@@ -9,6 +9,8 @@ import { readFileSync } from 'node:fs';
 
 import { Command } from 'commander';
 
+import { SetupCommand } from './features/setup/setup-command.js';
+
 // Package info from package.json
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
@@ -26,6 +28,10 @@ export function createProgram(): Command {
       'Local-first CLI tool for AI-powered git commit message generation using Ollama'
     )
     .version(pkg.version, '--version', 'Show version number');
+
+  // Register setup command
+  const setupCommand = new SetupCommand();
+  setupCommand.register(program);
 
   return program;
 }

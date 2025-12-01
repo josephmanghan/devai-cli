@@ -246,7 +246,7 @@ describe('OllamaAdapter', () => {
         },
       };
 
-      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream);
+      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream as any);
 
       await expect(adapter.createModel('test-model')).resolves.not.toThrow();
 
@@ -301,7 +301,7 @@ describe('OllamaAdapter', () => {
         },
       };
 
-      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream);
+      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream as any);
 
       await expect(adapter.createModel('test-model')).resolves.not.toThrow();
 
@@ -328,11 +328,9 @@ describe('OllamaAdapter', () => {
         },
       };
 
-      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream);
+      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream as any);
 
-      await expect(
-        adapter.createModel('test-model')
-      ).resolves.not.toThrow();
+      await expect(adapter.createModel('test-model')).resolves.not.toThrow();
 
       expect(mockOllamaClient.create).toHaveBeenCalledWith({
         model: 'test-model',
