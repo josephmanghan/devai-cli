@@ -1,9 +1,3 @@
-/**
- * Performance Tracker Smoke Tests
- *
- * Validates that PerformanceTracker records operation timing correctly.
- */
-
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { PerformanceTracker } from './performance-tracker';
@@ -16,16 +10,12 @@ describe('PerformanceTracker', () => {
   });
 
   it('records operation timing correctly', async () => {
-    // Start timing
     tracker.startOperation('test-operation');
 
-    // Simulate some work
     await new Promise(resolve => setTimeout(resolve, 10));
 
-    // End timing
     tracker.endOperation('test-operation');
 
-    // Verify metric was recorded
     const metrics = tracker.getMetrics();
     expect(metrics).toHaveLength(1);
     expect(metrics[0].operation).toBe('test-operation');
@@ -46,7 +36,7 @@ describe('PerformanceTracker', () => {
     const metrics = tracker.getMetrics();
     expect(metrics).toHaveLength(1);
     expect(metrics[0].operation).toBe('auto-operation');
-    expect(metrics[0].duration).toBeGreaterThan(4); // Should be at least 5ms
+    expect(metrics[0].duration).toBeGreaterThan(4);
   });
 
   it('includes metadata in recorded metrics', async () => {
@@ -83,7 +73,6 @@ describe('PerformanceTracker', () => {
   });
 
   it('filters metrics by operation correctly', async () => {
-    // Record multiple operations
     tracker.startOperation('op1');
     tracker.endOperation('op1');
 
@@ -104,7 +93,6 @@ describe('PerformanceTracker', () => {
   });
 
   it('calculates average durations correctly', async () => {
-    // Record operations with known durations
     await tracker.timeOperation('test-op-1', async () => {
       await new Promise(resolve => setTimeout(resolve, 10));
       return 'done';
@@ -120,9 +108,9 @@ describe('PerformanceTracker', () => {
     const op2Average = tracker.getAverageDurationByOperation('test-op-2');
 
     expect(totalAverage).toBeGreaterThan(0);
-    expect(op1Average).toBeGreaterThan(9); // At least 10ms
-    expect(op2Average).toBeGreaterThan(19); // At least 20ms
-    expect(op2Average).toBeGreaterThan(op1Average); // op2 should take longer
+    expect(op1Average).toBeGreaterThan(9);
+    expect(op2Average).toBeGreaterThan(19);
+    expect(op2Average).toBeGreaterThan(op1Average);
   });
 
   it('exports metrics as JSON correctly', () => {

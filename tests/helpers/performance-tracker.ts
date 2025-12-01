@@ -1,11 +1,4 @@
 /**
- * Performance Tracker
- *
- * Measures CLI execution time and resource usage.
- * Records operation timings with metadata support.
- */
-
-/**
  * Performance metric interface
  */
 export interface PerformanceMetric {

@@ -1,9 +1,3 @@
-/**
- * Mock LLM Provider Smoke Tests
- *
- * Validates that MockLlmProvider returns mocked strings when called.
- */
-
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { MockLlmProvider } from './mock-llm-provider';
@@ -16,7 +10,6 @@ describe('MockLlmProvider', () => {
   });
 
   it('returns queued mock response', async () => {
-    // Queue a specific response
     provider.mockResponse('feat: add new feature');
 
     const result = await provider.generateCommitMessage('Add new feature');
@@ -85,22 +78,18 @@ describe('MockLlmProvider', () => {
   });
 
   it('resets state correctly', async () => {
-    // Setup some state
     provider.mockResponse('Test response');
     provider.mockError(new Error('Test error'));
     await expect(
       provider.generateCommitMessage('Test prompt')
     ).rejects.toThrow();
 
-    // Verify state exists BEFORE reset
     expect(provider.getCallCount()).toBe(1);
     expect(provider.getQueuedResponseCount()).toBe(1);
-    expect(provider.getQueuedErrorCount()).toBe(0); // Error was consumed
+    expect(provider.getQueuedErrorCount()).toBe(0);
 
-    // Reset state
     provider.reset();
 
-    // Verify reset - call count should be 0 after reset
     expect(provider.getCallCount()).toBe(0);
     expect(provider.getQueuedResponseCount()).toBe(0);
     expect(provider.getQueuedErrorCount()).toBe(0);
@@ -114,11 +103,9 @@ describe('MockLlmProvider', () => {
 
     expect(provider.getQueuedResponseCount()).toBe(3);
 
-    // Consume one response
     await provider.generateCommitMessage('Test');
     expect(provider.getQueuedResponseCount()).toBe(2);
 
-    // Consume another
     await provider.generateCommitMessage('Test');
     expect(provider.getQueuedResponseCount()).toBe(1);
   });

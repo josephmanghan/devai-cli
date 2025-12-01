@@ -1,10 +1,3 @@
-/**
- * Git Test Harness
- *
- * Provides isolated temporary git repositories for testing.
- * Follows hexagonal architecture adapter pattern.
- */
-
 import { execa } from 'execa';
 import fs from 'fs/promises';
 import os from 'os';
@@ -118,9 +111,6 @@ export class TestGitHarness implements GitTestHarness {
     return stdout;
   }
 
-  /**
-   * Execute git command in repository
-   */
   private async execGit(
     args: string[]
   ): Promise<{ stdout: string; stderr: string }> {

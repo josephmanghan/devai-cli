@@ -1,11 +1,4 @@
 /**
- * Mock LLM Provider
- *
- * Implements LlmProvider port interface for testing.
- * Provides deterministic responses without Ollama dependency.
- */
-
-/**
  * LlmProvider port interface (from src/core/ports/llm-provider.ts)
  */
 export interface LlmProvider {
