@@ -1,8 +1,9 @@
 import { Command } from 'commander';
 import { Ollama } from 'ollama';
 import ora, { type Ora } from 'ora';
-import type { OllamaModelConfig } from '../../core/types/llm-types.js';
+
 import { AppError, SystemError } from '../../core/types/errors.types.js';
+import type { OllamaModelConfig } from '../../core/types/llm-types.js';
 import { OllamaAdapter } from '../../infrastructure/llm/ollama-adapter.js';
 
 // TODO failed to implement /ui pattern. Need to do design research.
@@ -38,9 +39,11 @@ export class SetupCommand {
     adapterFactory?: () => OllamaAdapter
   ) {
     this.modelConfig = modelConfig;
-    this.adapter = adapterFactory
-      ? adapterFactory()
-      : createOllamaAdapter(modelConfig);
+    if (adapterFactory !== null && adapterFactory !== undefined) {
+      this.adapter = adapterFactory();
+    } else {
+      this.adapter = createOllamaAdapter(modelConfig);
+    }
   }
 
   /**

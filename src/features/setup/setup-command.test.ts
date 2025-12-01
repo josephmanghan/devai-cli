@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { OllamaModelConfig } from '../../core/types/llm-types.js';
 
 import { SystemError } from '../../core/types/errors.types.js';
+import type { OllamaModelConfig } from '../../core/types/llm-types.js';
 import { OllamaAdapter } from '../../infrastructure/llm/ollama-adapter.js';
 import { SetupCommand } from './setup-command.js';
 
