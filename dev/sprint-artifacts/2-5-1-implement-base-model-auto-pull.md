@@ -256,6 +256,7 @@ const config = getModelConfig(options.model);
 **Status**: Complete and validated - functional implementation approved with architectural debt noted for future refactoring.
 
 **Architectural Debt Note**: Implementation contains moderate architectural violations:
+
 - Feature layer imports infrastructure directly (setup-command.ts:6)
 - Factory function creates dependencies in feature layer (setup-command.ts:11-21)
 - TODOs acknowledge failed /ui pattern and problematic adapter factory
