@@ -1,258 +1,133 @@
-# Epic 3: Git Context Gathering & Validation - Story Breakdown
+# Epic 3: Git & Editor Infrastructure (Consolidated)
 
-**Goal:** Enable tool to read git state and validate preconditions
-**User Value:** Users get immediate, clear feedback about their git state (staged changes, repository status) before expensive operations
-**FRs Covered:** FR1, FR2, FR3, FR4, FR6, FR33, FR36
-
----
-
-<!-- TODO we need to review this file. I think some of the stories around git commands can be consolidated. In addition, validation and error handling need a review, they look weird. -->
-
-## Story 3.1: Create Git Port Interface
-
-**As a** developer
-**I want** a port interface defining git operations
-**So that** the core domain doesn't depend on shell command execution
-
-**Acceptance Criteria:**
-
-- [ ] Interface created in `src/core/ports/git-port.ts`
-- [ ] Methods defined: `isGitRepository()`, `getStagedDiff()`, `getBranchName()`, `commitChanges()`
-- [ ] Type definitions for diff output and commit parameters
-- [ ] Interface documented with JSDoc
-- [ ] Zero external dependencies in core/
-- [ ] Code adheres to dev/styleguides/clean-code.md standards
-
-**Technical Notes:**
-
-- Hexagonal architecture: core defines ports (interfaces)
-- Infrastructure layer will implement as ShellGitAdapter using execa
-- Interface methods derived from FR1-FR4, FR33, FR36
-- Diff format: unified diff string (git diff --staged output)
-
-**Testing Deliverables:**
-
-- No runtime tests (interface only)
-- Verify TypeScript compiles with strict mode
-- Verify core/ maintains zero external dependencies
-
-**FRs Covered:** FR49 (extensible architecture)
+**Goal:** Enable the tool to interact with the Git repository and system text editor, and validate execution preconditions.
+**User Value:** Users get immediate, clear feedback about their git state, and the tool can securely execute commits and open editors.
+**FRs Covered:** FR1, FR2, FR3, FR4, FR6, FR27, FR30, FR33, FR36, FR46
 
 ---
 
-## Story 3.2: Implement ShellGitAdapter
+## Story 3.1: Implement Git Infrastructure (Port & Adapter)
 
 **As a** developer
-**I want** a git adapter that executes git commands via shell
-**So that** I can read repository state without git library dependencies
+**I want** a unified service to handle all low-level git operations
+**So that** the core logic interacts with an abstract interface rather than raw shell commands
 
 **Acceptance Criteria:**
 
-- [ ] ShellGitAdapter created in `src/infrastructure/adapters/shell-git-adapter.ts`
-- [ ] Implements Git port interface from core
-- [ ] execa (9.6.0) installed and imported
-- [ ] Constructor accepts cwd parameter (manual DI)
-- [ ] All port methods implemented with error handling
-- [ ] Commands use execa for shell execution
-- [ ] Code adheres to dev/styleguides/clean-code.md standards
+- [ ] Port defined: `src/core/ports/git-port.ts`
+  - [ ] `isGitRepository(): Promise<boolean>`
+  - [ ] `getStagedDiff(): Promise<string>` (Returns empty string if no changes)
+  - [ ] `getBranchName(): Promise<string>`
+  - [ ] `commitChanges(message: string): Promise<void>`
+- [ ] Adapter implemented: `src/infrastructure/adapters/shell-git-adapter.ts`
+  - [ ] Implements `GitPort`
+  - [ ] Uses `execa` (v9.6.0) for shell execution
+  - [ ] Wraps `execa` errors in `SystemError` (Exit code 3)
+- [ ] Code adheres to `dev/styleguides/clean-code.md`
 
 **Technical Notes:**
 
-- Architecture specifies execa 9.6.0 for shell commands
-- ESM-native, replaces child_process with better API
-- Default cwd to process.cwd() if not provided
-- Error handling: catch execa errors, throw typed domain errors
-- Commands: `git rev-parse --is-inside-work-tree`, `git diff --staged`, etc.
+- **Dependencies:** `execa` is already installed.
+- **Commands:**
+  - Repo Check: `git rev-parse --is-inside-work-tree`
+  - Diff: `git diff --cached`
+  - Branch: `git branch --show-current` (Fallback to `git rev-parse HEAD` if detached)
+  - Commit: `git commit -m <msg>`
+- **Error Handling:** Use `SystemError` for shell failures (e.g., git binary missing). Do not throw domain errors (like `NoStagedChanges`) here—the Adapter just reports what Git says; the Use Case handles logic.
 
 **Testing Deliverables:**
 
-- Unit tests with mocked execa
-- Test: isGitRepository() returns true/false correctly
-- Test: Error handling for git command failures
-- Co-located test: `shell-git-adapter.test.ts`
-
-**FRs Covered:** FR1 (git repository detection)
+- **Co-located Test:** `src/infrastructure/adapters/shell-git-adapter.test.ts`
+- **Unit Tests:** Mock `execa` to simulate:
+  - Successful diff output
+  - Empty diff output
+  - Binary file diffs
+  - Commit success/failure
 
 ---
 
-## Story 3.3: Implement Staged Changes Detection
+## Story 3.2: Implement Editor Infrastructure (Port & Adapter)
 
 **As a** developer
-**I want** to detect whether staged changes exist
-**So that** the commit command can fail fast if nothing to commit
+**I want** a unified service to open the system text editor
+**So that** users can edit commit messages in their preferred environment
 
 **Acceptance Criteria:**
 
-- [ ] ShellGitAdapter.getStagedDiff() implemented
-- [ ] Returns empty string if no staged changes
-- [ ] Returns unified diff output if changes exist
-- [ ] Handles binary file changes gracefully
-- [ ] Command: `git diff --staged`
-- [ ] Code adheres to dev/styleguides/clean-code.md standards
+- [ ] Port defined: `src/core/ports/editor-port.ts`
+  - [ ] `openEditor(initialContent: string): Promise<string>`
+- [ ] Adapter implemented: `src/infrastructure/adapters/shell-editor-adapter.ts`
+  - [ ] Implements `EditorPort`
+  - [ ] Respects `$EDITOR` environment variable (defaults to `nano`)
+  - [ ] Uses temporary file pattern (`.git/COMMIT_EDITMSG_OLLATOOL`)
+  - [ ] Uses `stdio: 'inherit'` to give editor control of terminal
+- [ ] Code adheres to `dev/styleguides/clean-code.md`
 
 **Technical Notes:**
 
-- Empty diff = no staged changes (precondition failure)
-- Diff string used later for AI prompt construction
-- Binary files: git shows "Binary files differ" placeholder
-- Performance: diff should be fast (<100ms typical)
+- **Flow:**
+  1. Write `initialContent` to temp file.
+  2. Spawn editor process (must block until exit).
+  3. Read file content back.
+  4. **Crucial:** Always delete temp file in `finally` block.
+- **Edge Cases:**
+  - `$EDITOR` is invalid/missing -> Fallback to `vim` or `nano`.
+  - Editor exits with error code -> Throw `UserError` (Exit 2).
 
 **Testing Deliverables:**
 
-- Unit test: no staged changes returns empty string
-- Unit test: staged changes return diff output
-- Unit test: binary file handling
-- Mock execa to return sample diff outputs
-
-**FRs Covered:** FR2 (detect staged changes), FR3 (fail if no changes)
+- **Co-located Test:** `src/infrastructure/adapters/shell-editor-adapter.test.ts`
+- **Unit Tests:**
+  - Mock `fs` and `execa`/`spawn`.
+  - Verify temp file creation and deletion.
+  - Verify environment variable usage.
 
 ---
 
-## Story 3.4: Implement Branch Name Extraction
+## Story 3.3: Implement Precondition Validation (Use Case)
 
 **As a** developer
-**I want** to extract current git branch name
-**So that** it can be included in commit metadata or error messages
+**I want** to orchestrate all system checks in a specific order
+**So that** the tool fails fast with actionable advice before attempting expensive AI operations
 
 **Acceptance Criteria:**
 
-- [ ] ShellGitAdapter.getBranchName() implemented
-- [ ] Returns current branch name as string
-- [ ] Handles detached HEAD state (return commit hash)
-- [ ] Command: `git branch --show-current`
-- [ ] Fallback: `git rev-parse HEAD` if detached
-- [ ] Code adheres to dev/styleguides/clean-code.md standards
+- [ ] Use Case created: `src/features/commit/use-cases/validate-preconditions.ts`
+- [ ] Injects `GitPort` and `LlmPort` (Dependency Injection)
+- [ ] Implements "Fail Fast" logic chain:
+  1. **Ollama Daemon:** Is it running? -> `SystemError` (Exit 3)
+  2. **Git Repo:** Is current dir a repo? -> `UserError` (Exit 2)
+  3. **Staged Changes:** Is diff empty? -> `UserError` (Exit 2)
+- [ ] Returns a "Context Object" on success: `{ diff: string, branch: string, status: string }`
+- [ ] Code adheres to `dev/styleguides/clean-code.md`
 
 **Technical Notes:**
 
-- Primary use: informational (user context)
-- Detached HEAD: return first 7 chars of commit hash
-- Error handling: throw if git command fails
-- Not critical path for MVP (nice-to-have metadata)
+- **Error Alignment (See `src/core/types/errors.types.ts`):**
+  - Daemon Fail: `SystemError` ("Ollama not running", "Run ollama serve")
+  - Not Repo: `UserError` ("Not a git repository", "Run git init")
+  - No Changes: `UserError` ("No staged changes", "Run git add <files>")
+- **Logic:** This is the _only_ place where business rules about preconditions live. The Adapters are dumb; this Use Case is smart.
 
 **Testing Deliverables:**
 
-- Unit test: normal branch returns name
-- Unit test: detached HEAD returns commit hash
-- Unit test: Error handling for failures
-- Mock execa with branch name output
-
-**FRs Covered:** FR33 (read current branch)
-
----
-
-## Story 3.5: Implement Commit Execution
-
-**As a** developer
-**I want** to execute git commit with a message
-**So that** the tool can finalize commits after approval
-
-**Acceptance Criteria:**
-
-- [ ] ShellGitAdapter.commitChanges(message) implemented
-- [ ] Executes `git commit -m <message>`
-- [ ] Returns success/failure status
-- [ ] Preserves multi-line commit messages
-- [ ] Handles commit hook failures gracefully
-- [ ] Code adheres to dev/styleguides/clean-code.md standards
-
-**Technical Notes:**
-
-- Message must be properly escaped for shell
-- execa handles argument escaping automatically
-- Multi-line messages: use array args, not string concatenation
-- Command: `git commit -m <message>` (execa with args array)
-- Commit hooks may fail (pre-commit, commit-msg)
-
-**Testing Deliverables:**
-
-- Unit test: commit succeeds with valid message
-- Unit test: multi-line message preserved
-- Unit test: commit hook failure detected
-- Mock execa with success/failure responses
-
-**FRs Covered:** FR36 (execute git commit)
-
----
-
-## Story 3.6: Implement Git Validation Use Case
-
-**As a** developer
-**I want** a use case that validates all git preconditions
-**So that** the commit command can fail fast with clear errors
-
-**Acceptance Criteria:**
-
-- [ ] Use case created in `src/features/commit/validate-git-preconditions.ts`
-- [ ] Checks: is git repo, has staged changes, Ollama setup complete
-- [ ] Returns typed result (success + data OR failure + error)
-- [ ] Integrates with ShellGitAdapter via port
-- [ ] Clear error messages for each failure mode
-
-**Technical Notes:**
-
-- Validation order: git repo → staged changes → Ollama setup
-- Fail fast: stop on first failure, return error
-- Success result includes diff + branch name (for prompt construction)
-- Error types: NotGitRepository, NoStagedChanges, OllamaNotSetup
-- Use case coordinates adapters (git + Ollama)
-
-**Testing Deliverables:**
-
-- Unit test: all validations pass returns success
-- Unit test: not a git repo returns typed error
-- Unit test: no staged changes returns typed error
-- Unit test: Ollama not setup returns typed error
-- Mock both adapters for isolated testing
-
-**FRs Covered:** FR1 (git repo check), FR3 (staged changes check), FR4 (clear validation errors)
-
----
-
-## Story 3.7: Implement Git Error Handling
-
-**As a** developer
-**I want** clear error messages for git-related failures
-**So that** users know exactly how to fix their git state
-
-**Acceptance Criteria:**
-
-- [ ] Typed error classes: NotGitRepository, NoStagedChanges, GitCommandFailed
-- [ ] Each error includes remediation guidance
-- [ ] Exit codes: user=2 (no staged changes), system=3 (git command fail)
-- [ ] Error messages reference git commands to fix issues
-- [ ] Integration with command handler
-
-**Technical Notes:**
-
-- Architecture specifies typed error classes with exit codes
-- User errors (exit 2): no staged changes (run `git add`)
-- System errors (exit 3): git command failed (check git installation)
-- Validation errors (exit 4): not a git repo (run `git init`)
-- Actionable messages per PRD requirement (FR38-40)
-
-**Testing Deliverables:**
-
-- Unit test: NoStagedChanges includes "git add" guidance
-- Unit test: NotGitRepository includes "git init" guidance
-- Unit test: Exit codes map correctly
-- Co-located tests for error classes
-
-**FRs Covered:** FR4 (validation errors), FR38-40 (actionable guidance), FR6 (failed preconditions)
+- **Co-located Test:** `src/features/commit/use-cases/validate-preconditions.test.ts`
+- **Unit Tests:**
+  - Mock Ports to simulate failure states.
+  - Verify correct Error type and Exit Code is thrown for each failure.
+  - Verify Context Object is returned on success.
 
 ---
 
 ## Epic 3 Summary
 
-**Total Stories:** 7
-**Estimated Complexity:** Medium (shell command integration)
-**Dependencies:** Epic 1 (Foundation) must be complete
-**Output:** Working git integration that validates preconditions and reads staged changes
+**Total Stories:** 3
+**Estimated Complexity:** Low/Medium
+**Dependencies:** Epic 1 (Errors/Types), Epic 2 (LlmPort)
+**Output:** A fully functioning infrastructure layer for Git and Editor operations, plus the "Gatekeeper" use case for the main command.
 
 **Completion Criteria:**
 
-- All 7 stories pass acceptance criteria
-- ShellGitAdapter works with real git commands (integration test)
-- Validation use case returns clear errors for each failure mode
-- Unit tests cover ShellGitAdapter with mocked execa
-- Manual testing confirms validation works in real repositories
+- `ShellGitAdapter` successfully executes commands in a real repo.
+- `ShellEditorAdapter` can launch `nano` (or mock) and capture input.
+- `ValidatePreconditions` correctly stops execution if user hasn't staged files.
