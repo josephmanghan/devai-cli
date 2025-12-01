@@ -8,7 +8,11 @@ import { OllamaAdapter } from '../../infrastructure/llm/ollama-adapter.js';
 // TODO failed to implement /ui pattern. Need to do design research.
 
 /**
- * TODO: Redesign needed - factory violates clean architecture, should use DI injection via application service
+ * TODO: Redesign needed - factory violates clean architecture, should use DI injection via application service.
+ *
+ * `createOllamaAdapter` factory function lives in the features/ layer (setup-command.ts:13-21).
+ * This creates a dependency from feature → infrastructure (importing `OllamaAdapter`).
+ * Should be: Application service layer handles adapter instantiation, feature layer receives adapter via DI.
  */
 export function createOllamaAdapter(config: OllamaModelConfig): OllamaAdapter {
   const ollamaClient = new Ollama();
@@ -28,7 +32,7 @@ export class SetupCommand {
   private readonly modelConfig: OllamaModelConfig;
   private readonly adapter: OllamaAdapter;
 
-  // TODO adapterFactor pattern is problematic
+  // TODO adapterFactor pattern is problematic. This has been done for testing purposes, which is bad.
   constructor(
     modelConfig: OllamaModelConfig,
     adapterFactory?: () => OllamaAdapter

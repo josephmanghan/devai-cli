@@ -256,6 +256,8 @@ _Critical note: implementation change in 2.4. No longer using ModelFile. Now cal
 
 **FRs Covered:** FR11 (fail fast validation), FR38-40 (error guidance), FR45 (ollatool setup command error handling)
 
+MOVED TO CLOSED. TURNS OUT THIS WAS DONE IN EARLIER TICKET. VERY ANNOYING.
+
 ---
 
 ## Epic 2 Summary
