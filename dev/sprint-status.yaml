@@ -56,7 +56,7 @@ development_status:
   epic-1-retrospective: done
 
   # Epic 2: Ollama Integration & Model Management (6 stories)
-  epic-2: backlog
+  epic-2: contexted
   2-1-create-ollama-port-interface: done
   2-2-implement-ollama-adapter: done
   2-3-implement-model-existence-check: closed
@@ -67,38 +67,24 @@ development_status:
   2-7-architecture-refactor: done
   epic-2-retrospective: done
 
-  # Epic 3: Git Context Gathering & Validation (7 stories)
-  epic-3: backlog
-  3-1-create-git-port-interface: backlog
-  3-2-implement-shell-git-adapter: backlog
-  3-3-implement-staged-changes-detection: backlog
-  3-4-implement-branch-name-extraction: backlog
-  3-5-implement-commit-execution: backlog
-  3-6-implement-git-validation-use-case: backlog
-  3-7-implement-git-error-handling: backlog
+  # Epic 3: Git & Editor Infrastructure (3 stories)
+  epic-3: contexted
+  3-1-implement-git-infrastructure: done
+  3-2-implement-editor-infrastructure: done
+  3-3-implement-precondition-validation: done
   epic-3-retrospective: optional
 
-  # Epic 4: AI-Powered Message Generation (7 stories)
-  epic-4: backlog
-  4-1-create-prompt-builder: backlog
-  4-2-implement-conventional-commits-type-support: backlog
-  4-3-implement-format-validator: backlog
-  4-4-implement-type-enforcement-logic: backlog
-  4-5-implement-message-normalization: backlog
-  4-6-implement-retry-logic-with-silent-regeneration: backlog
-  4-7-integrate-generation-pipeline: backlog
+  # Epic 4: AI Generation Logic (2 stories)
+  epic-4: contexted
+  4-1-implement-message-processing-utilities: backlog
+  4-2-implement-generate-commit-strategy: backlog
   epic-4-retrospective: optional
 
-  # Epic 5: Interactive Commit Workflow (8 stories)
-  epic-5: backlog
-  5-1-implement-commit-type-selector: backlog
-  5-2-implement-message-preview-display: backlog
-  5-3-implement-action-selector-approve-edit-regenerate-cancel: backlog
-  5-4-implement-editor-integration: backlog
-  5-5-implement-regenerate-logic: backlog
-  5-6-implement-commit-execution-on-approval: backlog
-  5-7-implement-commit-workflow-orchestrator: backlog
-  5-8-wire-commit-command-to-cli: backlog
+  # Epic 5: Interactive Workflow & CLI (3 stories)
+  epic-5: contexted
+  5-1-implement-ui-components: backlog
+  5-2-implement-commit-controller: backlog
+  5-3-wiring-cli-entry: backlog
   epic-5-retrospective: optional
 
   # Epic 6: Performance & Error Handling (8 stories)

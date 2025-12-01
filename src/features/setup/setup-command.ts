@@ -5,6 +5,8 @@ import { SetupUiPort } from '../../core/ports/setup-ui-port.js';
 import { AppError, SystemError } from '../../core/types/errors.types.js';
 import type { OllamaModelConfig } from '../../core/types/llm-types.js';
 
+// TODO we potentially should re-architect this file, though it is imported
+
 /**
  * Command handler for `ollatool setup`.
  * Orchestrates Ollama environment validation and model provisioning using dependency injection.
