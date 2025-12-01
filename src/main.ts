@@ -9,7 +9,6 @@ import { CONVENTIONAL_COMMIT_MODEL_CONFIG } from './infrastructure/config/conven
 import { OllamaAdapter } from './infrastructure/llm/ollama-adapter.js';
 import { ConsoleSetupRenderer } from './ui/setup/console-setup-renderer.js';
 
-// Package info from package.json
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 /**
@@ -26,10 +25,8 @@ export function createSetupCommand(
     modelConfig.parameters
   );
 
-  // Create Setup UI renderer
   const setupUi = new ConsoleSetupRenderer();
 
-  // Create and inject dependencies into feature
   return new SetupCommand(modelConfig, ollamaAdapter, setupUi);
 }
 
@@ -40,7 +37,6 @@ export function createSetupCommand(
 export function createProgram(): Command {
   const program = new Command();
 
-  // Configure program basics
   program
     .name('ollatool')
     .description(
@@ -48,7 +44,6 @@ export function createProgram(): Command {
     )
     .version(pkg.version, '--version', 'Show version number');
 
-  // Register setup command with proper DI wiring
   const setupCommand = createSetupCommand(CONVENTIONAL_COMMIT_MODEL_CONFIG);
   setupCommand.register(program);
 
@@ -62,6 +57,5 @@ export function createProgram(): Command {
 export function main(): void {
   const program = createProgram();
 
-  // Parse command line arguments
   program.parse();
 }

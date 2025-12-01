@@ -88,11 +88,45 @@ describe('OllamaAdapter', () => {
       completed: 100,
     };
 
+    // Base object for progress responses to reduce duplication
+    const baseProgress: Omit<ProgressResponse, 'status'> = {
+      digest: 'sha256:abc123',
+      total: 100,
+      completed: 100,
+    };
+
+    const mockProgressPullingManifest: ProgressResponse = {
+      status: 'pulling manifest',
+      digest: '',
+      total: 0,
+      completed: 0,
+    };
+
+    const mockProgressDownloading: ProgressResponse = {
+      ...baseProgress,
+      status: 'downloading',
+      completed: 50,
+    };
+
+    const mockProgressDownloadComplete: ProgressResponse = {
+      ...baseProgress,
+      status: 'downloading',
+    };
+
+    const mockProgressVerifying: ProgressResponse = {
+      ...baseProgress,
+      status: 'verifying',
+    };
+
     return {
       mockModels,
       mockOptions,
       mockGenerateResponse,
       mockProgressResponse,
+      mockProgressPullingManifest,
+      mockProgressDownloading,
+      mockProgressDownloadComplete,
+      mockProgressVerifying,
       createBaseModel,
     };
   };
@@ -271,7 +305,7 @@ describe('OllamaAdapter', () => {
         stream: true,
       });
 
-      expect(progressUpdates).toHaveLength(4); // 3 from stream + 1 success message
+      expect(progressUpdates).toHaveLength(4);
       expect(progressUpdates[0]).toEqual({
         status: 'reading model definition',
       });
@@ -294,8 +328,7 @@ describe('OllamaAdapter', () => {
 
       await expect(async () => {
         for await (const _ of adapter.createModel('test-model')) {
-          // Consume the generator
-          // Consume the generator
+          // Consume the stream to trigger the error
         }
       }).rejects.toThrow(SystemError);
     });
@@ -312,8 +345,7 @@ describe('OllamaAdapter', () => {
 
       await expect(async () => {
         for await (const _ of adapter.createModel('test-model')) {
-          // Consume the generator
-          // Consume the generator
+          // Consume the stream to trigger the error
         }
       }).rejects.toThrow(SystemError);
     });
@@ -333,7 +365,7 @@ describe('OllamaAdapter', () => {
         progressUpdates.push(update);
       }
 
-      expect(progressUpdates).toHaveLength(2); // 1 from stream + 1 success message
+      expect(progressUpdates).toHaveLength(2);
       expect(mockOllamaClient.create).toHaveBeenCalledWith({
         model: 'test-model',
         from: undefined,
@@ -362,7 +394,7 @@ describe('OllamaAdapter', () => {
         progressUpdates.push(update);
       }
 
-      expect(progressUpdates).toHaveLength(2); // 1 from stream + 1 success message
+      expect(progressUpdates).toHaveLength(2);
       expect(mockOllamaClient.create).toHaveBeenCalledWith({
         model: 'test-model',
         from: 'qwen2.5-coder:1.5b',
@@ -393,26 +425,24 @@ describe('OllamaAdapter', () => {
     });
 
     it('should pull model and yield progress when it does not exist', async () => {
+      const {
+        mockProgressPullingManifest,
+        mockProgressDownloading,
+        mockProgressDownloadComplete,
+        mockProgressVerifying,
+        mockProgressResponse,
+      } = getData();
+
       const { adapter, mockOllamaClient } = getInstance({
         listResponse: { models: [] },
       });
 
       const mockStream = createMockAsyncIterator([
-        { status: 'pulling manifest' },
-        {
-          status: 'downloading',
-          digest: 'sha256:abc123',
-          total: 100,
-          completed: 50,
-        },
-        {
-          status: 'downloading',
-          digest: 'sha256:abc123',
-          total: 100,
-          completed: 100,
-        },
-        { status: 'verifying' },
-        { status: 'success' },
+        mockProgressPullingManifest,
+        mockProgressDownloading,
+        mockProgressDownloadComplete,
+        mockProgressVerifying,
+        mockProgressResponse,
       ]);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -428,11 +458,30 @@ describe('OllamaAdapter', () => {
         stream: true,
       });
 
-      expect(progressUpdates).toHaveLength(6); // 5 from stream + 1 success message
-      expect(progressUpdates[0]).toEqual({ status: 'pulling manifest' });
+      expect(progressUpdates).toHaveLength(6);
+      expect(progressUpdates[0]).toEqual({
+        status: 'pulling manifest',
+        current: 0,
+        total: 0,
+      });
       expect(progressUpdates[1]).toEqual({
         status: 'downloading',
         current: 50,
+        total: 100,
+      });
+      expect(progressUpdates[2]).toEqual({
+        status: 'downloading',
+        current: 100,
+        total: 100,
+      });
+      expect(progressUpdates[3]).toEqual({
+        status: 'verifying',
+        current: 100,
+        total: 100,
+      });
+      expect(progressUpdates[4]).toEqual({
+        status: 'success',
+        current: 100,
         total: 100,
       });
       expect(progressUpdates[5]).toEqual({
@@ -450,8 +499,7 @@ describe('OllamaAdapter', () => {
 
       await expect(async () => {
         for await (const _ of adapter.pullModel('test-model')) {
-          // Consume the generator
-          // Consume the generator
+          // Consume the stream to trigger the error
         }
       }).rejects.toThrow(SystemError);
     });
@@ -466,8 +514,7 @@ describe('OllamaAdapter', () => {
 
       await expect(async () => {
         for await (const _ of adapter.pullModel('test-model')) {
-          // Consume the generator
-          // Consume the generator
+          // Consume the stream to trigger the error
         }
       }).rejects.toThrow(SystemError);
     });

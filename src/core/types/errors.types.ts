@@ -1,15 +1,9 @@
-/**
- * Custom error class for ollatool application
- * Provides typed exit codes and debug serialization
- */
-
 import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 import debug from 'debug';
 
-// Debug logger instances - only output when DEBUG=ollatool:* is set
 const logError = debug('ollatool:error');
 const logDebug = debug('ollatool:debug');
 
@@ -22,7 +16,6 @@ export class AppError extends Error {
     super(message);
     this.name = 'AppError';
 
-    // Ensure proper stack trace
     if (Error.captureStackTrace !== undefined) {
       Error.captureStackTrace(this, this.constructor);
     }

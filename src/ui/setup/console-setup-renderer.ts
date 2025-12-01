@@ -140,9 +140,6 @@ export class ConsoleSetupRenderer implements SetupUiPort {
     this.activeSpinner = ora(`Pulling ${modelName}...`).start();
   }
 
-  /**
-   * Get default success message for each step type.
-   */
   private getDefaultSuccessMessage(step: string): string {
     switch (step) {
       case 'daemon':
@@ -152,9 +149,6 @@ export class ConsoleSetupRenderer implements SetupUiPort {
     }
   }
 
-  /**
-   * Get default failure message for each step type.
-   */
   private getDefaultFailureMessage(step: string): string {
     switch (step) {
       case 'daemon':

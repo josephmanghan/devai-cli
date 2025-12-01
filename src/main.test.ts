@@ -1,39 +1,28 @@
-/**
- * CLI Program Tests
- * Tests for Commander.js program creation and configuration
- */
-
 import { Command } from 'commander';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createProgram, main } from './main.js';
 
-// Mock console methods to capture output
 const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
 const mockConsoleError = vi
   .spyOn(console, 'error')
   .mockImplementation(() => {});
 
-// Mock process.argv for testing
 const originalArgv = process.argv;
 
 describe('CLI Program', () => {
   let program: Command;
 
   beforeEach(() => {
-    // Clear all mock calls before each test
     mockConsoleLog.mockClear();
     mockConsoleError.mockClear();
 
-    // Reset process.argv to a clean state
     process.argv = ['node', 'test'];
 
-    // Create fresh program instance
     program = createProgram();
   });
 
   afterEach(() => {
-    // Restore original process.argv after each test
     process.argv = originalArgv;
   });
 
@@ -57,7 +46,6 @@ describe('CLI Program', () => {
     });
 
     it('should support command registration', () => {
-      // Minimal test: prove Commander.js command registration works
       const testCommand = program
         .command('test-cmd')
         .description('Test command');
@@ -73,7 +61,6 @@ describe('CLI Program', () => {
     it('should display help when --help flag is used', () => {
       process.argv = ['node', 'test', '--help'];
 
-      // Mock the help output
       const mockHelp = vi.fn();
       program.configureOutput({
         writeOut: mockHelp,
@@ -120,25 +107,6 @@ describe('CLI Program', () => {
       main();
 
       expect(mockParse).toHaveBeenCalled();
-    });
-  });
-
-  describe('conditional execution', () => {
-    it('should only execute main when run directly', () => {
-      // This test verifies that main() can be imported without execution
-      // The actual conditional execution is tested implicitly by the test setup
-      expect(typeof main).toBe('function');
-    });
-  });
-
-  describe('package integration', () => {
-    it('should read version from package.json', () => {
-      const program = createProgram();
-
-      // We can't easily test the exact version without mocking fs.readFileSync
-      // But we can verify that version option exists
-      const helpText = program.helpInformation();
-      expect(helpText).toContain('--version');
     });
   });
 });

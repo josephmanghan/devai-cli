@@ -1,7 +1,3 @@
-/**
- * Tests for custom error classes and debug logging
- */
-
 import { existsSync, unlinkSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
@@ -16,7 +12,6 @@ import {
   ValidationError,
 } from './errors.types';
 
-// Mock debug module
 vi.mock('debug', () => {
   return {
     default: vi.fn(() => vi.fn()),
@@ -27,14 +22,12 @@ const debugLog = join(homedir(), '.ollatool', 'debug.log');
 
 describe('AppError', () => {
   beforeEach(() => {
-    // Clean up debug log file if it exists
     if (existsSync(debugLog)) {
       unlinkSync(debugLog);
     }
   });
 
   afterEach(() => {
-    // Clean up debug log file after each test
     if (existsSync(debugLog)) {
       unlinkSync(debugLog);
     }
@@ -243,28 +236,5 @@ describe('UnexpectedError', () => {
     expect(logEntry.message).toBe('Unexpected error occurred');
     expect(logEntry.code).toBe(5);
     expect(logEntry.remediation).toBe('Contact support');
-  });
-});
-
-describe('Clean code compliance', () => {
-  it('should have functions no longer than 15 lines', () => {
-    // This test verifies our adherence to the clean code standard
-    // All methods should be ≤15 lines
-    const error = new AppError('Test', 1);
-
-    expect(error.serializeToDebugObject).toBeDefined();
-    expect(error.writeToDebugLog).toBeDefined();
-    expect(typeof error.serializeToDebugObject).toBe('function');
-    expect(typeof error.writeToDebugLog).toBe('function');
-  });
-
-  it('should maintain high coverage without complex error mocks', () => {
-    // Our implementation already has excellent coverage (94%+)
-    // The 50% branch coverage is from error handling paths that are
-    // difficult to test reliably in unit tests but work in practice
-    const error = new AppError('Test', 1);
-    expect(error.serializeToDebugObject()).toHaveProperty('name', 'AppError');
-    expect(error.serializeToDebugObject()).toHaveProperty('message', 'Test');
-    expect(error.serializeToDebugObject()).toHaveProperty('code', 1);
   });
 });

@@ -50,7 +50,6 @@ describe('Setup Command Business Logic Integration Tests', () => {
     }
   });
 
-  // TODO: skipped as this has randomly stopped passing due to timeout but the time itself it not even happening
   it('should execute complete setup workflow with auto-pull', async () => {
     const setupCommand = new SetupCommand(
       testConfig,

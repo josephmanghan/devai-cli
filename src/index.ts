@@ -6,5 +6,4 @@
 
 import { main } from './main.js';
 
-// Execute the CLI
 main();

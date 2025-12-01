@@ -1,9 +1,4 @@
 /**
- * Large Language Model related types and interfaces.
- * Shared across the core domain for LLM operations.
- */
-
-/**
  * Configuration parameters for text generation.
  * Controls model behavior, output characteristics, and resource management.
  */
