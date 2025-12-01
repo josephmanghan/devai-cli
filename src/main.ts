@@ -5,6 +5,7 @@ import { Ollama } from 'ollama';
 
 import { OllamaModelConfig } from './core/index.js';
 import { SetupCommand } from './features/setup/setup-command.js';
+import { ProvisionEnvironment } from './features/setup/use-cases/provision-environment.js';
 import {
   CONVENTIONAL_COMMIT_MODEL_CONFIG,
   OllamaAdapter,
@@ -29,7 +30,15 @@ export function createSetupCommand(
 
   const setupUi = new ConsoleSetupRenderer();
 
-  return new SetupCommand(modelConfig, ollamaAdapter, setupUi);
+  // Create the ProvisionEnvironment use case
+  const provisionEnvironment = new ProvisionEnvironment(
+    ollamaAdapter,
+    setupUi,
+    modelConfig
+  );
+
+  // Inject ProvisionEnvironment into SetupCommand
+  return new SetupCommand(modelConfig, provisionEnvironment, setupUi);
 }
 
 /**

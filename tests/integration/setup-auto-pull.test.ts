@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { SetupUiPort } from '../../src/core/ports/setup-ui-port.js';
 import type { OllamaModelConfig } from '../../src/core/types/llm-types.js';
 import { SetupCommand } from '../../src/features/setup/setup-command.js';
+import { ProvisionEnvironment } from '../../src/features/setup/use-cases/provision-environment.js';
 import { OllamaAdapter } from '../../src/infrastructure/adapters/ollama/ollama-adapter.js';
 
 // Stub UI implementation for integration tests (no console output)
@@ -51,10 +52,16 @@ describe('Setup Command Business Logic Integration Tests', () => {
   });
 
   it('should execute complete setup workflow with auto-pull', async () => {
+    const stubUi = new StubUi();
+    const provisionEnvironment = new ProvisionEnvironment(
+      testAdapter,
+      stubUi,
+      testConfig
+    );
     const setupCommand = new SetupCommand(
       testConfig,
-      testAdapter,
-      new StubUi()
+      provisionEnvironment,
+      stubUi
     );
     const program = new Command();
 
@@ -76,10 +83,16 @@ describe('Setup Command Business Logic Integration Tests', () => {
       // Model doesn't exist
     }
 
+    const stubUi = new StubUi();
+    const provisionEnvironment = new ProvisionEnvironment(
+      testAdapter,
+      stubUi,
+      testConfig
+    );
     const setupCommand = new SetupCommand(
       testConfig,
-      testAdapter,
-      new StubUi()
+      provisionEnvironment,
+      stubUi
     );
     const program = new Command();
 
