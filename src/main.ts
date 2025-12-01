@@ -1,20 +1,36 @@
 import { readFileSync } from 'node:fs';
+
 import { Command } from 'commander';
+import { Ollama } from 'ollama';
+
 import type { OllamaModelConfig } from './core/types/llm-types.js';
 import { SetupCommand } from './features/setup/setup-command.js';
 import { CONVENTIONAL_COMMIT_MODEL_CONFIG } from './infrastructure/config/conventional-commit-model.config.js';
+import { OllamaAdapter } from './infrastructure/llm/ollama-adapter.js';
+import { ConsoleSetupRenderer } from './ui/setup/console-setup-renderer.js';
 
 // Package info from package.json
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 /**
- * Factory function for creating setup commands with different model types.
- * Enables clean extensibility.
+ * Composition root - creates and wires all dependencies.
  */
 export function createSetupCommand(
   modelConfig: OllamaModelConfig
 ): SetupCommand {
-  return new SetupCommand(modelConfig);
+  const ollamaClient = new Ollama();
+  const ollamaAdapter = new OllamaAdapter(
+    ollamaClient,
+    modelConfig.baseModel,
+    modelConfig.systemPrompt,
+    modelConfig.parameters
+  );
+
+  // Create Setup UI renderer
+  const setupUi = new ConsoleSetupRenderer();
+
+  // Create and inject dependencies into feature
+  return new SetupCommand(modelConfig, ollamaAdapter, setupUi);
 }
 
 /**
@@ -32,7 +48,7 @@ export function createProgram(): Command {
     )
     .version(pkg.version, '--version', 'Show version number');
 
-  // Register setup command
+  // Register setup command with proper DI wiring
   const setupCommand = createSetupCommand(CONVENTIONAL_COMMIT_MODEL_CONFIG);
   setupCommand.register(program);
 

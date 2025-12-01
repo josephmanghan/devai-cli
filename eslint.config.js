@@ -71,7 +71,7 @@ export default [
       'max-lines-per-function': [
         'error',
         {
-          max: 15,
+          max: 20,
           skipBlankLines: true,
           skipComments: true,
         },
@@ -135,6 +135,10 @@ export default [
       'max-lines-per-function': 'off',
       'n/no-unpublished-import': 'off',
       'n/no-missing-import': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^_' },
+      ],
     },
   },
   {

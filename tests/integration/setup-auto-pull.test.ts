@@ -2,9 +2,23 @@ import { Command } from 'commander';
 import { Ollama } from 'ollama';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import type { SetupUiPort } from '../../src/core/ports/setup-ui-port.js';
 import type { OllamaModelConfig } from '../../src/core/types/llm-types.js';
 import { SetupCommand } from '../../src/features/setup/setup-command.js';
 import { OllamaAdapter } from '../../src/infrastructure/llm/ollama-adapter.js';
+
+// Stub UI implementation for integration tests (no console output)
+class StubUi implements SetupUiPort {
+  showIntro(): void {}
+  showOutro(): void {}
+  onCheckStarted(): void {}
+  onCheckSuccess(): void {}
+  onCheckFailure(): void {}
+  onProgress(): void {}
+  showBaseModelMissingWarning(): void {}
+  showPullStartMessage(): void {}
+  startPullSpinner(): void {}
+}
 
 describe('Setup Command Business Logic Integration Tests', () => {
   let ollamaClient: Ollama;
@@ -38,7 +52,11 @@ describe('Setup Command Business Logic Integration Tests', () => {
 
   // TODO: skipped as this has randomly stopped passing due to timeout but the time itself it not even happening
   it('should execute complete setup workflow with auto-pull', async () => {
-    const setupCommand = new SetupCommand(testConfig, () => testAdapter);
+    const setupCommand = new SetupCommand(
+      testConfig,
+      testAdapter,
+      new StubUi()
+    );
     const program = new Command();
 
     setupCommand.register(program);
@@ -59,7 +77,11 @@ describe('Setup Command Business Logic Integration Tests', () => {
       // Model doesn't exist
     }
 
-    const setupCommand = new SetupCommand(testConfig, () => testAdapter);
+    const setupCommand = new SetupCommand(
+      testConfig,
+      testAdapter,
+      new StubUi()
+    );
     const program = new Command();
 
     setupCommand.register(program);

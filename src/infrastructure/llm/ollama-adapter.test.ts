@@ -5,20 +5,10 @@ import type {
   Ollama,
   ProgressResponse,
 } from 'ollama';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { SystemError, UserError } from '../../core/types/errors.types.js';
 import { OllamaAdapter } from './ollama-adapter.js';
-
-vi.mock('ora', () => ({
-  default: vi.fn().mockReturnValue({
-    start: vi.fn().mockReturnValue({
-      succeed: vi.fn(),
-      fail: vi.fn(),
-      text: '',
-    }),
-  }),
-}));
 
 function createMockAsyncIterator(items: ProgressResponse[]) {
   async function* generator() {
@@ -220,26 +210,22 @@ describe('OllamaAdapter', () => {
   });
 
   describe('createModel', () => {
-    beforeEach(() => {
-      vi.spyOn(console, 'log').mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-      vi.restoreAllMocks();
-    });
-
-    it('should skip creation when model already exists (idempotency)', async () => {
+    it('should yield progress when model already exists (idempotency)', async () => {
       const { mockModels } = getData();
       const { adapter, mockOllamaClient } = getInstance({
         listResponse: mockModels,
       });
 
-      await expect(adapter.createModel('custom-model')).resolves.not.toThrow();
+      const progressUpdates = [];
+      for await (const update of adapter.createModel('custom-model')) {
+        progressUpdates.push(update);
+      }
 
       expect(mockOllamaClient.create).not.toHaveBeenCalled();
-      expect(console.log).toHaveBeenCalledWith(
-        "✓ Model 'custom-model' already exists, skipping creation"
-      );
+      expect(progressUpdates).toHaveLength(1);
+      expect(progressUpdates[0]).toEqual({
+        status: "Model 'custom-model' already exists",
+      });
     });
 
     it('should create model with direct SDK parameters', async () => {
@@ -272,7 +258,10 @@ describe('OllamaAdapter', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockOllamaClient.create as any).mockResolvedValue(mockStream);
 
-      await expect(adapter.createModel('test-model')).resolves.not.toThrow();
+      const progressUpdates = [];
+      for await (const update of adapter.createModel('test-model')) {
+        progressUpdates.push(update);
+      }
 
       expect(mockOllamaClient.create).toHaveBeenCalledWith({
         model: 'test-model',
@@ -280,6 +269,16 @@ describe('OllamaAdapter', () => {
         system: systemPrompt,
         parameters,
         stream: true,
+      });
+
+      expect(progressUpdates).toHaveLength(4); // 3 from stream + 1 success message
+      expect(progressUpdates[0]).toEqual({
+        status: 'reading model definition',
+      });
+      expect(progressUpdates[1]).toEqual({ status: 'creating model' });
+      expect(progressUpdates[2]).toEqual({ status: 'success' });
+      expect(progressUpdates[3]).toEqual({
+        status: "Model 'test-model' created successfully",
       });
     });
 
@@ -293,9 +292,12 @@ describe('OllamaAdapter', () => {
       const createError = new Error('Invalid model definition');
       vi.mocked(mockOllamaClient.create).mockRejectedValue(createError);
 
-      await expect(adapter.createModel('test-model')).rejects.toThrow(
-        SystemError
-      );
+      await expect(async () => {
+        for await (const _ of adapter.createModel('test-model')) {
+          // Consume the generator
+          // Consume the generator
+        }
+      }).rejects.toThrow(SystemError);
     });
 
     it('should throw SystemError when daemon is unavailable during creation', async () => {
@@ -308,9 +310,12 @@ describe('OllamaAdapter', () => {
       const connectionError = new Error('ECONNREFUSED');
       vi.mocked(mockOllamaClient.create).mockRejectedValue(connectionError);
 
-      await expect(adapter.createModel('test-model')).rejects.toThrow(
-        SystemError
-      );
+      await expect(async () => {
+        for await (const _ of adapter.createModel('test-model')) {
+          // Consume the generator
+          // Consume the generator
+        }
+      }).rejects.toThrow(SystemError);
     });
 
     it('should work with minimal constructor (generic adapter)', async () => {
@@ -323,8 +328,12 @@ describe('OllamaAdapter', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockOllamaClient.create as any).mockResolvedValue(mockStream);
 
-      await expect(adapter.createModel('test-model')).resolves.not.toThrow();
+      const progressUpdates = [];
+      for await (const update of adapter.createModel('test-model')) {
+        progressUpdates.push(update);
+      }
 
+      expect(progressUpdates).toHaveLength(2); // 1 from stream + 1 success message
       expect(mockOllamaClient.create).toHaveBeenCalledWith({
         model: 'test-model',
         from: undefined,
@@ -348,8 +357,12 @@ describe('OllamaAdapter', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockOllamaClient.create as any).mockResolvedValue(mockStream);
 
-      await expect(adapter.createModel('test-model')).resolves.not.toThrow();
+      const progressUpdates = [];
+      for await (const update of adapter.createModel('test-model')) {
+        progressUpdates.push(update);
+      }
 
+      expect(progressUpdates).toHaveLength(2); // 1 from stream + 1 success message
       expect(mockOllamaClient.create).toHaveBeenCalledWith({
         model: 'test-model',
         from: 'qwen2.5-coder:1.5b',
@@ -361,37 +374,69 @@ describe('OllamaAdapter', () => {
   });
 
   describe('pullModel', () => {
-    beforeEach(() => {
-      vi.spyOn(console, 'log').mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-      vi.restoreAllMocks();
-    });
-
-    it('should skip pulling when model already exists (idempotency)', async () => {
+    it('should yield progress when model already exists (idempotency)', async () => {
       const { mockModels } = getData();
       const { adapter, mockOllamaClient } = getInstance({
         listResponse: mockModels,
       });
 
-      await expect(adapter.pullModel('custom-model')).resolves.not.toThrow();
+      const progressUpdates = [];
+      for await (const update of adapter.pullModel('custom-model')) {
+        progressUpdates.push(update);
+      }
 
       expect(mockOllamaClient.pull).not.toHaveBeenCalled();
+      expect(progressUpdates).toHaveLength(1);
+      expect(progressUpdates[0]).toEqual({
+        status: "Model 'custom-model' already exists",
+      });
     });
 
-    it('should pull model when it does not exist', async () => {
+    it('should pull model and yield progress when it does not exist', async () => {
       const { adapter, mockOllamaClient } = getInstance({
         listResponse: { models: [] },
       });
 
-      await expect(
-        adapter.pullModel('qwen2.5-coder:1.5b')
-      ).resolves.not.toThrow();
+      const mockStream = createMockAsyncIterator([
+        { status: 'pulling manifest' },
+        {
+          status: 'downloading',
+          digest: 'sha256:abc123',
+          total: 100,
+          completed: 50,
+        },
+        {
+          status: 'downloading',
+          digest: 'sha256:abc123',
+          total: 100,
+          completed: 100,
+        },
+        { status: 'verifying' },
+        { status: 'success' },
+      ]);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockOllamaClient.pull as any).mockResolvedValue(mockStream);
+
+      const progressUpdates = [];
+      for await (const update of adapter.pullModel('qwen2.5-coder:1.5b')) {
+        progressUpdates.push(update);
+      }
 
       expect(mockOllamaClient.pull).toHaveBeenCalledWith({
         model: 'qwen2.5-coder:1.5b',
-        stream: false,
+        stream: true,
+      });
+
+      expect(progressUpdates).toHaveLength(6); // 5 from stream + 1 success message
+      expect(progressUpdates[0]).toEqual({ status: 'pulling manifest' });
+      expect(progressUpdates[1]).toEqual({
+        status: 'downloading',
+        current: 50,
+        total: 100,
+      });
+      expect(progressUpdates[5]).toEqual({
+        status: "Model 'qwen2.5-coder:1.5b' pulled successfully",
       });
     });
 
@@ -403,9 +448,12 @@ describe('OllamaAdapter', () => {
       const connectionError = new Error('ECONNREFUSED');
       vi.mocked(mockOllamaClient.pull).mockRejectedValue(connectionError);
 
-      await expect(adapter.pullModel('test-model')).rejects.toThrow(
-        SystemError
-      );
+      await expect(async () => {
+        for await (const _ of adapter.pullModel('test-model')) {
+          // Consume the generator
+          // Consume the generator
+        }
+      }).rejects.toThrow(SystemError);
     });
 
     it('should throw SystemError when pull fails with network error', async () => {
@@ -416,9 +464,12 @@ describe('OllamaAdapter', () => {
       const networkError = new Error('Network timeout');
       vi.mocked(mockOllamaClient.pull).mockRejectedValue(networkError);
 
-      await expect(adapter.pullModel('test-model')).rejects.toThrow(
-        SystemError
-      );
+      await expect(async () => {
+        for await (const _ of adapter.pullModel('test-model')) {
+          // Consume the generator
+          // Consume the generator
+        }
+      }).rejects.toThrow(SystemError);
     });
   });
 

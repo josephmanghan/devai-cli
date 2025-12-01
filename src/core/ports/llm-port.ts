@@ -1,4 +1,5 @@
 import { GenerationOptions } from '../types/llm-types.js';
+import type { ProgressUpdate } from '../types/ui.types.js';
 
 /**
  * Defines the contract for Large Language Model provider operations.
@@ -23,23 +24,24 @@ export interface LlmPort {
 
   /**
    * Create a custom model instance from constructor-injected configuration.
+   * Returns async generator for progress updates.
    *
    * @param modelName - Name for the custom model instance
-   * @returns Promise that resolves when model creation is complete
+   * @returns AsyncGenerator yielding progress updates
    * @throws {SystemError} When service is unavailable during creation
    */
-  createModel(modelName: string): Promise<void>;
+  createModel(modelName: string): AsyncGenerator<ProgressUpdate>;
 
   /**
    * Download (pull) a model from the remote registry to local storage.
-   * Returns raw progress stream data without any UI components.
+   * Returns async generator for progress updates without UI dependencies.
    *
    * @param modelName - Model identifier to download (e.g., 'qwen2.5-coder:1.5b')
-   * @returns Promise that resolves when download is complete
+   * @returns AsyncGenerator yielding progress updates
    * @throws {SystemError} When service is unavailable during download
    * @throws {ValidationError} When modelName is invalid or empty
    */
-  pullModel(modelName: string): Promise<void>;
+  pullModel(modelName: string): AsyncGenerator<ProgressUpdate>;
 
   /**
    * Generate text using specified model and parameters.

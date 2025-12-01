@@ -7,3 +7,4 @@
 
 export * from './example-port.js';
 export * from './llm-port.js';
+export * from './setup-ui-port.js';

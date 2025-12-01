@@ -55,7 +55,7 @@ Prevents memory growth during long-running batch operations.`,
       const modelExists = await adapter.checkModel(TEST_MODEL_NAME);
       if (modelExists) {
         await ollama.delete({ model: TEST_MODEL_NAME });
-        console.log(`✓ Cleaned up existing test model: ${TEST_MODEL_NAME}`);
+        console.log(` Cleaned up existing test model: ${TEST_MODEL_NAME}`);
       }
     } catch (error) {
       console.warn(`Warning: Could not clean up test model: ${error}`);
@@ -67,7 +67,7 @@ Prevents memory growth during long-running batch operations.`,
       const modelExists = await adapter.checkModel(TEST_MODEL_NAME);
       if (modelExists) {
         await ollama.delete({ model: TEST_MODEL_NAME });
-        console.log(`✓ Cleaned up test model after tests: ${TEST_MODEL_NAME}`);
+        console.log(` Cleaned up test model after tests: ${TEST_MODEL_NAME}`);
       }
     } catch (error) {
       console.warn(`Warning: Could not clean up test model: ${error}`);
@@ -87,7 +87,12 @@ Prevents memory growth during long-running batch operations.`,
         return;
       }
 
-      await expect(adapter.createModel(TEST_MODEL_BASE)).resolves.not.toThrow();
+      // Consume the generator AND verify it's working
+      for await (const update of adapter.createModel(TEST_MODEL_BASE)) {
+        // Solves the lint error by USING the variable
+        // Also ensures the generator is yielding the expected shape
+        expect(update).toHaveProperty('status');
+      }
 
       const modelExists = await adapter.checkModel(TEST_MODEL_NAME);
       expect(modelExists).toBe(true);
@@ -110,8 +115,17 @@ Prevents memory growth during long-running batch operations.`,
         return;
       }
 
-      await expect(adapter.createModel(TEST_MODEL_BASE)).resolves.not.toThrow();
-      await expect(adapter.createModel(TEST_MODEL_BASE)).resolves.not.toThrow();
+      // Should not throw on second call (idempotent)
+      for await (const update of adapter.createModel(TEST_MODEL_BASE)) {
+        // Solves the lint error by USING the variable
+        // Also ensures the generator is yielding the expected shape
+        expect(update).toHaveProperty('status');
+      }
+      for await (const update of adapter.createModel(TEST_MODEL_BASE)) {
+        // Solves the lint error by USING the variable
+        // Also ensures the generator is yielding the expected shape
+        expect(update).toHaveProperty('status');
+      }
 
       const modelExists = await adapter.checkModel(TEST_MODEL_NAME);
       expect(modelExists).toBe(true);
@@ -122,9 +136,17 @@ Prevents memory growth during long-running batch operations.`,
     it('should handle missing constructor parameters gracefully', async () => {
       const minimalAdapter = new OllamaAdapter(ollama);
 
-      await expect(minimalAdapter.createModel('test-minimal')).rejects.toThrow(
-        'Failed to create model'
-      );
+      try {
+        for await (const update of minimalAdapter.createModel('test-minimal')) {
+          // Solves the lint error by USING the variable
+          // Also ensures the generator is yielding the expected shape
+          expect(update).toHaveProperty('status');
+        }
+        // Should not reach here
+        expect.fail('Expected createModel to throw an error');
+      } catch (error) {
+        expect((error as Error).message).toContain('Failed to create model');
+      }
     }, 10000);
   });
 });

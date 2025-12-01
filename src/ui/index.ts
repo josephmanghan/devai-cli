@@ -5,6 +5,4 @@
  * UI depends on Features layer for business logic orchestration.
  */
 
-// Future UI components will be exported from here
-// export * from './commands/index.js';
-// export * from './prompts/index.js';
+export * from './setup/console-setup-renderer.js';

@@ -1,17 +1,11 @@
 import { Command } from 'commander';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { LlmPort } from '../../core/ports/llm-port.js';
+import { SetupUiPort } from '../../core/ports/setup-ui-port.js';
 import { SystemError } from '../../core/types/errors.types.js';
 import type { OllamaModelConfig } from '../../core/types/llm-types.js';
-import { OllamaAdapter } from '../../infrastructure/llm/ollama-adapter.js';
 import { SetupCommand } from './setup-command.js';
-
-vi.mock('../../ui/setup.js', () => ({
-  SetupUI: {
-    setupStart: vi.fn(),
-    setupSuccess: vi.fn(),
-  },
-}));
 
 function createMockModelConfig(): OllamaModelConfig {
   return {
@@ -25,7 +19,8 @@ function createMockModelConfig(): OllamaModelConfig {
 describe('SetupCommand', () => {
   let setupCommand: SetupCommand;
   let mockProgram: Command;
-  let mockAdapter: OllamaAdapter;
+  let mockLlm: LlmPort;
+  let mockUi: SetupUiPort;
 
   beforeEach(() => {
     mockProgram = {
@@ -34,16 +29,28 @@ describe('SetupCommand', () => {
       action: vi.fn().mockReturnThis(),
     } as unknown as Command;
 
-    mockAdapter = {
+    mockLlm = {
       checkConnection: vi.fn(),
       checkModel: vi.fn(),
-      createModel: vi.fn(),
-      pullModel: vi.fn(),
       generate: vi.fn(),
-    } as unknown as OllamaAdapter;
+      pullModel: vi.fn(),
+      createModel: vi.fn(),
+    } as unknown as LlmPort;
+
+    mockUi = {
+      showIntro: vi.fn(),
+      showOutro: vi.fn(),
+      onCheckStarted: vi.fn(),
+      onCheckSuccess: vi.fn(),
+      onCheckFailure: vi.fn(),
+      onProgress: vi.fn(),
+      showBaseModelMissingWarning: vi.fn(),
+      showPullStartMessage: vi.fn(),
+      startPullSpinner: vi.fn(),
+    };
 
     const mockConfig = createMockModelConfig();
-    setupCommand = new SetupCommand(mockConfig, () => mockAdapter);
+    setupCommand = new SetupCommand(mockConfig, mockLlm, mockUi);
   });
 
   describe('Command Registration', () => {
@@ -60,8 +67,8 @@ describe('SetupCommand', () => {
 
   describe('Daemon Validation', () => {
     it('should succeed when daemon is running', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(true);
-      vi.mocked(mockAdapter.checkModel).mockResolvedValue(true);
+      vi.mocked(mockLlm.checkConnection).mockResolvedValue(true);
+      vi.mocked(mockLlm.checkModel).mockResolvedValue(true);
 
       let actionHandler: () => Promise<void>;
       const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
@@ -73,11 +80,14 @@ describe('SetupCommand', () => {
       setupCommand.register(mockProgram);
       await actionHandler!();
 
-      expect(mockAdapter.checkConnection).toHaveBeenCalled();
+      expect(mockLlm.checkConnection).toHaveBeenCalled();
+      expect(mockUi.showIntro).toHaveBeenCalled();
+      expect(mockUi.onCheckStarted).toHaveBeenCalledWith('daemon');
+      expect(mockUi.onCheckSuccess).toHaveBeenCalledWith('daemon');
     });
 
     it('should throw SystemError when daemon is not running', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(false);
+      vi.mocked(mockLlm.checkConnection).mockResolvedValue(false);
 
       let actionHandler: () => Promise<void>;
       const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
@@ -91,13 +101,18 @@ describe('SetupCommand', () => {
       await expect(actionHandler!()).rejects.toThrow(
         'Ollama daemon is not running or accessible'
       );
+
+      expect(mockUi.onCheckFailure).toHaveBeenCalledWith(
+        'daemon',
+        expect.any(SystemError)
+      );
     });
   });
 
   describe('Base Model Validation', () => {
     it('should succeed when base model exists', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(true);
-      vi.mocked(mockAdapter.checkModel)
+      vi.mocked(mockLlm.checkConnection).mockResolvedValue(true);
+      vi.mocked(mockLlm.checkModel)
         .mockResolvedValueOnce(true) // Base model check
         .mockResolvedValueOnce(true); // Custom model check
 
@@ -112,14 +127,25 @@ describe('SetupCommand', () => {
       await actionHandler!();
 
       const mockConfig = createMockModelConfig();
-      expect(mockAdapter.checkModel).toHaveBeenCalledWith(mockConfig.baseModel);
+      expect(mockLlm.checkModel).toHaveBeenCalledWith(mockConfig.baseModel);
+      expect(mockUi.onCheckSuccess).toHaveBeenCalledWith(
+        'base-model',
+        expect.stringContaining('Base model')
+      );
     });
 
     it('should auto-pull when base model is missing', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(true);
-      vi.mocked(mockAdapter.checkModel)
-        .mockResolvedValueOnce(false) // Base model missing (should trigger auto-pull)
+      vi.mocked(mockLlm.checkConnection).mockResolvedValue(true);
+      vi.mocked(mockLlm.checkModel)
+        .mockResolvedValueOnce(false) // Base model missing
         .mockResolvedValueOnce(true); // Custom model exists
+
+      // ✅ CORRECT MOCK PATTERN for async generator
+      const mockPullModel = vi.fn().mockImplementation(async function* () {
+        yield { status: 'downloading', current: 10, total: 100 };
+        yield { status: 'downloading', current: 100, total: 100 };
+      });
+      vi.mocked(mockLlm.pullModel).mockImplementation(mockPullModel);
 
       let actionHandler: () => Promise<void>;
       const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
@@ -129,30 +155,29 @@ describe('SetupCommand', () => {
       });
 
       setupCommand.register(mockProgram);
-
-      // Mock console.log to capture UI messages
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-      await expect(actionHandler!()).resolves.not.toThrow();
+      await actionHandler!();
 
       const mockConfig = createMockModelConfig();
-      expect(mockAdapter.checkModel).toHaveBeenCalledWith(mockConfig.baseModel);
-
-      // Verify that we get the auto-pull UI message
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('📥 Pulling base model')
-      );
-
-      consoleSpy.mockRestore();
+      expect(mockLlm.checkModel).toHaveBeenCalledWith(mockConfig.baseModel);
+      expect(mockUi.onProgress).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('Base Model Auto-Pull', () => {
-    it('should show success message when base model already exists', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(true);
-      vi.mocked(mockAdapter.checkModel)
-        .mockResolvedValueOnce(true) // Base model exists
+    it('should consume progress stream from pullModel', async () => {
+      vi.mocked(mockLlm.checkConnection).mockResolvedValue(true);
+      vi.mocked(mockLlm.checkModel)
+        .mockResolvedValueOnce(false) // Base model missing
         .mockResolvedValueOnce(true); // Custom model exists
+
+      // Mock async generator with multiple progress updates
+      const mockPullModel = vi.fn().mockImplementation(async function* () {
+        yield { status: 'pulling manifest' };
+        yield { status: 'downloading', current: 50, total: 100 };
+        yield { status: 'downloading', current: 100, total: 100 };
+        yield { status: 'verifying' };
+      });
+      vi.mocked(mockLlm.pullModel).mockImplementation(mockPullModel);
 
       let actionHandler: () => Promise<void>;
       const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
@@ -164,76 +189,30 @@ describe('SetupCommand', () => {
       setupCommand.register(mockProgram);
       await actionHandler!();
 
-      const mockConfig = createMockModelConfig();
-      expect(mockAdapter.checkModel).toHaveBeenCalledWith(mockConfig.baseModel);
-      expect(mockAdapter.pullModel).not.toHaveBeenCalled();
-    });
-
-    it('should handle missing base model gracefully', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(true);
-      vi.mocked(mockAdapter.checkModel)
-        .mockResolvedValueOnce(false) // Base model missing (should not throw error)
-        .mockResolvedValueOnce(true); // Custom model exists
-
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
+      // Verify all progress updates were consumed
+      expect(mockUi.onProgress).toHaveBeenCalledTimes(4);
+      expect(mockUi.onProgress).toHaveBeenCalledWith({
+        status: 'pulling manifest',
       });
-
-      setupCommand.register(mockProgram);
-
-      // Mock console.log to capture UI messages
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-      // Should not throw error - should attempt auto-pull
-      await expect(actionHandler!()).resolves.not.toThrow();
-
-      // Verify that auto-pull UI messages are shown
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('📥 Pulling base model')
-      );
-
-      consoleSpy.mockRestore();
+      expect(mockUi.onProgress).toHaveBeenCalledWith({
+        status: 'downloading',
+        current: 50,
+        total: 100,
+      });
     });
 
-    it('should include manual pull command in error fallback', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(true);
-      vi.mocked(mockAdapter.checkModel)
+    it('should handle pullModel errors correctly', async () => {
+      vi.mocked(mockLlm.checkConnection).mockResolvedValue(true);
+      vi.mocked(mockLlm.checkModel)
         .mockResolvedValueOnce(false) // Base model missing
         .mockResolvedValueOnce(true); // Custom model exists
 
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
+      const pullError = new SystemError('Network error', 'Check connection');
+      const mockPullModel = vi.fn().mockImplementation(async function* () {
+        yield { status: 'starting' };
+        throw pullError;
       });
-
-      setupCommand.register(mockProgram);
-
-      // Mock console.log to capture UI messages
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-      // Should attempt auto-pull and show appropriate UI messages
-      await expect(actionHandler!()).resolves.not.toThrow();
-
-      // Verify that auto-pull UI messages are shown
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('📥 Pulling base model')
-      );
-
-      consoleSpy.mockRestore();
-    });
-
-    it('should show progress UI during auto-pull', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(true);
-      vi.mocked(mockAdapter.checkModel)
-        .mockResolvedValueOnce(false) // Base model missing
-        .mockResolvedValueOnce(true); // Custom model exists
-
-      vi.mocked(mockAdapter.pullModel).mockResolvedValue();
+      vi.mocked(mockLlm.pullModel).mockImplementation(mockPullModel);
 
       let actionHandler: () => Promise<void>;
       const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
@@ -244,27 +223,18 @@ describe('SetupCommand', () => {
 
       setupCommand.register(mockProgram);
 
-      // Mock console.log to capture UI messages
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-      await actionHandler!();
-
-      // Verify that UI messages are shown during auto-pull
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('📥 Pulling base model')
+      await expect(actionHandler!()).rejects.toThrow('Network error');
+      expect(mockUi.onCheckFailure).toHaveBeenCalledWith(
+        'base-model',
+        pullError
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Press Ctrl+C to exit')
-      );
-
-      consoleSpy.mockRestore();
     });
   });
 
   describe('Custom Model Provisioning', () => {
     it('should skip creation when custom model already exists', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(true);
-      vi.mocked(mockAdapter.checkModel)
+      vi.mocked(mockLlm.checkConnection).mockResolvedValue(true);
+      vi.mocked(mockLlm.checkModel)
         .mockResolvedValueOnce(true) // Base model
         .mockResolvedValueOnce(true); // Custom model
 
@@ -278,16 +248,25 @@ describe('SetupCommand', () => {
       setupCommand.register(mockProgram);
       await actionHandler!();
 
-      expect(mockAdapter.createModel).not.toHaveBeenCalled();
+      expect(mockLlm.createModel).not.toHaveBeenCalled();
+      expect(mockUi.onCheckSuccess).toHaveBeenCalledWith(
+        'custom-model',
+        expect.stringContaining('already exists')
+      );
     });
 
     it('should create custom model when missing', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(true);
-      vi.mocked(mockAdapter.checkModel)
+      vi.mocked(mockLlm.checkConnection).mockResolvedValue(true);
+      vi.mocked(mockLlm.checkModel)
         .mockResolvedValueOnce(true) // Base model
         .mockResolvedValueOnce(false); // Custom model missing
 
-      vi.mocked(mockAdapter.createModel).mockResolvedValue();
+      // Mock async generator for createModel
+      const mockCreateModel = vi.fn().mockImplementation(async function* () {
+        yield { status: 'creating model' };
+        yield { status: 'model created successfully' };
+      });
+      vi.mocked(mockLlm.createModel).mockImplementation(mockCreateModel);
 
       let actionHandler: () => Promise<void>;
       const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
@@ -300,12 +279,17 @@ describe('SetupCommand', () => {
       await actionHandler!();
 
       const mockConfig = createMockModelConfig();
-      expect(mockAdapter.createModel).toHaveBeenCalledWith(mockConfig.model);
+      expect(mockLlm.createModel).toHaveBeenCalledWith(mockConfig.model);
+      expect(mockUi.onProgress).toHaveBeenCalledTimes(2);
+      expect(mockUi.onCheckSuccess).toHaveBeenCalledWith(
+        'custom-model',
+        expect.stringContaining('created successfully')
+      );
     });
 
     it('should handle model creation failure', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(true);
-      vi.mocked(mockAdapter.checkModel)
+      vi.mocked(mockLlm.checkConnection).mockResolvedValue(true);
+      vi.mocked(mockLlm.checkModel)
         .mockResolvedValueOnce(true) // Base model
         .mockResolvedValueOnce(false); // Custom model missing
 
@@ -313,7 +297,11 @@ describe('SetupCommand', () => {
         'Model creation failed',
         'Test remediation'
       );
-      vi.mocked(mockAdapter.createModel).mockRejectedValue(createError);
+      const mockCreateModel = vi.fn().mockImplementation(async function* () {
+        yield { status: 'starting' };
+        throw createError;
+      });
+      vi.mocked(mockLlm.createModel).mockImplementation(mockCreateModel);
 
       let actionHandler: () => Promise<void>;
       const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
@@ -325,16 +313,20 @@ describe('SetupCommand', () => {
       setupCommand.register(mockProgram);
 
       await expect(actionHandler!()).rejects.toThrow('Model creation failed');
+      expect(mockUi.onCheckFailure).toHaveBeenCalledWith(
+        'custom-model',
+        createError
+      );
     });
   });
 
   describe('Error Handling', () => {
-    it('should handle SystemError from adapter', async () => {
+    it('should handle SystemError from LLM port', async () => {
       const systemError = new SystemError(
         'Failed to check daemon status',
         'Ensure Ollama is properly installed'
       );
-      vi.mocked(mockAdapter.checkConnection).mockRejectedValue(systemError);
+      vi.mocked(mockLlm.checkConnection).mockRejectedValue(systemError);
 
       let actionHandler: () => Promise<void>;
       const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
@@ -348,13 +340,14 @@ describe('SetupCommand', () => {
       await expect(actionHandler!()).rejects.toThrow(
         'Failed to check daemon status'
       );
+      expect(mockUi.onCheckFailure).toHaveBeenCalledWith('daemon', systemError);
     });
   });
 
   describe('Idempotency', () => {
     it('should complete successfully when all components already exist', async () => {
-      vi.mocked(mockAdapter.checkConnection).mockResolvedValue(true);
-      vi.mocked(mockAdapter.checkModel)
+      vi.mocked(mockLlm.checkConnection).mockResolvedValue(true);
+      vi.mocked(mockLlm.checkModel)
         .mockResolvedValueOnce(true) // Base model
         .mockResolvedValueOnce(true); // Custom model
 
@@ -368,32 +361,17 @@ describe('SetupCommand', () => {
       setupCommand.register(mockProgram);
 
       await expect(actionHandler!()).resolves.not.toThrow();
-      expect(mockAdapter.createModel).not.toHaveBeenCalled();
+      expect(mockLlm.createModel).not.toHaveBeenCalled();
+      expect(mockLlm.pullModel).not.toHaveBeenCalled();
+      expect(mockUi.showOutro).toHaveBeenCalled();
     });
   });
 
   describe('Dependency Injection', () => {
-    it('should accept custom config and adapter factory', () => {
-      const customAdapter = {
-        checkConnection: vi.fn(),
-        checkModel: vi.fn(),
-        createModel: vi.fn(),
-      } as unknown as OllamaAdapter;
-
+    it('should accept LLM and UI ports via constructor', () => {
       const mockConfig = createMockModelConfig();
-      const commandWithCustomAdapter = new SetupCommand(
-        mockConfig,
-        () => customAdapter
-      );
-
-      expect(commandWithCustomAdapter).toBeDefined();
-    });
-
-    it('should accept custom config only', () => {
-      const mockConfig = createMockModelConfig();
-      const commandWithCustomConfig = new SetupCommand(mockConfig);
-
-      expect(commandWithCustomConfig).toBeDefined();
+      const command = new SetupCommand(mockConfig, mockLlm, mockUi);
+      expect(command).toBeDefined();
     });
   });
 });

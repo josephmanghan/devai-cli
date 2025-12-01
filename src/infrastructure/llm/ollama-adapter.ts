@@ -1,5 +1,4 @@
 import type { Ollama } from 'ollama';
-import ora from 'ora';
 
 import { LlmPort } from '../../core/ports/llm-port.js';
 import {
@@ -8,6 +7,7 @@ import {
   UserError,
 } from '../../core/types/errors.types.js';
 import type { GenerationOptions } from '../../core/types/llm-types.js';
+import type { ProgressUpdate } from '../../core/types/ui.types.js';
 
 /**
  * Ollama implementation of the LLM port interface.
@@ -58,46 +58,68 @@ export class OllamaAdapter implements LlmPort {
 
   /**
    * Creates a new model in Ollama using constructor-injected configuration.
+   * Returns async generator yielding progress updates.
    * @param modelName - The name for the new model
+   * @returns AsyncGenerator yielding progress updates
    * @throws {AppError} When model creation fails or daemon is unavailable
    */
-  async createModel(modelName: string): Promise<void> {
-    try {
-      if (await this.modelAlreadyExists(modelName)) {
-        return;
-      }
-
-      await this.executeCreateModel(modelName);
-    } catch (error) {
-      throw this.wrapOllamaError(error, 'Failed to create model');
+  async *createModel(modelName: string): AsyncGenerator<ProgressUpdate> {
+    if (await this.checkModel(modelName)) {
+      yield { status: `Model '${modelName}' already exists` };
+      return;
     }
+
+    const stream = await this.createModelStream(modelName);
+    for await (const progress of stream) {
+      if (progress.status !== undefined && progress.status.length > 0) {
+        yield { status: progress.status };
+      }
+    }
+    yield { status: `Model '${modelName}' created successfully` };
   }
 
   /**
    * Downloads (pulls) a model from the remote registry to local storage.
-   * Returns raw progress stream data without any UI components.
+   * Returns async generator yielding progress updates without UI dependencies.
    * @param modelName - Model identifier to download
+   * @returns AsyncGenerator yielding progress updates
    * @throws {AppError} When download fails or daemon is unavailable
    */
-  async pullModel(modelName: string): Promise<void> {
-    try {
-      if (await this.checkModel(modelName)) {
-        return;
-      }
+  async *pullModel(modelName: string): AsyncGenerator<ProgressUpdate> {
+    if (await this.checkModel(modelName)) {
+      yield { status: `Model '${modelName}' already exists` };
+      return;
+    }
 
-      await this.executePullModel(modelName);
+    try {
+      const stream = await this.ollamaClient.pull({
+        model: modelName,
+        stream: true,
+      });
+
+      for await (const progress of stream) {
+        yield this.createProgressUpdate(progress);
+      }
+      yield { status: `Model '${modelName}' pulled successfully` };
     } catch (error) {
-      throw this.wrapOllamaError(error, 'Failed to pull model');
+      throw this.wrapOllamaError(error, 'Failed to pull model', 'system');
     }
   }
 
-  private async modelAlreadyExists(modelName: string): Promise<boolean> {
-    const modelExists = await this.checkModel(modelName);
-    if (modelExists) {
-      console.log(`✓ Model '${modelName}' already exists, skipping creation`);
-      return true;
+  private createProgressUpdate(progress: {
+    status?: string;
+    completed?: number | null;
+    total?: number | null;
+  }): ProgressUpdate {
+    if (progress.status === undefined || progress.status.length === 0) {
+      return { status: progress.status ?? '' };
     }
-    return false;
+
+    return {
+      status: progress.status,
+      current: progress.completed ?? undefined,
+      total: progress.total ?? undefined,
+    };
   }
 
   /**
@@ -178,45 +200,18 @@ export class OllamaAdapter implements LlmPort {
     );
   }
 
-  private async executeCreateModel(modelName: string): Promise<void> {
-    const spinner = ora(`Creating model '${modelName}'...`).start();
-
-    try {
-      const stream = await this.createModelStream(modelName);
-      await this.processCreationStream(stream, spinner);
-      spinner.succeed(`✓ Model '${modelName}' created successfully`);
-    } catch (error) {
-      spinner.fail(`✗ Failed to create model '${modelName}'`);
-      throw this.wrapOllamaError(error, 'Failed to create model');
-    }
-  }
-
   private async createModelStream(modelName: string) {
-    return await this.ollamaClient.create({
-      model: modelName,
-      from: this.baseModel,
-      system: this.systemPrompt,
-      parameters: this.parameters,
-      stream: true as const,
-    });
-  }
-
-  private async processCreationStream(
-    stream: AsyncIterable<{ status?: string }>,
-    spinner: { text: string }
-  ): Promise<void> {
-    for await (const progress of stream) {
-      if (progress.status !== undefined && progress.status.length > 0) {
-        spinner.text = progress.status;
-      }
+    try {
+      return await this.ollamaClient.create({
+        model: modelName,
+        from: this.baseModel,
+        system: this.systemPrompt,
+        parameters: this.parameters,
+        stream: true as const,
+      });
+    } catch (error) {
+      throw this.wrapOllamaError(error, 'Failed to create model', 'system');
     }
-  }
-
-  private async executePullModel(modelName: string): Promise<void> {
-    await this.ollamaClient.pull({
-      model: modelName,
-      stream: false,
-    });
   }
 }
 
