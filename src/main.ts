@@ -8,11 +8,23 @@
 import { readFileSync } from 'node:fs';
 
 import { Command } from 'commander';
+import type { OllamaModelConfig } from './core/types/llm-types.js';
 
+import { CONVENTIONAL_COMMIT_MODEL_CONFIG } from './infrastructure/config/conventional-commit-model.config.js';
 import { SetupCommand } from './features/setup/setup-command.js';
 
 // Package info from package.json
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
+
+/**
+ * Factory function for creating setup commands with different model types.
+ * Enables clean extensibility.
+ */
+export function createSetupCommand(
+  modelConfig: OllamaModelConfig
+): SetupCommand {
+  return new SetupCommand(modelConfig);
+}
 
 /**
  * Create and configure the CLI program
@@ -30,7 +42,7 @@ export function createProgram(): Command {
     .version(pkg.version, '--version', 'Show version number');
 
   // Register setup command
-  const setupCommand = new SetupCommand();
+  const setupCommand = createSetupCommand(CONVENTIONAL_COMMIT_MODEL_CONFIG);
   setupCommand.register(program);
 
   return program;

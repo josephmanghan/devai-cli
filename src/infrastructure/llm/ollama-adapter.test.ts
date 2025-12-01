@@ -130,6 +130,7 @@ describe('OllamaAdapter', () => {
       generate: vi
         .fn()
         .mockResolvedValue(config?.generateResponse ?? mockGenerateResponse),
+      pull: vi.fn().mockResolvedValue(undefined),
     } as unknown as Ollama;
 
     const adapter = new OllamaAdapter(
@@ -356,6 +357,68 @@ describe('OllamaAdapter', () => {
         parameters: { temperature: 0.2 },
         stream: true,
       });
+    });
+  });
+
+  describe('pullModel', () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('should skip pulling when model already exists (idempotency)', async () => {
+      const { mockModels } = getData();
+      const { adapter, mockOllamaClient } = getInstance({
+        listResponse: mockModels,
+      });
+
+      await expect(adapter.pullModel('custom-model')).resolves.not.toThrow();
+
+      expect(mockOllamaClient.pull).not.toHaveBeenCalled();
+    });
+
+    it('should pull model when it does not exist', async () => {
+      const { adapter, mockOllamaClient } = getInstance({
+        listResponse: { models: [] },
+      });
+
+      await expect(
+        adapter.pullModel('qwen2.5-coder:1.5b')
+      ).resolves.not.toThrow();
+
+      expect(mockOllamaClient.pull).toHaveBeenCalledWith({
+        model: 'qwen2.5-coder:1.5b',
+        stream: false,
+      });
+    });
+
+    it('should throw SystemError when pull fails with connection error', async () => {
+      const { adapter, mockOllamaClient } = getInstance({
+        listResponse: { models: [] },
+      });
+
+      const connectionError = new Error('ECONNREFUSED');
+      vi.mocked(mockOllamaClient.pull).mockRejectedValue(connectionError);
+
+      await expect(adapter.pullModel('test-model')).rejects.toThrow(
+        SystemError
+      );
+    });
+
+    it('should throw SystemError when pull fails with network error', async () => {
+      const { adapter, mockOllamaClient } = getInstance({
+        listResponse: { models: [] },
+      });
+
+      const networkError = new Error('Network timeout');
+      vi.mocked(mockOllamaClient.pull).mockRejectedValue(networkError);
+
+      await expect(adapter.pullModel('test-model')).rejects.toThrow(
+        SystemError
+      );
     });
   });
 

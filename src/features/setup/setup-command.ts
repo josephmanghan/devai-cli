@@ -1,48 +1,34 @@
-/**
- * Setup command for configuring Ollama integration and provisioning custom model.
- * Implements 3-tier validation: daemon → base model → custom model.
- */
-
 import { Command } from 'commander';
 import { Ollama } from 'ollama';
 import ora, { type Ora } from 'ora';
-
-import {
-  AppError,
-  SystemError,
-  ValidationError,
-} from '../../core/types/errors.types.js';
-import { CONVENTIONAL_COMMIT_MODEL_CONFIG } from '../../infrastructure/config/conventional-commit-model.config.js';
+import type { OllamaModelConfig } from '../../core/types/llm-types.js';
+import { AppError, SystemError } from '../../core/types/errors.types.js';
 import { OllamaAdapter } from '../../infrastructure/llm/ollama-adapter.js';
-import { SetupUI } from '../../ui/setup.js';
 
-/**
- * Factory function for creating default OllamaAdapter.
- * Centralizes adapter configuration for consistency.
- */
-export function createDefaultAdapter(): OllamaAdapter {
+export function createOllamaAdapter(config: OllamaModelConfig): OllamaAdapter {
   const ollamaClient = new Ollama();
   return new OllamaAdapter(
     ollamaClient,
-    CONVENTIONAL_COMMIT_MODEL_CONFIG.baseModel,
-    CONVENTIONAL_COMMIT_MODEL_CONFIG.systemPrompt,
-    CONVENTIONAL_COMMIT_MODEL_CONFIG.parameters
+    config.baseModel,
+    config.systemPrompt,
+    config.parameters
   );
 }
 
-/**
- * Command handler for `ollatool setup`.
- * Orchestrates Ollama environment validation and model provisioning.
- */
 export class SetupCommand {
-  constructor(
-    private readonly adapter: OllamaAdapter = createDefaultAdapter()
-  ) {}
+  private readonly modelConfig: OllamaModelConfig;
+  private readonly adapter: OllamaAdapter;
 
-  /**
-   * Registers the setup command with the Commander.js program.
-   * @param program - The Commander.js program instance
-   */
+  constructor(
+    modelConfig: OllamaModelConfig,
+    adapterFactory?: () => OllamaAdapter
+  ) {
+    this.modelConfig = modelConfig;
+    this.adapter = adapterFactory
+      ? adapterFactory()
+      : createOllamaAdapter(modelConfig);
+  }
+
   register(program: Command): void {
     program
       .command('setup')
@@ -54,16 +40,31 @@ export class SetupCommand {
 
   private async execute(): Promise<void> {
     try {
-      SetupUI.setupStart();
+      this.setupStart();
 
       await this.validateDaemon(this.adapter);
       await this.validateBaseModel(this.adapter);
       await this.provisionCustomModel(this.adapter);
 
-      SetupUI.setupSuccess();
+      this.setupSuccess();
     } catch (error) {
       this.handleError(error);
     }
+  }
+
+  private setupStart(): void {
+    console.log('🔧 Configuring Ollama integration...\n');
+  }
+
+  private setupSuccess(): void {
+    console.log('\n✅ Setup complete!');
+    console.log('\nModels configured:');
+    console.log(
+      `  • Base model: ${this.modelConfig.baseModel}`
+    );
+    console.log(`  • Custom model: ${this.modelConfig.model}`);
+    console.log('\n🚀 Ready to generate commits:');
+    console.log('  ollatool commit');
   }
 
   private async validateDaemon(adapter: OllamaAdapter): Promise<void> {
@@ -102,32 +103,94 @@ export class SetupCommand {
 
   private async validateBaseModel(adapter: OllamaAdapter): Promise<void> {
     const spinner = ora(
-      `Checking base model (${CONVENTIONAL_COMMIT_MODEL_CONFIG.baseModel})...`
+      `Checking base model (${this.modelConfig.baseModel})...`
     ).start();
 
     try {
-      const baseModelExists = await adapter.checkModel(
-        CONVENTIONAL_COMMIT_MODEL_CONFIG.baseModel
-      );
-      this.handleBaseModelResult(baseModelExists, spinner);
+      const baseModelExists = await this.checkBaseModelAvailability(adapter);
+      if (baseModelExists) {
+        this.handleBaseModelAvailable(spinner);
+      } else {
+        await this.handleBaseModelMissingAndPull(adapter, spinner);
+      }
     } catch (error) {
       this.handleBaseModelError(error, spinner);
     }
   }
 
-  private handleBaseModelResult(baseModelExists: boolean, spinner: Ora): void {
-    if (!baseModelExists) {
-      spinner.fail(
-        `✗ Base model '${CONVENTIONAL_COMMIT_MODEL_CONFIG.baseModel}' not found`
-      );
-      throw new ValidationError(
-        `Base model '${CONVENTIONAL_COMMIT_MODEL_CONFIG.baseModel}' is required`,
-        `Pull the base model: ollama pull ${CONVENTIONAL_COMMIT_MODEL_CONFIG.baseModel}`
-      );
+  private async handleBaseModelMissingAndPull(
+    adapter: OllamaAdapter,
+    spinner: Ora
+  ): Promise<void> {
+    this.handleBaseModelMissing(spinner);
+    await this.autoPullBaseModel(adapter, spinner);
+  }
+
+  private async checkBaseModelAvailability(
+    adapter: OllamaAdapter
+  ): Promise<boolean> {
+    return await adapter.checkModel(this.modelConfig.baseModel);
+  }
+
+  private handleBaseModelAvailable(spinner: Ora): void {
+    spinner.succeed(
+      `✓ Base model '${this.modelConfig.baseModel}' is available`
+    );
+  }
+
+  private handleBaseModelMissing(spinner: Ora): void {
+    spinner.warn(
+      `⚠ Base model '${this.modelConfig.baseModel}' not found - will auto-pull`
+    );
+  }
+
+  private async autoPullBaseModel(
+    adapter: OllamaAdapter,
+    spinner: Ora
+  ): Promise<void> {
+    try {
+      this.showPullStartMessage();
+      this.startPullSpinner(spinner);
+
+      await adapter.pullModel(this.modelConfig.baseModel);
+
+      this.showPullSuccess(spinner);
+    } catch (error) {
+      this.showPullFailure(spinner, error);
+    }
+  }
+
+  private showPullStartMessage(): void {
+    console.log('\n📥 Pulling base model. This may take a few minutes...');
+    console.log('   Press Ctrl+C to exit if needed\n');
+  }
+
+  private startPullSpinner(spinner: Ora): void {
+    spinner.text = `Pulling ${this.modelConfig.baseModel}...`;
+    spinner.start();
+  }
+
+  private showPullSuccess(spinner: Ora): void {
+    spinner.succeed(
+      `✓ Base model '${this.modelConfig.baseModel}' pulled successfully`
+    );
+  }
+
+  private showPullFailure(spinner: Ora, error: unknown): never {
+    spinner.fail(`✗ Failed to pull '${this.modelConfig.baseModel}'`);
+    this.handlePullError(error);
+  }
+
+  private handlePullError(error: unknown): never {
+    if (error instanceof AppError) {
+      throw error;
     }
 
-    spinner.succeed(
-      `✓ Base model '${CONVENTIONAL_COMMIT_MODEL_CONFIG.baseModel}' is available`
+    const manualPullCommand = `ollama pull ${this.modelConfig.baseModel}`;
+
+    throw new SystemError(
+      `Failed to auto-pull '${this.modelConfig.baseModel}'`,
+      `Try manually: ${manualPullCommand}\n\nCheck network connection and Ollama daemon status.`
     );
   }
 
@@ -144,7 +207,7 @@ export class SetupCommand {
 
   private async provisionCustomModel(adapter: OllamaAdapter): Promise<void> {
     const spinner = ora(
-      `Checking custom model (${CONVENTIONAL_COMMIT_MODEL_CONFIG.model})...`
+      `Checking custom model (${this.modelConfig.model})...`
     ).start();
 
     try {
@@ -158,13 +221,11 @@ export class SetupCommand {
     adapter: OllamaAdapter,
     spinner: Ora
   ): Promise<void> {
-    const customModelExists = await adapter.checkModel(
-      CONVENTIONAL_COMMIT_MODEL_CONFIG.model
-    );
+    const customModelExists = await adapter.checkModel(this.modelConfig.model);
 
     if (customModelExists) {
       spinner.succeed(
-        `✓ Custom model '${CONVENTIONAL_COMMIT_MODEL_CONFIG.model}' already exists`
+        `✓ Custom model '${this.modelConfig.model}' already exists`
       );
       return;
     }
@@ -173,10 +234,10 @@ export class SetupCommand {
   }
 
   private async createCustomModel(spinner: Ora): Promise<void> {
-    spinner.text = `Creating custom model '${CONVENTIONAL_COMMIT_MODEL_CONFIG.model}'...`;
-    await this.adapter.createModel(CONVENTIONAL_COMMIT_MODEL_CONFIG.model);
+    spinner.text = `Creating custom model '${this.modelConfig.model}'...`;
+    await this.adapter.createModel(this.modelConfig.model);
     spinner.succeed(
-      `✓ Custom model '${CONVENTIONAL_COMMIT_MODEL_CONFIG.model}' created successfully`
+      `✓ Custom model '${this.modelConfig.model}' created successfully`
     );
   }
 

@@ -31,6 +31,17 @@ export interface LlmPort {
   createModel(modelName: string): Promise<void>;
 
   /**
+   * Download (pull) a model from the remote registry to local storage.
+   * Returns raw progress stream data without any UI components.
+   *
+   * @param modelName - Model identifier to download (e.g., 'qwen2.5-coder:1.5b')
+   * @returns Promise that resolves when download is complete
+   * @throws {SystemError} When service is unavailable during download
+   * @throws {ValidationError} When modelName is invalid or empty
+   */
+  pullModel(modelName: string): Promise<void>;
+
+  /**
    * Generate text using specified model and parameters.
    *
    * @param prompt - Input text and context for generation

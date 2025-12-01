@@ -73,6 +73,24 @@ export class OllamaAdapter implements LlmPort {
     }
   }
 
+  /**
+   * Downloads (pulls) a model from the remote registry to local storage.
+   * Returns raw progress stream data without any UI components.
+   * @param modelName - Model identifier to download
+   * @throws {AppError} When download fails or daemon is unavailable
+   */
+  async pullModel(modelName: string): Promise<void> {
+    try {
+      if (await this.checkModel(modelName)) {
+        return;
+      }
+
+      await this.executePullModel(modelName);
+    } catch (error) {
+      throw this.wrapOllamaError(error, 'Failed to pull model');
+    }
+  }
+
   private async modelAlreadyExists(modelName: string): Promise<boolean> {
     const modelExists = await this.checkModel(modelName);
     if (modelExists) {
@@ -192,6 +210,13 @@ export class OllamaAdapter implements LlmPort {
         spinner.text = progress.status;
       }
     }
+  }
+
+  private async executePullModel(modelName: string): Promise<void> {
+    await this.ollamaClient.pull({
+      model: modelName,
+      stream: false,
+    });
   }
 }
 
