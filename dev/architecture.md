@@ -121,32 +121,32 @@ This architecture draws upon several comprehensive reference documents that prov
 
 This table provides a quick reference for all major architectural decisions, enabling AI agents to understand choices without reading the full document.
 
-| Category                 | Decision                                          | Version/Value                                                             | Rationale                                                                                                                                |
-| ------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Language & Runtime**   | TypeScript on Node.js ESM                         | TypeScript Latest (strict), Node ≥20.0.0                                  | Type safety prevents runtime errors (deliverability), ESM required by execa 9.x, Node 20 LTS supports M1/M2 target platform              |
-| **Module System**        | ESM (type: "module")                              | NodeNext resolution, ES2022 target                                        | Modern standard, required by execa 9.x, enables tree-shaking and faster startup                                                          |
-| **Build Tool**           | tsup                                              | Latest                                                                    | Fast ESM bundling with minimal config, built for TypeScript ESM projects                                                                 |
-| **CLI Framework**        | Commander.js                                      | 14.0.2                                                                    | Industry standard (50M+ weekly downloads), stable API, minimal API surface                                                               |
-| **Interactive UI**       | @clack/prompts + ora                              | @clack/prompts 0.11.0, ora 8.2.0                                          | Modern Inquirer alternative with better aesthetics, cross-platform spinner support, zero config complexity                               |
-| **Git Integration**      | execa                                             | 9.6.0                                                                     | Shell command execution with TypeScript support, ESM-native, replaces child_process with better API                                      |
-| **LLM SDK**              | ollama (official)                                 | 0.6.3                                                                     | Official Ollama JavaScript SDK, streaming support, type definitions included                                                             |
-| **LLM Model**            | Qwen 2.5 Coder 1.5B                               | qwen2.5-coder:1.5b (quantized)                                            | Sub-1s inference on M1/M2 (70-90 tok/sec), code-optimized, low "chatty" output, 1.2GB RAM footprint                                      |
-| **Model Parameters**     | temperature=0.2, num_ctx=131072, keep_alive=0     | Ollama parameters                                                         | Low randomness for determinism, full 128K context window, unload after use (clean lifecycle)                                             |
-| **Prompt Engineering**   | Modelfile-based system prompt                     | Static (baked into custom model)                                          | Iterate prompts without code deploys (`ollama create`), separates static role from dynamic diff, custom model instance `ollatool-commit` |
-| **Validation Strategy**  | Regex-only (structural check)                     | `/^\w+: .+$/`                                                             | Zero deps (no Zod in MVP), detects conversational pollution, deterministic type overwrite makes schema validation unnecessary            |
-| **Type Enforcement**     | Force overwrite (user selection is truth)         | Programmatic strip + replace                                              | Eliminates type hallucination, no retry needed for type mismatches, 100% user control                                                    |
-| **Architecture Pattern** | Pragmatic Hexagonal (Ports & Adapters)            | Manual DI, no IoC container                                               | Testability via interfaces, swappable adapters (OpenAI fallback), maintainable by solo dev without framework overhead                    |
-| **Project Structure**    | Hexagonal layers: core/infrastructure/features/ui | src/ with 4 top-level dirs                                                | Clear dependency flow inward, zero external deps in core, adapters implement interfaces                                                  |
-| **Testing Framework**    | Vitest                                            | Latest                                                                    | Modern test runner with native ESM support, fast execution, minimal config                                                               |
-| **Test Pattern**         | Co-located tests (adjacent .test.ts)              | One test file per source file                                             | Angular-style familiarity, clear 1:1 relationship, easier navigation                                                                     |
-| **Error Handling**       | Typed error classes with exit codes               | User=2, System=3, Validation=4, Unexpected=5                              | Clear remediation guidance (PRD req), distinguishes user errors from bugs, actionable messages                                           |
-| **Configuration**        | Zero-config (hard-coded defaults)                 | MVP only, post-MVP: cosmiconfig + Zod                                     | Works immediately after npm install, 80% use case, config complexity deferred                                                            |
-| **Editor Integration**   | Temp file & spawn pattern                         | `.git/COMMIT_EDITMSG_OLLATOOL` + `$EDITOR`                                | Standard git pattern, stdio: 'inherit' for terminal control, try/finally cleanup                                                         |
-| **First-Run Setup**      | Explicit setup command                            | `ollatool setup` required before first commit                             | Preserves sub-1s commit performance, clear separation of setup vs workflow, fails fast with guidance                                     |
-| **Model Provisioning**   | Manual setup (MVP)                                | Require `ollatool setup`, no auto-pull during commit                      | Zero auto-downloads during commit (speed), idempotent setup (safe to re-run), post-MVP: automatic Ollama install                         |
-| **Ollama Validation**    | Fail fast (3-tier check, no auto-pull)            | Daemon → Base model → Custom model                                        | Preserves speed (no auto-pull during commit), clear error guidance, exit codes guide resolution                                          |
-| **Retry Visibility**     | Completely silent retries                         | No user-facing retry indicators                                           | Clean UX, implementation detail hidden, binary success/failure only                                                                      |
-| **Success Messaging**    | Silent format (UX spec-compliant)                 | Show commit directly, no success indicator between generation and preview | Matches UX spec lines 219-248, success only shown post-approval                                                                          |
+| Category                 | Decision                                          | Version/Value                                                             | Rationale                                                                                                                                                     |
+| ------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Language & Runtime**   | TypeScript on Node.js ESM                         | TypeScript Latest (strict), Node ≥20.0.0                                  | Type safety prevents runtime errors (deliverability), ESM required by execa 9.x, Node 20 LTS supports M1/M2 target platform                                   |
+| **Module System**        | ESM (type: "module")                              | NodeNext resolution, ES2022 target                                        | Modern standard, required by execa 9.x, enables tree-shaking and faster startup                                                                               |
+| **Build Tool**           | tsup                                              | Latest                                                                    | Fast ESM bundling with minimal config, built for TypeScript ESM projects                                                                                      |
+| **CLI Framework**        | Commander.js                                      | 14.0.2                                                                    | Industry standard (50M+ weekly downloads), stable API, minimal API surface                                                                                    |
+| **Interactive UI**       | @clack/prompts + ora                              | @clack/prompts 0.11.0, ora 8.2.0                                          | Modern Inquirer alternative with better aesthetics, cross-platform spinner support, zero config complexity                                                    |
+| **Git Integration**      | execa                                             | 9.6.0                                                                     | Shell command execution with TypeScript support, ESM-native, replaces child_process with better API                                                           |
+| **LLM SDK**              | ollama (official)                                 | 0.6.3                                                                     | Official Ollama JavaScript SDK, streaming support, type definitions included                                                                                  |
+| **LLM Model**            | Qwen 2.5 Coder 1.5B                               | qwen2.5-coder:1.5b (quantized)                                            | Sub-1s inference on M1/M2 (70-90 tok/sec), code-optimized, low "chatty" output, 1.2GB RAM footprint                                                           |
+| **Model Parameters**     | temperature=0.2, num_ctx=131072, keep_alive=0     | Ollama parameters                                                         | Low randomness for determinism, full 128K context window, unload after use (clean lifecycle)                                                                  |
+| **Prompt Engineering**   | Configuration-based system prompt                 | Static config file (`commit-model-config.ts`)                             | Iterate prompts without code logic changes (update config + recreate model), separates static role from dynamic diff, custom model instance `ollatool-commit` |
+| **Validation Strategy**  | Regex-only (structural check)                     | `/^\w+: .+$/`                                                             | Zero deps (no Zod in MVP), detects conversational pollution, deterministic type overwrite makes schema validation unnecessary                                 |
+| **Type Enforcement**     | Force overwrite (user selection is truth)         | Programmatic strip + replace                                              | Eliminates type hallucination, no retry needed for type mismatches, 100% user control                                                                         |
+| **Architecture Pattern** | Pragmatic Hexagonal (Ports & Adapters)            | Manual DI, no IoC container                                               | Testability via interfaces, swappable adapters (OpenAI fallback), maintainable by solo dev without framework overhead                                         |
+| **Project Structure**    | Hexagonal layers: core/infrastructure/features/ui | src/ with 4 top-level dirs                                                | Clear dependency flow inward, zero external deps in core, adapters implement interfaces                                                                       |
+| **Testing Framework**    | Vitest                                            | Latest                                                                    | Modern test runner with native ESM support, fast execution, minimal config                                                                                    |
+| **Test Pattern**         | Co-located tests (adjacent .test.ts)              | One test file per source file                                             | Angular-style familiarity, clear 1:1 relationship, easier navigation                                                                                          |
+| **Error Handling**       | Typed error classes with exit codes               | User=2, System=3, Validation=4, Unexpected=5                              | Clear remediation guidance (PRD req), distinguishes user errors from bugs, actionable messages                                                                |
+| **Configuration**        | Zero-config (hard-coded defaults)                 | MVP only, post-MVP: cosmiconfig + Zod                                     | Works immediately after npm install, 80% use case, config complexity deferred                                                                                 |
+| **Editor Integration**   | Temp file & spawn pattern                         | `.git/COMMIT_EDITMSG_OLLATOOL` + `$EDITOR`                                | Standard git pattern, stdio: 'inherit' for terminal control, try/finally cleanup                                                                              |
+| **First-Run Setup**      | Explicit setup command                            | `ollatool setup` required before first commit                             | Preserves sub-1s commit performance, clear separation of setup vs workflow, fails fast with guidance                                                          |
+| **Model Provisioning**   | Manual setup (MVP)                                | Require `ollatool setup`, no auto-pull during commit                      | Zero auto-downloads during commit (speed), idempotent setup (safe to re-run), post-MVP: automatic Ollama install                                              |
+| **Ollama Validation**    | Fail fast (3-tier check, no auto-pull)            | Daemon → Base model → Custom model                                        | Preserves speed (no auto-pull during commit), clear error guidance, exit codes guide resolution                                                               |
+| **Retry Visibility**     | Completely silent retries                         | No user-facing retry indicators                                           | Clean UX, implementation detail hidden, binary success/failure only                                                                                           |
+| **Success Messaging**    | Silent format (UX spec-compliant)                 | Show commit directly, no success indicator between generation and preview | Matches UX spec lines 219-248, success only shown post-approval                                                                                               |
 
 **Key Design Principles:** Every decision optimizes for PRD's three pillars: (1) **Speed** - sub-1s via Qwen 1.5B + simple validation, (2) **Privacy** - 100% local via hexagonal isolation, (3) **Simplicity** - zero-config via hard-coded defaults + manual DI.
 
@@ -227,6 +227,7 @@ The first implementation story will execute manual npm project setup following t
 **🔴 CRITICAL ARCHITECTURAL LEARNING (Epic 2 Story 2.4):**
 
 **CLI vs JS SDK Fundamental Difference:**
+
 - **Ollama CLI**: Uses Modelfile parsing (`ollama create -f Modelfile`)
 - **Ollama JS SDK**: Uses direct parameter passing (`ollama.create({ model, from, system, parameters })`)
 
@@ -234,6 +235,7 @@ The first implementation story will execute manual npm project setup following t
 Original story incorrectly planned Modelfile parsing implementation for JS SDK usage. The JS SDK doesn't support Modelfile content like the CLI tool. Attempting to parse Modelfile content for the SDK would have resulted in ~200 lines of unnecessary parsing code with architectural mismatch.
 
 **Correct Implementation Pattern:**
+
 ```typescript
 // ✅ CORRECT: Direct SDK parameters
 await ollamaClient.create({
@@ -241,22 +243,25 @@ await ollamaClient.create({
   from: 'qwen2.5-coder:1.5b',
   system: 'Conventional Commits expert system prompt...',
   parameters: { temperature: 0.2, num_ctx: 131072, keep_alive: 0 },
-  stream: true
+  stream: true,
 });
 ```
 
 **Configuration Architecture:**
+
 - **Generic OllamaAdapter**: Reusable via constructor injection
 - **Specific Config Files**: `commit-model-config.ts` for domain-specific setup
 - **Type Safety**: `OllamaModelConfig` interface prevents runtime errors
 - **Separation of Concerns**: Generic vs specific logic properly separated
 
 **CLI vs SDK Usage Patterns:**
+
 - **CLI**: `ollama create ollatool-commit -f Modelfile` (file-based)
 - **JS SDK**: Direct parameter passing (configuration-based)
 - **Learning**: Always validate SDK capabilities before planning implementation
 
 **System Prompt Configuration (via config files):**
+
 ```
 System Prompt: Conventional Commits expert role with few-shot examples
 Parameters: temperature=0.2, num_ctx=131072, keep_alive=0
@@ -268,7 +273,7 @@ Model Name: ollatool-commit:latest
 
 **System Prompt (Configuration-Based - Static):**
 
-- Role definition and behavioral constraints (stored in `commit-model-config.ts`)
+- Role definition and behavioral constraints (stored in `src/infrastructure/config/conventional-commit-model.config.ts`)
 - Conventional Commits format rules and few-shot examples
 - Output format constraints (no conversational filler)
 - Applied at model creation time via SDK parameters
@@ -281,17 +286,18 @@ Model Name: ollatool-commit:latest
 - File paths and change indicators (M/A/D)
 
 **Configuration Pattern:**
+
 ```typescript
-// commit-model-config.ts - Static configuration
-export const COMMIT_MODEL_CONFIG: OllamaModelConfig = {
+// src/infrastructure/config/conventional-commit-model.config.ts - Static configuration
+export const CONVENTIONAL_COMMIT_MODEL_CONFIG: OllamaModelConfig = {
   model: 'ollatool-commit:latest',
   baseModel: 'qwen2.5-coder:1.5b',
   systemPrompt: 'Conventional Commits expert role with examples...',
-  parameters: { temperature: 0.2, num_ctx: 131072, keep_alive: 0 }
+  parameters: { temperature: 0.2, num_ctx: 131072, keep_alive: 0 },
 };
 ```
 
-**Rationale:** The system prompt is static (configuration-based), while the diff/status are dynamic (sent per-request). This separation means we iterate on the system prompt by updating configuration and recreating the model instance (`ollama.create` with new parameters), not by changing application code.
+**Rationale:** The system prompt is static (configuration-based), while the diff/status are dynamic (sent per-request). This separation means we iterate on the system prompt by updating configuration files and recreating the model instance via `ollama.create()` with new parameters, not by changing application code.
 
 ### Ollama Integration Parameters
 
@@ -324,10 +330,10 @@ export const COMMIT_MODEL_CONFIG: OllamaModelConfig = {
    - Check: `ollama.list()` - does `qwen2.5-coder:1.5b` exist?
    - If exists: Skip pull, display `[INFO] Base model already present ✓`
    - If missing: `ollama pull qwen2.5-coder:1.5b` with progress bar
-2. Create custom model instance
+2. Create custom model instance via SDK
    - Check: `ollama.list()` - does `ollatool-commit` exist?
    - If exists: Skip creation, display `[INFO] Custom model already present ✓`
-   - If missing: Read Modelfile, run `ollama create ollatool-commit -f Modelfile` with spinner
+   - If missing: Load configuration from `conventional-commit-model.config.ts`, call `ollama.create()` with parameters
 3. Final Validation
    - Verify both models exist via `ollama.list()`
    - Display: `[SUCCESS] ✓ Setup complete. Run 'ollatool commit' to start.`
@@ -337,7 +343,7 @@ export const COMMIT_MODEL_CONFIG: OllamaModelConfig = {
 - Ollama not installed: Exit code 3, link to download
 - Ollama daemon not running: Exit code 3, instruction to run `ollama serve`
 - Base model pull failure: Exit code 3, network troubleshooting guidance
-- Custom model creation failure: Exit code 4, Modelfile validation error
+- Custom model creation failure: Exit code 3, SDK error details with remediation
 
 **Post-MVP:** Automatic Ollama installation can be added
 
@@ -478,23 +484,27 @@ tests/
 
 ## Prompt Engineering Architecture
 
-### System Prompt (Modelfile - Static)
+### System Prompt (Configuration-Based - Static)
 
-**Location:** `Modelfile` (project root)
-**Content:** Role definition, format rules, few-shot examples
-**Creation:** `ollama create ollatool-commit -f Modelfile` during setup
-**Upgrade Path Requirement:** The setup command must implement version/hash checking of the Modelfile to ensure users can upgrade the `ollatool-commit` model when newer versions are released with improved system prompts
+**Location:** `src/infrastructure/config/conventional-commit-model.config.ts`
+**Content:** Role definition, format rules, few-shot examples (TypeScript configuration)
+**Creation:** Direct SDK parameter passing via `ollama.create()` during setup
+**Upgrade Path:** Update configuration file and recreate model instance with new parameters
 
 > **Note:** The few-shot examples below are a subset example. For the full specification and dataset, see `docs/research/technical/Commit Message Generator Prompt Engineering.md`.
 
-```dockerfile
-FROM qwen2.5-coder:1.5b
+**Configuration Structure:**
 
-SYSTEM """You are a git commit message generator specialized in Conventional Commits format.
+```typescript
+// src/infrastructure/config/conventional-commit-model.config.ts
+export const CONVENTIONAL_COMMIT_MODEL_CONFIG: OllamaModelConfig = {
+  model: 'ollatool-commit:latest',
+  baseModel: 'qwen2.5-coder:1.5b',
+  systemPrompt: `You are a git commit message generator specialized in Conventional Commits format.
 
 CRITICAL RULES:
 1. Output ONLY the commit message - no conversational text, no markdown, no code blocks
-2. Format: <type>: <description>\n\n<body>
+2. Format: <type>: <description>\\n\\n<body>
 3. Valid types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
 4. Description: imperative mood, lowercase, no period, <50 characters
 5. Body: explain WHAT and WHY, not HOW. 2-3 sentences max.
@@ -510,30 +520,25 @@ fix: increase auth request timeout
 
 Increase the default request timeout from 1s to 5s. This addresses user reports of timeouts occurring on high-latency mobile networks.
 
-Input:
-diff --git a/src/components/LoginForm.tsx b/src/components/LoginForm.tsx
-+ import { AuthService } from '../services/AuthService';
-+ const handleSubmit = async () => { await AuthService.login(email, password); }
+[Additional examples...]`,
+  parameters: {
+    temperature: 0.2,
+    num_ctx: 131072,
+    keep_alive: 0,
+  },
+};
+```
 
-Output:
-feat: connect submit handler to auth service
+**SDK Usage Pattern:**
 
-Import the authentication service and invoke the login method within the form submission handler. Add async/await logic to handle the network request.
-
-Input:
-diff --git a/README.md b/README.md
-+ ## Local Setup
-+ 1. Install Node.js 20+
-+ 2. Run npm install
-
-Output:
-docs: add local setup instructions
-
-Update the README.md file to include a step-by-step guide for setting up the development environment locally. Include details on environment variables.
-"""
-
-PARAMETER temperature 0.2
-PARAMETER num_ctx 131072
+```typescript
+await ollamaClient.create({
+  model: CONVENTIONAL_COMMIT_MODEL_CONFIG.model,
+  from: CONVENTIONAL_COMMIT_MODEL_CONFIG.baseModel,
+  system: CONVENTIONAL_COMMIT_MODEL_CONFIG.systemPrompt,
+  parameters: CONVENTIONAL_COMMIT_MODEL_CONFIG.parameters,
+  stream: true,
+});
 ```
 
 ### User Prompt (Dynamic - Per Request)
@@ -1613,19 +1618,21 @@ export class OllamaAdapter implements LlmProvider {
 - ❌ Build step required (tsup)
 - ❌ Slight learning curve
 
-### ADR-003: Modelfile-based System Prompt
+### ADR-003: Configuration-based System Prompt
 
-**Context:** System prompt needs to be iterable without code changes.
+**Context:** System prompt needs to be iterable without code logic changes.
 
-**Decision:** Bake system prompt into Modelfile, separate from dynamic user prompts.
+**Decision:** Store system prompt in TypeScript configuration files, pass directly to SDK via parameters.
 
 **Consequences:**
 
-- ✅ Iterate on prompts via `ollama create` (no code deployment)
-- ✅ Cleaner API requests (smaller payload)
-- ✅ Model + prompt versioned together
-- ❌ Requires `ollama create` setup step
-- ❌ Less flexible than dynamic prompts
+- ✅ Iterate on prompts by updating config (no code logic changes)
+- ✅ Type-safe configuration with TypeScript interfaces
+- ✅ Eliminates file parsing complexity (~85% code reduction)
+- ✅ Proper separation of generic vs specific concerns
+- ✅ Uses Ollama JS SDK as intended (direct parameters)
+- ❌ Requires model recreation for prompt updates
+- ❌ Cannot use Modelfile syntax (CLI-only feature)
 
 ### ADR-004: Co-located Tests
 
@@ -1662,7 +1669,7 @@ export class OllamaAdapter implements LlmProvider {
 This architecture document defines:
 
 ✅ **Technology Stack** - Verified versions, Node 22.20 compatibility
-✅ **Ollama Integration** - Modelfile structure, parameters, prompt architecture
+✅ **Ollama Integration** - Configuration-based approach, parameters, prompt architecture
 ✅ **Project Structure** - Hexagonal architecture, co-located tests
 ✅ **Cross-Cutting Concerns** - Errors, logging, validation, config
 ✅ **Implementation Patterns** - Naming, DI, async/await, testing
@@ -1686,7 +1693,7 @@ Before starting implementation stories:
 
 - [ ] Review architecture with team
 - [ ] Confirm Node 22.20 compatibility
-- [ ] Validate Modelfile approach with Ollama test
+- [ ] Validate configuration-based approach with Ollama test
 - [ ] Verify co-located test pattern in tsconfig/vitest config
 - [ ] Approve naming conventions
 

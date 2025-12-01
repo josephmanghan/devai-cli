@@ -61,7 +61,7 @@ development_status:
   2-2-implement-ollama-adapter: done
   2-3-implement-model-existence-check: closed
   2-4-implement-custom-model-creation: done
-  2-5-implement-setup-command: ready-for-dev
+  2-5-implement-setup-command: done
   2-6-implement-setup-validation-error-handling: backlog
   epic-2-retrospective: optional
 

@@ -10,7 +10,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SystemError, UserError } from '../../core/types/errors.types.js';
 import { OllamaAdapter } from './ollama-adapter.js';
 
-// Mock ora
 vi.mock('ora', () => ({
   default: vi.fn().mockReturnValue({
     start: vi.fn().mockReturnValue({
@@ -20,6 +19,24 @@ vi.mock('ora', () => ({
     }),
   }),
 }));
+
+function createMockAsyncIterator(items: ProgressResponse[]) {
+  async function* generator() {
+    for (const item of items) {
+      yield item;
+    }
+  }
+
+  const iterator = generator();
+
+  return {
+    [Symbol.asyncIterator]: () => iterator,
+    abort: vi.fn(),
+    abortController: new AbortController(),
+    itr: iterator,
+    doneCallback: vi.fn(),
+  };
+}
 
 describe('OllamaAdapter', () => {
   const getData = () => {
@@ -202,7 +219,6 @@ describe('OllamaAdapter', () => {
   });
 
   describe('createModel', () => {
-    // Mock console.log to capture idempotency messages
     beforeEach(() => {
       vi.spyOn(console, 'log').mockImplementation(() => {});
     });
@@ -219,7 +235,6 @@ describe('OllamaAdapter', () => {
 
       await expect(adapter.createModel('custom-model')).resolves.not.toThrow();
 
-      // Should not call create since model exists
       expect(mockOllamaClient.create).not.toHaveBeenCalled();
       expect(console.log).toHaveBeenCalledWith(
         "✓ Model 'custom-model' already exists, skipping creation"
@@ -237,16 +252,24 @@ describe('OllamaAdapter', () => {
         parameters,
       });
 
-      // Mock async iterator for streaming
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { status: 'reading model definition' };
-          yield { status: 'creating model' };
-          yield { status: 'success' };
+      const mockStream = createMockAsyncIterator([
+        {
+          status: 'reading model definition',
+          digest: 'abc123',
+          total: 100,
+          completed: 0,
         },
-      };
+        {
+          status: 'creating model',
+          digest: 'abc123',
+          total: 100,
+          completed: 50,
+        },
+        { status: 'success', digest: 'abc123', total: 100, completed: 100 },
+      ]);
 
-      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockOllamaClient.create as any).mockResolvedValue(mockStream);
 
       await expect(adapter.createModel('test-model')).resolves.not.toThrow();
 
@@ -266,7 +289,6 @@ describe('OllamaAdapter', () => {
         parameters: { temperature: 0.2 },
       });
 
-      // Mock SDK error
       const createError = new Error('Invalid model definition');
       vi.mocked(mockOllamaClient.create).mockRejectedValue(createError);
 
@@ -282,7 +304,6 @@ describe('OllamaAdapter', () => {
         parameters: { temperature: 0.2 },
       });
 
-      // Mock connection error
       const connectionError = new Error('ECONNREFUSED');
       vi.mocked(mockOllamaClient.create).mockRejectedValue(connectionError);
 
@@ -294,14 +315,12 @@ describe('OllamaAdapter', () => {
     it('should work with minimal constructor (generic adapter)', async () => {
       const { adapter, mockOllamaClient } = getInstance();
 
-      // Mock async iterator for streaming
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { status: 'success' };
-        },
-      };
+      const mockStream = createMockAsyncIterator([
+        { status: 'success', digest: 'def456', total: 50, completed: 50 },
+      ]);
 
-      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockOllamaClient.create as any).mockResolvedValue(mockStream);
 
       await expect(adapter.createModel('test-model')).resolves.not.toThrow();
 
@@ -321,14 +340,12 @@ describe('OllamaAdapter', () => {
         parameters: { temperature: 0.2 },
       });
 
-      // Mock async iterator for streaming
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { status: 'success' };
-        },
-      };
+      const mockStream = createMockAsyncIterator([
+        { status: 'success', digest: 'def456', total: 50, completed: 50 },
+      ]);
 
-      vi.mocked(mockOllamaClient.create).mockResolvedValue(mockStream as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockOllamaClient.create as any).mockResolvedValue(mockStream);
 
       await expect(adapter.createModel('test-model')).resolves.not.toThrow();
 

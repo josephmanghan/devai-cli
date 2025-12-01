@@ -6,6 +6,13 @@ import { CONVENTIONAL_COMMIT_MODEL_CONFIG } from '../../infrastructure/config/co
 import { OllamaAdapter } from '../../infrastructure/llm/ollama-adapter.js';
 import { SetupCommand } from './setup-command.js';
 
+vi.mock('../../ui/setup.js', () => ({
+  SetupUI: {
+    setupStart: vi.fn(),
+    setupSuccess: vi.fn(),
+  },
+}));
+
 describe('SetupCommand', () => {
   let setupCommand: SetupCommand;
   let mockProgram: Command;
