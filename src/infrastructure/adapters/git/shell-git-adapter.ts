@@ -1,7 +1,6 @@
 import { execa } from 'execa';
 
-import { GitPort } from '../../core/ports/git-port.js';
-import { SystemError, UserError } from '../../core/types/errors.types.js';
+import { GitPort, SystemError, UserError } from '../../../core/index.js';
 
 /**
  * Shell-based Git adapter implementation using execa for command execution.

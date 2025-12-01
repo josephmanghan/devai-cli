@@ -1,13 +1,13 @@
 import type { Ollama } from 'ollama';
 
-import { LlmPort } from '../../core/ports/llm-port.js';
 import {
   AppError,
+  GenerationOptions,
+  LlmPort,
+  ProgressUpdate,
   SystemError,
   UserError,
-} from '../../core/types/errors.types.js';
-import type { GenerationOptions } from '../../core/types/llm-types.js';
-import type { ProgressUpdate } from '../../core/types/ui.types.js';
+} from '../../../core/index.js';
 
 /**
  * Ollama implementation of the LLM port interface.

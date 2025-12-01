@@ -7,7 +7,7 @@ import type {
 } from 'ollama';
 import { describe, expect, it, vi } from 'vitest';
 
-import { SystemError, UserError } from '../../core/types/errors.types.js';
+import { SystemError, UserError } from '../../../core/types/errors.types.js';
 import { OllamaAdapter } from './ollama-adapter.js';
 
 function createMockAsyncIterator(items: ProgressResponse[]) {

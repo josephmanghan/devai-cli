@@ -1,7 +1,7 @@
 import { Ollama } from 'ollama';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { OllamaAdapter } from '../../src/infrastructure/llm/ollama-adapter.js';
+import { OllamaAdapter } from '../../src/infrastructure/adapters/ollama/ollama-adapter.js';
 
 describe('createModel Integration Tests', () => {
   const TEST_MODEL_NAME = 'ollatool-commit-test:latest';

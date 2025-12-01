@@ -1,4 +1,4 @@
-import type { OllamaModelConfig } from '../../core/types/llm-types.js';
+import type { OllamaModelConfig } from '../../core/index.js';
 
 /**
  * Configuration for conventional commit-specific model creation.

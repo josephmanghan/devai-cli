@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { GitPort } from '../../core/ports/git-port.js';
-import { SystemError, UserError } from '../../core/types/errors.types.js';
+import { GitPort } from '../../../core/ports/git-port.js';
+import { SystemError, UserError } from '../../../core/types/errors.types.js';
 import { ShellGitAdapter } from './shell-git-adapter.js';
 
 vi.mock('execa', () => ({

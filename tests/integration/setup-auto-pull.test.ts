@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { SetupUiPort } from '../../src/core/ports/setup-ui-port.js';
 import type { OllamaModelConfig } from '../../src/core/types/llm-types.js';
 import { SetupCommand } from '../../src/features/setup/setup-command.js';
-import { OllamaAdapter } from '../../src/infrastructure/llm/ollama-adapter.js';
+import { OllamaAdapter } from '../../src/infrastructure/adapters/ollama/ollama-adapter.js';
 
 // Stub UI implementation for integration tests (no console output)
 class StubUi implements SetupUiPort {

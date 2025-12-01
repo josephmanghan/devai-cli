@@ -3,11 +3,13 @@ import { readFileSync } from 'node:fs';
 import { Command } from 'commander';
 import { Ollama } from 'ollama';
 
-import type { OllamaModelConfig } from './core/types/llm-types.js';
+import { OllamaModelConfig } from './core/index.js';
 import { SetupCommand } from './features/setup/setup-command.js';
-import { CONVENTIONAL_COMMIT_MODEL_CONFIG } from './infrastructure/config/conventional-commit-model.config.js';
-import { OllamaAdapter } from './infrastructure/llm/ollama-adapter.js';
-import { ConsoleSetupRenderer } from './ui/setup/console-setup-renderer.js';
+import {
+  CONVENTIONAL_COMMIT_MODEL_CONFIG,
+  OllamaAdapter,
+} from './infrastructure/index.js';
+import { ConsoleSetupRenderer } from './ui/index.js';
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
