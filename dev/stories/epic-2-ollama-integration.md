@@ -176,42 +176,91 @@ _Critical note: implementation change in 2.4. No longer using ModelFile. Now cal
 
 ---
 
-## Story 2.6: Implement Setup Validation Error Handling
+## Story 2.5.1: Implement Base Model Auto-Pull
 
 **As a** developer
-**I want** clear error messages when setup validation fails
-**So that** users know exactly how to fix their environment
+**I want** the `ollatool setup` command to automatically pull the base model if it's missing
+**So that** users don't need to manually download models during initial setup
 
 **Acceptance Criteria:**
 
-- [ ] Typed error classes for: DaemonNotRunning, BaseModelMissing, CustomModelFailed
-- [ ] Each error includes remediation guidance
-- [ ] Exit codes: daemon=3 (system), model=4 (validation)
-- [ ] Error messages reference Ollama docs/installation
+- [ ] LlmPort interface updated with `pullModel(modelName: string, showProgress?: boolean)` method
+- [ ] OllamaAdapter implements `pullModel()` with streaming progress feedback using ora spinner
+- [ ] SetupCommand modified to auto-pull base model instead of erroring when missing
+- [ ] Progress shows model name dynamically: "Pulling ${modelName}... ${percentage}% (${downloaded}MB/${total}MB)"
+- [ ] Graceful exit handling with "Press Ctrl+C to exit" message for long-running operations
+- [ ] Fallback error message with manual pull command if auto-pull fails
+- [ ] Implementation is idempotent (safe to re-run, skips if model already exists)
+- [ ] Unit tests added for pull functionality with mocked streaming progress
+- [ ] Integration test added using `smollm:135m` model with cleanup in afterEach
+- [ ] Integration test NEVER uses `qwen2.5-coder:1.5b` to avoid large downloads
+
+**Technical Notes:**
+
+- Use ollama SDK `pull()` method with streaming progress support
+- Follow existing OllamaAdapter patterns for error handling and progress feedback
+- Implement idempotency using existing `modelAlreadyExists()` check pattern
+- Update SetupCommand `validateBaseModel()` method to call `pullModel()` instead of throwing error
+- Progress updates include percentage and MB downloaded for better UX
+
+**Testing Deliverables:**
+
+- Unit test: pullModel success with streaming progress display
+- Unit test: pullModel idempotency when model already exists
+- Unit test: pullModel error handling and graceful failure scenarios
+- Integration test: end-to-end auto-pull workflow using `smollm:135m` (tiny model)
+- Integration test: clean up test model using `ollamaClient.delete()` in afterEach
+- Test validation: ensure `qwen2.5-coder:1.5b` is NEVER used in integration tests
+
+**FRs Covered:** FR45 (ollatool setup command), FR9 (auto-model provisioning)
+
+---
+
+## Story 2.6: Implement Setup Validation Error Handling
+
+**As a** developer
+**I want** typed error classes with clear remediation guidance
+**So that** users get actionable error messages with proper exit codes
+
+**Acceptance Criteria:**
+
+- [ ] DaemonNotRunning error class with remediation guidance
+- [ ] ModelPullFailed error class for auto-pull failures
+- [ ] CustomModelFailed error class for model creation failures
+- [ ] Exit codes: daemon=3 (system), validation=4 (model/validation failures)
+- [ ] DaemonNotRunning includes "Start Ollama: ollama serve" guidance
+- [ ] ModelPullFailed includes manual fallback: "Try manually: ollama pull qwen2.5-coder:1.5b"
+- [ ] CustomModelFailed includes "Check base model availability" guidance
+- [ ] Error messages reference Ollama docs/installation where appropriate
 - [ ] `ollatool commit` fails fast with setup guidance if not ready
+- [ ] Network timeout handling for pull operations
+- [ ] Graceful handling of Ctrl+C interruption during long operations
 
 **Technical Notes:**
 
 - Architecture specifies typed error classes with exit codes
-- User errors (exit 2): N/A for setup (all system/validation)
-- System errors (exit 3): daemon not running (check Ollama)
-- Validation errors (exit 4): model missing (run `ollatool setup`)
+- System errors (exit 3): daemon not running, network timeouts
+- Validation errors (exit 4): model pull failures, model creation failures
 - Actionable messages per PRD requirement (FR38-40)
+- Error classes should extend existing AppError hierarchy
+- ModelPullFailed replaces obsolete BaseModelMissing (post-2.5.1)
 
 **Testing Deliverables:**
 
-- Unit test: DaemonNotRunning error includes "brew services start ollama"
-- Unit test: BaseModelMissing error includes "ollama pull qwen2.5-coder:1.5b"
-- Unit test: Exit codes map correctly
-- Co-located tests for error classes
+- Unit test: DaemonNotRunning error includes "ollama serve" guidance
+- Unit test: ModelPullFailed error includes manual pull fallback
+- Unit test: CustomModelFailed error includes base model guidance
+- Unit test: Exit codes map correctly (3=system, 4=validation)
+- Unit test: Network timeout handling during pull operations
+- Co-located tests for all error classes
 
-**FRs Covered:** FR11 (fail fast validation), FR12 (no auto-downloads), FR38-40 (error guidance)
+**FRs Covered:** FR11 (fail fast validation), FR38-40 (error guidance), FR45 (ollatool setup command error handling)
 
 ---
 
 ## Epic 2 Summary
 
-**Total Stories:** 6
+**Total Stories:** 7
 **Estimated Complexity:** Medium-High (external system integration)
 **Dependencies:** Epic 1 (Foundation) must be complete
 **Output:** Working `ollatool setup` command that validates and configures Ollama

@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { OllamaModelConfig } from '../../core/types/llm-types.js';
 
 import { SystemError } from '../../core/types/errors.types.js';
-import { CONVENTIONAL_COMMIT_MODEL_CONFIG } from '../../infrastructure/config/conventional-commit-model.config.js';
 import { OllamaAdapter } from '../../infrastructure/llm/ollama-adapter.js';
 import { SetupCommand } from './setup-command.js';
 

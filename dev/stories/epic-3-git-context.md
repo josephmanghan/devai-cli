@@ -6,6 +6,8 @@
 
 ---
 
+<!-- TODO we need to review this file. I think some of the stories around git commands can be consolidated. In addition, validation and error handling need a review, they look weird. -->
+
 ## Story 3.1: Create Git Port Interface
 
 **As a** developer

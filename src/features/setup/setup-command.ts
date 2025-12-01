@@ -5,6 +5,11 @@ import type { OllamaModelConfig } from '../../core/types/llm-types.js';
 import { AppError, SystemError } from '../../core/types/errors.types.js';
 import { OllamaAdapter } from '../../infrastructure/llm/ollama-adapter.js';
 
+// TODO failed to implement /ui pattern. Need to do design research.
+
+/**
+ * TODO: Redesign needed - factory violates clean architecture, should use DI injection via application service
+ */
 export function createOllamaAdapter(config: OllamaModelConfig): OllamaAdapter {
   const ollamaClient = new Ollama();
   return new OllamaAdapter(
@@ -15,10 +20,15 @@ export function createOllamaAdapter(config: OllamaModelConfig): OllamaAdapter {
   );
 }
 
+/**
+ * Command handler for `ollatool setup`.
+ * Orchestrates Ollama environment validation and model provisioning.
+ */
 export class SetupCommand {
   private readonly modelConfig: OllamaModelConfig;
   private readonly adapter: OllamaAdapter;
 
+  // TODO adapterFactor pattern is problematic
   constructor(
     modelConfig: OllamaModelConfig,
     adapterFactory?: () => OllamaAdapter
@@ -29,6 +39,10 @@ export class SetupCommand {
       : createOllamaAdapter(modelConfig);
   }
 
+  /**
+   * Registers the setup command with the Commander.js program.
+   * @param program - The Commander.js program instance
+   */
   register(program: Command): void {
     program
       .command('setup')
@@ -59,9 +73,7 @@ export class SetupCommand {
   private setupSuccess(): void {
     console.log('\n✅ Setup complete!');
     console.log('\nModels configured:');
-    console.log(
-      `  • Base model: ${this.modelConfig.baseModel}`
-    );
+    console.log(`  • Base model: ${this.modelConfig.baseModel}`);
     console.log(`  • Custom model: ${this.modelConfig.model}`);
     console.log('\n🚀 Ready to generate commits:');
     console.log('  ollatool commit');

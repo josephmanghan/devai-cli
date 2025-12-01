@@ -11,7 +11,7 @@ Status: Draft
 
 Epic 2 establishes the foundation for AI-powered commit message generation by integrating the Ollama local LLM service into the ollatool CLI architecture. This epic implements hexagonal architecture patterns to create a clean separation between core business logic and external service dependencies, enabling testability, maintainability, and future extensibility (e.g., OpenAI fallback).
 
-The primary goal is to create a robust `ollatool setup` command that validates the Ollama environment (daemon running, base model available) and provisions a custom model instance (`ollatool-commit:latest`) that encapsulates the Conventional Commits system prompt via Modelfile. This setup workflow must be idempotent, providing clear error guidance when prerequisites are missing, and preparing the system for sub-1-second commit message generation in subsequent epics.
+The primary goal is to create a robust `ollatool setup` command that validates the Ollama environment (daemon running, base model available) and provisions a custom model instance (`ollatool-commit:latest`) that encapsulates the Conventional Commits system prompt via configuration-based direct SDK parameters. This setup workflow must be idempotent, providing clear error guidance when prerequisites are missing, and preparing the system for sub-1-second commit message generation in subsequent epics.
 
 ## Objectives and Scope
 
@@ -20,7 +20,7 @@ The primary goal is to create a robust `ollatool setup` command that validates t
 - LLM Port interface defining Ollama operations contract (FR49: extensible architecture)
 - OllamaAdapter implementing the port via official ollama SDK v0.6.3 (FR7: daemon detection)
 - Model existence validation for base model (qwen2.5-coder:1.5b) and custom model (ollatool-commit:latest) (FR8)
-- Custom model creation from Modelfile containing Conventional Commits system prompt (FR9, FR10)
+- Custom model creation from configuration containing Conventional Commits system prompt (FR9, FR10)
 - `ollatool setup` command providing 3-tier validation: daemon → base → custom (FR45)
 - Typed error classes with actionable remediation messages and exit codes (FR38-40)
 - Idempotent setup workflow safe to re-run multiple times
@@ -56,7 +56,7 @@ This epic implements the "Ports & Adapters" pattern as defined in dev/architectu
 
 **Alignment with Architecture Decisions:**
 
-- **ADR-003:** Modelfile-based system prompt - baked into `ollatool-commit:latest` during setup (architecture lines 1596-1609)
+- **ADR-003:** Configuration-based system prompt - baked into `ollatool-commit:latest` during setup via SDK parameters (architecture lines 1615-1629)
 - **ADR-005:** Zero-config MVP - hard-coded defaults, no config file required (architecture lines 1624-1634)
 - **Decision Table Row 5:** Official ollama SDK v0.6.3 for LLM integration
 - **Decision Table Row 7:** Qwen 2.5 Coder 1.5B as base model with custom instance creation
@@ -102,13 +102,13 @@ export interface LlmPort {
   checkModel(modelName: string): Promise<boolean>;
 
   /**
-   * Create custom model instance from Modelfile
+   * Create custom model instance using configuration parameters
    * @param modelName - Name for custom model (e.g., 'ollatool-commit:latest')
-   * @param modelfileContent - Complete Modelfile definition
+   * @param modelDefinition - Optional model definition (legacy compatibility)
    * @returns void on success
-   * @throws ValidationError if creation fails
+   * @throws SystemError if SDK creation fails
    */
-  createModel(modelName: string, modelfileContent: string): Promise<void>;
+  createModel(modelName: string, modelDefinition?: string): Promise<void>;
 
   /**
    * Generate text from prompt (used in Epic 4)
@@ -155,13 +155,14 @@ export class ValidationError extends AppError {
 }
 ```
 
-**Modelfile Structure:**
+**Configuration Structure:**
 
-```dockerfile
-# Modelfile (project root)
-FROM qwen2.5-coder:1.5b
-
-SYSTEM """You are a git commit message generator specialized in Conventional Commits format.
+```typescript
+// src/infrastructure/config/conventional-commit-model.config.ts
+export const CONVENTIONAL_COMMIT_MODEL_CONFIG: OllamaModelConfig = {
+  model: 'ollatool-commit:latest',
+  baseModel: 'qwen2.5-coder:1.5b',
+  systemPrompt: `You are a git commit message generator specialized in Conventional Commits format.
 
 CRITICAL RULES:
 1. Output ONLY the commit message - no conversational text, no markdown, no code blocks
@@ -171,11 +172,13 @@ CRITICAL RULES:
 5. Body: explain WHAT and WHY, not HOW. 2-3 sentences max.
 
 FEW-SHOT EXAMPLES:
-[Examples from architecture doc lines 471-513]
-"""
-
-PARAMETER temperature 0.2
-PARAMETER num_ctx 131072
+[Examples from architecture doc lines 471-513]`,
+  parameters: {
+    temperature: 0.2,
+    num_ctx: 131072,
+    keep_alive: 0,
+  },
+};
 ```
 
 ### APIs and Interfaces
@@ -225,20 +228,23 @@ export class OllamaAdapter implements LlmPort {
 
   async createModel(
     modelName: string,
-    modelfileContent: string
+    modelDefinition?: string
   ): Promise<void> {
     try {
-      debug('Creating model %s from Modelfile', modelName);
+      debug('Creating model %s with configuration parameters', modelName);
       await this.client.create({
         model: modelName,
-        modelfile: modelfileContent,
+        from: this.baseModel,
+        system: this.systemPrompt,
+        parameters: this.parameters,
+        stream: true as const,
       });
       debug('Model %s created successfully', modelName);
     } catch (error) {
       debug('Model creation failed: %O', error);
-      throw new ValidationError(
+      throw new SystemError(
         `Failed to create custom model: ${modelName}`,
-        'Check Modelfile syntax and base model availability'
+        'Check base model availability and SDK configuration'
       );
     }
   }
@@ -343,14 +349,14 @@ export class SetupCommand {
 │                                                                 │
 │ [EXISTS] → Skip creation, display "[INFO] Already present ✓"  │
 │ [MISSING] → OllamaAdapter.createModel(...)                     │
-│             Read Modelfile from project root                    │
-│             Call ollama.create()                                │
+│             Load CONVENTIONAL_COMMIT_MODEL_CONFIG              │
+│             Call ollama.create() with SDK parameters           │
 │             Display progress (optional spinner)                 │
 │                                                                 │
 │ [SUCCESS] → Continue to Phase 4                                │
-│ [FAILURE] → ValidationError (exit 4)                           │
+│ [FAILURE] → SystemError (exit 3)                               │
 │             "Failed to create custom model"                     │
-│             Remediation: "Check Modelfile syntax"               │
+│             Remediation: "Check base model availability"         │
 └────────────────────┬────────────────────────────────────────────┘
                      │
                      ▼
@@ -776,10 +782,10 @@ All dependencies already installed during Epic 1 foundation setup. Epic 2 only a
 
 ### Implementation Decisions (Resolved)
 
-**DECISION-2.1: Modelfile Location**
+**DECISION-2.1: Configuration Pattern**
 
-- **Decision:** Modelfile placed in src/assets/conventional-commit-modelfile
-- **Rationale:** Cleaner project structure, descriptive naming for future template additions
+- **Decision:** Configuration-based approach using direct SDK parameters (CONVENTIONAL_COMMIT_MODEL_CONFIG)
+- **Rationale:** Eliminates file parsing complexity, uses Ollama JS SDK as intended, type-safe configuration
 
 **DECISION-2.2: Model Creation Progress Feedback**
 
@@ -899,7 +905,7 @@ ollatool setup  # Skips creation, shows "Already present"
 - **Type Safety:** `npm run typecheck` passes (TypeScript strict mode)
 - **Tests:** `npm run test` passes (all unit tests green)
 - **Build:** `npm run build` succeeds (tsup compilation)
-- **PR Script:** `npm run pr` runs all gates sequentially
+- **PR Script:** `npm run pr` runs all gates sequentially (MANDATORY validation before story completion)
 
 ### Testing Anti-Patterns to Avoid (Epic 1 Retro Learning)
 
