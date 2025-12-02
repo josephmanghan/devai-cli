@@ -13,6 +13,10 @@ export interface GitTestHarness {
   add(files?: string[]): Promise<void>;
   getDiff(): Promise<string>;
   getStatus(): Promise<string>;
+  commit(message: string): Promise<void>;
+  getLog(): Promise<string>;
+  config(name: string, value: string): Promise<void>;
+  getTempDir(): Promise<string>;
 }
 
 /**
@@ -109,6 +113,50 @@ export class TestGitHarness implements GitTestHarness {
 
     const { stdout } = await this.execGit(['status', '--porcelain']);
     return stdout;
+  }
+
+  /**
+   * Commit staged changes
+   */
+  async commit(message: string): Promise<void> {
+    if (!this.repoPath) {
+      throw new Error('Repository not initialized. Call init() first.');
+    }
+
+    await this.execGit(['commit', '-m', message]);
+  }
+
+  /**
+   * Get commit log
+   */
+  async getLog(): Promise<string> {
+    if (!this.repoPath) {
+      throw new Error('Repository not initialized. Call init() first.');
+    }
+
+    const { stdout } = await this.execGit(['log', '--oneline', '-n', '5']);
+    return stdout;
+  }
+
+  /**
+   * Configure git setting
+   */
+  async config(name: string, value: string): Promise<void> {
+    if (!this.repoPath) {
+      throw new Error('Repository not initialized. Call init() first.');
+    }
+
+    await this.execGit(['config', name, value]);
+  }
+
+  /**
+   * Get temporary directory path
+   */
+  async getTempDir(): Promise<string> {
+    if (!this.repoPath) {
+      throw new Error('Repository not initialized. Call init() first.');
+    }
+    return this.repoPath;
   }
 
   private async execGit(

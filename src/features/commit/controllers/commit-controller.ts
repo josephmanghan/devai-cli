@@ -39,7 +39,7 @@ export class CommitController {
   /**
    * Executes the commit workflow orchestration.
    */
-  private async execute(): Promise<void> {
+  async execute(): Promise<void> {
     try {
       const context = await this.validatePreconditions.execute();
 

@@ -89,15 +89,7 @@ describe('CommitController', () => {
     it('should commit changes when user approves', async () => {
       const { message } = getData();
 
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
-      });
-
-      controller.register(mockProgram);
-      await actionHandler!();
+      await controller.execute();
 
       expect(mockGitPort.commitChanges).toHaveBeenCalledWith(message);
     });
@@ -106,15 +98,7 @@ describe('CommitController', () => {
       const { message } = getData();
       mockUi.selectCommitAction = vi.fn().mockResolvedValue(CommitAction.EDIT);
 
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
-      });
-
-      controller.register(mockProgram);
-      await actionHandler!();
+      await controller.execute();
 
       expect(mockEditorPort.edit).toHaveBeenCalledWith(message);
       expect(mockGitPort.commitChanges).toHaveBeenCalledWith(message);
@@ -124,32 +108,14 @@ describe('CommitController', () => {
       const error = new UserError('No staged changes', 'Stage files first');
       mockValidatePreconditions.execute = vi.fn().mockRejectedValue(error);
 
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
-      });
-
-      controller.register(mockProgram);
-
-      await expect(actionHandler!()).rejects.toThrow(UserError);
+      await expect(controller.execute()).rejects.toThrow(UserError);
     });
 
     it('should propagate SystemError from GenerateCommit', async () => {
       const error = new SystemError('Ollama not running', 'Start Ollama');
       mockGenerateCommit.execute = vi.fn().mockRejectedValue(error);
 
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
-      });
-
-      controller.register(mockProgram);
-
-      await expect(actionHandler!()).rejects.toThrow(SystemError);
+      await expect(controller.execute()).rejects.toThrow(SystemError);
     });
 
     it('should wrap generic Error as SystemError', async () => {
@@ -157,16 +123,7 @@ describe('CommitController', () => {
         .fn()
         .mockRejectedValue(new Error('Network timeout'));
 
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
-      });
-
-      controller.register(mockProgram);
-
-      await expect(actionHandler!()).rejects.toThrow(SystemError);
+      await expect(controller.execute()).rejects.toThrow(SystemError);
     });
 
     it('should wrap unknown errors as SystemError', async () => {
@@ -174,30 +131,13 @@ describe('CommitController', () => {
         .fn()
         .mockRejectedValue('string error');
 
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
-      });
-
-      controller.register(mockProgram);
-
-      await expect(actionHandler!()).rejects.toThrow(SystemError);
+      await expect(controller.execute()).rejects.toThrow(SystemError);
     });
 
     it('should preview message to user', async () => {
       const { message } = getData();
 
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
-      });
-
-      controller.register(mockProgram);
-      await actionHandler!();
+      await controller.execute();
 
       expect(mockUi.previewMessage).toHaveBeenCalledWith(message);
     });
