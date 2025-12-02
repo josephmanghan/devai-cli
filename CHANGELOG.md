@@ -1,3 +1,9 @@
+## [0.3.0] - 02/12/2025
+
+### Added
+
+- **Documentation**: Added README.md with accurate feature descriptions, Commander Select interface examples, and VRAM requirements
+
 ## [0.2.0] - 02/12/2025
 
 ### Fixed
