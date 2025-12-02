@@ -4,7 +4,7 @@
   "description": "Local-first CLI tool for AI-powered git commit message generation using Ollama",
   "type": "module",
   "bin": {
-    "devai-cli": "./dist/index.js"
+    "devai-cli": "dist/index.js"
   },
   "files": [
     "dist/**/*"
@@ -64,7 +64,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/josephmanghan/devai-cli.git"
+    "url": "git+https://github.com/josephmanghan/devai-cli.git"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
