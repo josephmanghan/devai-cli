@@ -30,7 +30,7 @@ export class ConsoleSetupRenderer implements SetupUiPort {
     console.log(`  • Base model: ${config.baseModel}`);
     console.log(`  • Custom model: ${config.model}`);
     console.log('\n🚀 Ready to generate commits:');
-    console.log('  ollatool commit');
+    console.log('  devai-cli commit');
   }
 
   /**

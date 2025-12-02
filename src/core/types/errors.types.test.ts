@@ -18,7 +18,7 @@ vi.mock('debug', () => {
   };
 });
 
-const debugLog = join(homedir(), '.ollatool', 'debug.log');
+const debugLog = join(homedir(), '.devai-cli', 'debug.log');
 
 describe('AppError', () => {
   beforeEach(() => {

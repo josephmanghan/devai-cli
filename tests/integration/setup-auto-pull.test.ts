@@ -33,7 +33,7 @@ describe('Setup Command Business Logic Integration Tests', () => {
   let testAdapter: OllamaAdapter;
 
   const testConfig: OllamaModelConfig = {
-    model: 'test-ollatool:latest',
+    model: 'test-devai-cli:latest',
     baseModel: 'smollm:135m',
     systemPrompt: 'Test prompt for integration testing',
     parameters: { temperature: 0.2, num_ctx: 2048, keep_alive: 0 },

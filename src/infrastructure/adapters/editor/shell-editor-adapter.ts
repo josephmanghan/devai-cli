@@ -23,7 +23,7 @@ export class ShellEditorAdapter implements EditorPort {
   }
 
   private getTempFilePath(): string {
-    return join(this.gitDir, 'COMMIT_EDITMSG_OLLATOOL');
+    return join(this.gitDir, 'COMMIT_EDITMSG_DEVAI-CLI');
   }
 
   private async writeTempFile(path: string, content: string): Promise<void> {

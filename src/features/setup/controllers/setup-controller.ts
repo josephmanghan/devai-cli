@@ -15,7 +15,7 @@ import {
 } from '../use-cases/index.js';
 
 /**
- * Primary adapter for the `ollatool setup` command.
+ * Primary adapter for the `devai-cli setup` command.
  * Orchestrates environment validation and model provisioning workflow.
  * Delegates business logic to use cases and handles UI interactions.
  */

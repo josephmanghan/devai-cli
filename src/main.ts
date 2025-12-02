@@ -96,7 +96,7 @@ export function createProgram(): Command {
   const program = new Command();
 
   program
-    .name('ollatool')
+    .name('devai-cli')
     .description(
       'Local-first CLI tool for AI-powered git commit message generation using Ollama'
     )

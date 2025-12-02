@@ -1,25 +1,25 @@
 /**
- * Debug loggers for ollatool application
+ * Debug loggers for devai-cli application
  * Each namespace provides targeted debugging information
- * No output appears unless DEBUG=ollatool:* is set
+ * No output appears unless DEBUG=devai-cli:* is set
  */
 
 import debug from 'debug';
 
 // Git operations logger - tracks git commands and their execution
-export const gitLogger = debug('ollatool:git');
+export const gitLogger = debug('devai-cli:git');
 
 // LLM interactions logger - tracks Ollama API calls and responses
-export const llmLogger = debug('ollatool:llm');
+export const llmLogger = debug('devai-cli:llm');
 
 // Performance metrics logger - tracks timing and performance data
-export const perfLogger = debug('ollatool:perf');
+export const perfLogger = debug('devai-cli:perf');
 
 // Validation logger - tracks input validation and format checking
-export const validationLogger = debug('ollatool:validation');
+export const validationLogger = debug('devai-cli:validation');
 
 // Error logger - tracks error handling and recovery attempts
-export const errorLogger = debug('ollatool:error');
+export const errorLogger = debug('devai-cli:error');
 
 // Debug logger - general debug information
-export const debugLogger = debug('ollatool:debug');
+export const debugLogger = debug('devai-cli:debug');

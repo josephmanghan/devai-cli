@@ -75,12 +75,12 @@ describe('Debug Loggers', () => {
   });
 
   describe('output when DEBUG flag is set', () => {
-    it('should enable loggers when DEBUG=ollatool:* is set', () => {
-      process.env.DEBUG = 'ollatool:*';
+    it('should enable loggers when DEBUG=devai-cli:* is set', () => {
+      process.env.DEBUG = 'devai-cli:*';
 
-      const gitLog = debug('ollatool:git');
-      const llmLog = debug('ollatool:llm');
-      const perfLog = debug('ollatool:perf');
+      const gitLog = debug('devai-cli:git');
+      const llmLog = debug('devai-cli:llm');
+      const perfLog = debug('devai-cli:perf');
 
       expect(typeof gitLog).toBe('function');
       expect(typeof llmLog).toBe('function');
@@ -88,10 +88,10 @@ describe('Debug Loggers', () => {
     });
 
     it('should enable individual namespace when specific DEBUG is set', () => {
-      process.env.DEBUG = 'ollatool:git';
+      process.env.DEBUG = 'devai-cli:git';
 
-      const gitLog = debug('ollatool:git');
-      const llmLog = debug('ollatool:llm');
+      const gitLog = debug('devai-cli:git');
+      const llmLog = debug('devai-cli:llm');
 
       expect(typeof gitLog).toBe('function');
       expect(typeof llmLog).toBe('function');
@@ -101,12 +101,12 @@ describe('Debug Loggers', () => {
   describe('logger namespace separation', () => {
     it('should create loggers with correct namespaces', () => {
       expect(() => {
-        debug('ollatool:git');
-        debug('ollatool:llm');
-        debug('ollatool:perf');
-        debug('ollatool:validation');
-        debug('ollatool:error');
-        debug('ollatool:debug');
+        debug('devai-cli:git');
+        debug('devai-cli:llm');
+        debug('devai-cli:perf');
+        debug('devai-cli:validation');
+        debug('devai-cli:error');
+        debug('devai-cli:debug');
       }).not.toThrow();
     });
   });

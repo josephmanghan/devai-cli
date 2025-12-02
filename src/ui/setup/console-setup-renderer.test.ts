@@ -13,7 +13,7 @@ describe('ConsoleSetupRenderer', () => {
   let mockConsoleLog: ReturnType<typeof vi.spyOn>;
 
   const createMockConfig = (): OllamaModelConfig => ({
-    model: 'ollatool-commit:latest',
+    model: 'devai-cli-commit:latest',
     baseModel: 'qwen2.5-coder:1.5b',
     systemPrompt: 'You are a commit message expert',
     parameters: { temperature: 0.2, num_ctx: 1000, keep_alive: 0 },
@@ -66,7 +66,7 @@ describe('ConsoleSetupRenderer', () => {
       expect(mockConsoleLog).toHaveBeenCalledWith(
         '\n🚀 Ready to generate commits:'
       );
-      expect(mockConsoleLog).toHaveBeenCalledWith('  ollatool commit');
+      expect(mockConsoleLog).toHaveBeenCalledWith('  devai-cli commit');
     });
   });
 

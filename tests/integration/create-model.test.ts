@@ -4,8 +4,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { OllamaAdapter } from '../../src/infrastructure/adapters/ollama/ollama-adapter.js';
 
 describe('createModel Integration Tests', () => {
-  const TEST_MODEL_NAME = 'ollatool-commit-test:latest';
-  const TEST_MODEL_BASE = 'ollatool-commit-test';
+  const TEST_MODEL_NAME = 'devai-cli-commit-test:latest';
+  const TEST_MODEL_BASE = 'devai-cli-commit-test';
 
   const getInstance = () => {
     const ollama = new Ollama();

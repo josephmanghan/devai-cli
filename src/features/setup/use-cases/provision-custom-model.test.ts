@@ -35,7 +35,7 @@ describe('ProvisionCustomModel', () => {
   let provisionCustomModel: ProvisionCustomModel;
 
   const modelConfig: OllamaModelConfig = {
-    model: 'ollatool-commit:latest',
+    model: 'devai-cli-commit:latest',
     baseModel: 'qwen2.5-coder:1.5b',
     systemPrompt: 'Test system prompt',
     parameters: { temperature: 0.2, num_ctx: 2048, keep_alive: 5 },

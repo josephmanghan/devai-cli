@@ -65,23 +65,23 @@ describe('ShellEditorAdapter', () => {
 
       expect(result).toBe(editedContent);
       expect(mockWriteFile).toHaveBeenCalledWith(
-        '.git/COMMIT_EDITMSG_OLLATOOL',
+        '.git/COMMIT_EDITMSG_DEVAI-CLI',
         initialContent,
         'utf8'
       );
       expect(mockSpawn).toHaveBeenCalledWith(
         'nano',
-        ['.git/COMMIT_EDITMSG_OLLATOOL'],
+        ['.git/COMMIT_EDITMSG_DEVAI-CLI'],
         {
           stdio: 'inherit',
           shell: true,
         }
       );
       expect(mockReadFile).toHaveBeenCalledWith(
-        '.git/COMMIT_EDITMSG_OLLATOOL',
+        '.git/COMMIT_EDITMSG_DEVAI-CLI',
         'utf8'
       );
-      expect(mockUnlink).toHaveBeenCalledWith('.git/COMMIT_EDITMSG_OLLATOOL');
+      expect(mockUnlink).toHaveBeenCalledWith('.git/COMMIT_EDITMSG_DEVAI-CLI');
     });
 
     it('should use custom git directory when provided', async () => {
@@ -103,13 +103,13 @@ describe('ShellEditorAdapter', () => {
       await customAdapter.edit(initialContent);
 
       expect(mockWriteFile).toHaveBeenCalledWith(
-        '.custom-git/COMMIT_EDITMSG_OLLATOOL',
+        '.custom-git/COMMIT_EDITMSG_DEVAI-CLI',
         initialContent,
         'utf8'
       );
       expect(mockSpawn).toHaveBeenCalledWith(
         'nano',
-        ['.custom-git/COMMIT_EDITMSG_OLLATOOL'],
+        ['.custom-git/COMMIT_EDITMSG_DEVAI-CLI'],
         {
           stdio: 'inherit',
           shell: true,
@@ -137,7 +137,7 @@ describe('ShellEditorAdapter', () => {
 
       expect(mockSpawn).toHaveBeenCalledWith(
         'vim',
-        ['.git/COMMIT_EDITMSG_OLLATOOL'],
+        ['.git/COMMIT_EDITMSG_DEVAI-CLI'],
         {
           stdio: 'inherit',
           shell: true,
@@ -158,7 +158,7 @@ describe('ShellEditorAdapter', () => {
       mockWriteFile.mockResolvedValue(undefined);
 
       await expect(adapter.edit(initialContent)).rejects.toThrow();
-      expect(mockUnlink).toHaveBeenCalledWith('.git/COMMIT_EDITMSG_OLLATOOL');
+      expect(mockUnlink).toHaveBeenCalledWith('.git/COMMIT_EDITMSG_DEVAI-CLI');
     });
 
     it('should cleanup temp file even when readFile fails', async () => {
@@ -175,7 +175,7 @@ describe('ShellEditorAdapter', () => {
       mockReadFile.mockRejectedValue(new Error('Read failed'));
 
       await expect(adapter.edit(initialContent)).rejects.toThrow();
-      expect(mockUnlink).toHaveBeenCalledWith('.git/COMMIT_EDITMSG_OLLATOOL');
+      expect(mockUnlink).toHaveBeenCalledWith('.git/COMMIT_EDITMSG_DEVAI-CLI');
     });
 
     it('should handle spawn error', async () => {
@@ -197,7 +197,7 @@ describe('ShellEditorAdapter', () => {
       );
       // Error remediation is tested through the error type (SystemError) above
 
-      expect(mockUnlink).toHaveBeenCalledWith('.git/COMMIT_EDITMSG_OLLATOOL');
+      expect(mockUnlink).toHaveBeenCalledWith('.git/COMMIT_EDITMSG_DEVAI-CLI');
     });
 
     it('should handle editor cancellation (exit code 130)', async () => {
@@ -325,7 +325,7 @@ describe('ShellEditorAdapter', () => {
 
       expect(mockSpawn).toHaveBeenCalledWith(
         'nano',
-        ['.git/COMMIT_EDITMSG_OLLATOOL'],
+        ['.git/COMMIT_EDITMSG_DEVAI-CLI'],
         {
           stdio: 'inherit',
           shell: true,
@@ -353,7 +353,7 @@ describe('ShellEditorAdapter', () => {
 
       expect(mockSpawn).toHaveBeenCalledWith(
         'code --wait',
-        ['.git/COMMIT_EDITMSG_OLLATOOL'],
+        ['.git/COMMIT_EDITMSG_DEVAI-CLI'],
         {
           stdio: 'inherit',
           shell: true,

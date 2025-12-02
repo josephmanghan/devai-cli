@@ -5,7 +5,7 @@ import type { OllamaModelConfig } from '../../core/index.js';
  * Extracts commit-specific logic from OllamaAdapter to maintain generic reusability.
  */
 export const CONVENTIONAL_COMMIT_MODEL_CONFIG: OllamaModelConfig = {
-  model: 'ollatool-commit:latest',
+  model: 'devai-cli-commit:latest',
   baseModel: 'qwen2.5-coder:1.5b',
   systemPrompt: `You are a Conventional Commits expert who generates clear, structured commit messages. Your output must follow the exact format:
 

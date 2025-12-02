@@ -4,8 +4,8 @@ import { join } from 'node:path';
 
 import debug from 'debug';
 
-const logError = debug('ollatool:error');
-const logDebug = debug('ollatool:debug');
+const logError = debug('devai-cli:error');
+const logDebug = debug('devai-cli:debug');
 
 export class AppError extends Error {
   constructor(
@@ -39,7 +39,7 @@ export class AppError extends Error {
    * Write error to debug log file
    */
   async writeToDebugLog(): Promise<void> {
-    const debugDir = join(homedir(), '.ollatool');
+    const debugDir = join(homedir(), '.devai-cli');
     const debugFile = join(debugDir, 'debug.log');
     this.ensureDebugDir(debugDir);
     const logEntry = this.createLogEntry();

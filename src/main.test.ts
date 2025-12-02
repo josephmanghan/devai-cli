@@ -29,7 +29,7 @@ describe('CLI Program', () => {
   describe('createProgram', () => {
     it('should return a configured Commander instance', () => {
       expect(program).toBeInstanceOf(Command);
-      expect(program.name()).toBe('ollatool');
+      expect(program.name()).toBe('devai-cli');
     });
 
     it('should have correct program description', () => {

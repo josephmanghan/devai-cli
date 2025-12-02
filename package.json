@@ -1,10 +1,10 @@
 {
-  "name": "ollatool",
+  "name": "devai-cli",
   "version": "0.1.0",
   "description": "Local-first CLI tool for AI-powered git commit message generation using Ollama",
   "type": "module",
   "bin": {
-    "ollatool": "./dist/index.js"
+    "devai-cli": "./dist/index.js"
   },
   "files": [
     "dist/**/*"
@@ -31,7 +31,7 @@
     "pr:lite": "npm run format && npm run lint && npm run typecheck && npm run test:unit && npm run build",
     "validate:setup": "tsx scripts/validate-setup.ts",
     "build:link": "npm run build && npm link",
-    "unlink": "npm unlink ollatool"
+    "unlink": "npm unlink devai-cli"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -64,7 +64,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jmanghan/ollatool"
+    "url": "https://github.com/jmanghan/devai-cli"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
