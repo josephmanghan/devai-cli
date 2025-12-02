@@ -103,6 +103,22 @@ export class ShellGitAdapter implements GitPort {
   }
 
   /**
+   * Stages all changes in the repository.
+   * @returns Promise that resolves when all changes are staged
+   * @throws {UserError} When not a git repository or git command fails
+   * @throws {SystemError} When git binary is not available
+   */
+  async stageAllChanges(): Promise<void> {
+    try {
+      await execa('git', ['add', '.'], {
+        cwd: this.workingDirectory,
+      });
+    } catch (error) {
+      throw this.wrapGitError(error, 'Failed to stage all changes');
+    }
+  }
+
+  /**
    * Wraps git command errors into appropriate domain error types.
    * @param error - The error from git command execution
    * @param defaultMessage - Default error message for unknown errors

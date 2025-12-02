@@ -36,6 +36,7 @@ describe('CommitController', () => {
     mockProgram = {
       command: vi.fn().mockReturnThis(),
       description: vi.fn().mockReturnThis(),
+      option: vi.fn().mockReturnThis(),
       action: vi.fn().mockReturnThis(),
     } as unknown as Command;
 
@@ -44,6 +45,7 @@ describe('CommitController', () => {
       getBranchName: vi.fn().mockResolvedValue(branch),
       getStagedDiff: vi.fn().mockResolvedValue(diff),
       isGitRepository: vi.fn().mockResolvedValue(true),
+      stageAllChanges: vi.fn().mockResolvedValue(undefined),
     } satisfies GitPort;
 
     mockEditorPort = {
@@ -80,6 +82,10 @@ describe('CommitController', () => {
       expect(mockProgram.command).toHaveBeenCalledWith('commit');
       expect(mockProgram.description).toHaveBeenCalledWith(
         'Generate a conventional commit message and commit staged changes'
+      );
+      expect(mockProgram.option).toHaveBeenCalledWith(
+        '-a, --all',
+        'Stage all changes before generating commit'
       );
       expect(mockProgram.action).toHaveBeenCalledWith(expect.any(Function));
     });
@@ -146,6 +152,48 @@ describe('CommitController', () => {
   describe('Dependency Injection', () => {
     it('should accept all dependencies via constructor', () => {
       expect(controller).toBeDefined();
+    });
+  });
+
+  describe('--all flag behavior', () => {
+    it('should stage all changes when --all flag is true', async () => {
+      await controller.execute(true);
+
+      expect(mockGitPort.stageAllChanges).toHaveBeenCalled();
+      expect(mockValidatePreconditions.execute).toHaveBeenCalled();
+    });
+
+    it('should not stage changes when --all flag is false', async () => {
+      await controller.execute(false);
+
+      expect(mockGitPort.stageAllChanges).not.toHaveBeenCalled();
+    });
+
+    it('should not stage changes when --all flag is undefined (default)', async () => {
+      await controller.execute();
+
+      expect(mockGitPort.stageAllChanges).not.toHaveBeenCalled();
+    });
+
+    it('should maintain --all flag state on regenerate', async () => {
+      mockUi.selectCommitAction = vi
+        .fn()
+        .mockResolvedValueOnce(CommitAction.REGENERATE)
+        .mockResolvedValueOnce(CommitAction.APPROVE);
+
+      await controller.execute(true);
+
+      expect(mockGitPort.stageAllChanges).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle stageAllChanges errors gracefully', async () => {
+      const error = new UserError(
+        'Not a git repository',
+        'Initialize with: git init'
+      );
+      mockGitPort.stageAllChanges = vi.fn().mockRejectedValue(error);
+
+      await expect(controller.execute(true)).rejects.toThrow(UserError);
     });
   });
 });

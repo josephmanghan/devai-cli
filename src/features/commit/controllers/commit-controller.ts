@@ -13,6 +13,8 @@ import {
 import { GenerateCommit, ValidatePreconditions } from '../index.js';
 
 export class CommitController {
+  private stageAll = false;
+
   constructor(
     private readonly gitPort: GitPort,
     private readonly editorPort: EditorPort,
@@ -31,16 +33,23 @@ export class CommitController {
       .description(
         'Generate a conventional commit message and commit staged changes'
       )
-      .action(async () => {
-        await this.execute();
+      .option('-a, --all', 'Stage all changes before generating commit')
+      .action(async options => {
+        await this.execute(options.all);
       });
   }
 
   /**
    * Executes the commit workflow orchestration.
    */
-  async execute(): Promise<void> {
+  async execute(stageAll = false): Promise<void> {
     try {
+      this.stageAll = stageAll;
+
+      if (stageAll) {
+        await this.gitPort.stageAllChanges();
+      }
+
       const context = await this.validatePreconditions.execute();
 
       const commitType = await this.ui.selectCommitType();
@@ -80,7 +89,7 @@ export class CommitController {
         return async (msg: string) => await this.handleEditAction(msg);
 
       case CommitAction.REGENERATE:
-        return async () => await this.execute();
+        return async () => await this.execute(this.stageAll);
 
       case CommitAction.CANCEL:
         return async () => process.exit(0);

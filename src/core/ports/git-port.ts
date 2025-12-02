@@ -37,4 +37,13 @@ export interface GitPort {
    * @throws {SystemError} When git binary is not available
    */
   commitChanges(message: string): Promise<void>;
+
+  /**
+   * Stages all changes in the repository.
+   *
+   * @returns Promise that resolves when all changes are staged
+   * @throws {UserError} When not in a git repository or git command fails
+   * @throws {SystemError} When git binary is not available
+   */
+  stageAllChanges(): Promise<void>;
 }

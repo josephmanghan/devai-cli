@@ -345,6 +345,42 @@ describe('ShellGitAdapter', () => {
       expect(typeof adapter.getStagedDiff).toBe('function');
       expect(typeof adapter.getBranchName).toBe('function');
       expect(typeof adapter.commitChanges).toBe('function');
+      expect(typeof adapter.stageAllChanges).toBe('function');
+    });
+  });
+
+  describe('stageAllChanges', () => {
+    it('should stage all changes successfully', async () => {
+      mockExeca.mockResolvedValue({ stdout: '', stderr: '' });
+
+      await expect(adapter.stageAllChanges()).resolves.not.toThrow();
+
+      expect(mockExeca).toHaveBeenCalledWith('git', ['add', '.'], {
+        cwd: undefined,
+      });
+    });
+
+    it('should throw UserError when not a git repository', async () => {
+      mockExeca.mockRejectedValue(new Error('fatal: not a git repository'));
+
+      await expect(adapter.stageAllChanges()).rejects.toThrow(UserError);
+    });
+
+    it('should throw SystemError when git binary not found', async () => {
+      mockExeca.mockRejectedValue(new Error('git: command not found'));
+
+      await expect(adapter.stageAllChanges()).rejects.toThrow(SystemError);
+    });
+
+    it('should use working directory when provided', async () => {
+      const adapterWithDir = new ShellGitAdapter('/test/dir');
+      mockExeca.mockResolvedValue({ stdout: '', stderr: '' });
+
+      await adapterWithDir.stageAllChanges();
+
+      expect(mockExeca).toHaveBeenCalledWith('git', ['add', '.'], {
+        cwd: '/test/dir',
+      });
     });
   });
 });

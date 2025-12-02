@@ -15,6 +15,7 @@ const mockGitPort = {
   getStagedDiff: vi.fn(),
   getBranchName: vi.fn(),
   commitChanges: vi.fn(),
+  stageAllChanges: vi.fn(),
 } satisfies GitPort;
 
 const mockLlmPort = {
