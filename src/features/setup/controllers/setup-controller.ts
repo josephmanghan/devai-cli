@@ -1,15 +1,15 @@
 import { Command } from 'commander';
 
-import { SetupUiPort } from '../../core/ports/setup-ui-port.js';
-import { AppError, SystemError } from '../../core/types/errors.types.js';
-import type { OllamaModelConfig } from '../../core/types/llm-types.js';
-import { ProvisionEnvironment } from './use-cases/provision-environment.js';
+import { SetupUiPort } from '../../../core/ports/setup-ui-port.js';
+import { AppError, SystemError } from '../../../core/types/errors.types.js';
+import type { OllamaModelConfig } from '../../../core/types/llm-types.js';
+import { ProvisionEnvironment } from '../use-cases/provision-environment.js';
 
 /**
  * Primary adapter for the `ollatool setup` command.
  * Serves as a thin wrapper that delegates business logic to the ProvisionEnvironment use case.
  */
-export class SetupCommand {
+export class SetupController {
   constructor(
     private readonly modelConfig: OllamaModelConfig,
     private readonly provisionEnvironment: ProvisionEnvironment,

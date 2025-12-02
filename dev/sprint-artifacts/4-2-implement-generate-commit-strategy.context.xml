@@ -1,0 +1,98 @@
+<story-context id="{bmad_folder}/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>2</storyId>
+    <title>Implement Generate Commit Strategy</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>dev/sprint-artifacts/4-2-implement-generate-commit-strategy.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>commit message generator</asA>
+    <iWant>to have a use case that orchestrates the LLM generation loop with validation and retry logic</iWant>
+    <soThat>I can reliably generate high-quality conventional commit messages from git diffs</soThat>
+    <tasks>
+- [ ] Task 1: Create GenerateCommit use case class (AC: #1, #7)
+  - [ ] Subtask 1.1: Implement class with constructor injection for LlmProvider
+  - [ ] Subtask 1.2: Add TypeScript interfaces for inputs/outputs
+  - [ ] Subtask 1.3: Create public execute method with proper error handling
+- [ ] Task 2: Implement four-phase processing pipeline (AC: #2, #6)
+  - [ ] Subtask 2.1: Add intelligent parsing to extract commit message from LLM output
+  - [ ] Subtask 2.2: Integrate FormatValidator for structural validation
+  - [ ] Subtask 2.3: Integrate TypeEnforcer to overwrite model's type with user selection
+  - [ ] Subtask 2.4: Integrate MessageNormalizer for proper format spacing
+- [ ] Task 3: Implement silent retry logic with error feedback (AC: #3, #5)
+  - [ ] Subtask 3.1: Add retry loop with configurable max attempts (default 3)
+  - [ ] Subtask 3.2: Feed specific validation errors back to LLM on each retry
+  - [ ] Subtask 3.3: Ensure retry visibility is completely silent to user
+- [ ] Task 4: Add comprehensive error handling (AC: #4)
+  - [ ] Subtask 4.1: Throw ValidationError with remediation options after max retries
+  - [ ] Subtask 4.2: Propagate SystemError from LlmProvider appropriately
+  - [ ] Subtask 4.3: Handle edge cases (empty diff, network issues, etc.)
+- [ ] Task 5: Ensure clean code and performance standards (AC: #7)
+  - [ ] Subtask 5.1: Keep methods ≤15 lines, extract private helpers as needed
+  - [ ] Subtask 5.2: Follow class member ordering (constructor → private → public)
+  - [ ] Subtask 5.3: Ensure pure function delegation to utilities (no side effects)
+- [ ] Task 6: Comprehensive unit testing (AC: #8)
+  - [ ] Subtask 6.1: Create test file with mock LlmProvider using Vitest
+  - [ ] Subtask 6.2: Test successful generation scenarios with different commit types
+  - [ ] Subtask 6.3: Test retry logic with invalid LLM responses
+  - [ ] Subtask 6.4: Test error handling for LLM failures and max retry exceeded
+  - [ ] Subtask 6.5: Achieve ≥80% test coverage for all code paths
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>1. **GenerateCommit Use Case** - Orchestrate the complete generation workflow from LLM call to final formatted message
+2. **Four-Phase Processing Pipeline** - Implement parsing → validation → type enforcement → normalization sequence
+3. **Silent Retry Logic** - Up to 3 silent retries with specific error feedback for validation failures
+4. **Error Handling** - Throw ValidationError with clear remediation if all retries fail
+5. **LLM Integration** - Use existing OllamaAdapter for text generation with proper error propagation
+6. **Utility Integration** - Use existing message processing utilities (PromptBuilder, FormatValidator, TypeEnforcer, MessageNormalizer)
+7. **Type Safety** - Proper TypeScript interfaces and error handling throughout
+8. **Unit Tests** - Co-located unit tests with ≥80% coverage for all generation scenarios</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact path="dev/architecture.md" title="System Architecture and Decisions" section="Four-Phase Processing Pipeline & Retry Logic" snippet="Four-Phase Processing Pipeline: Parsing → Validation → Type Enforcement → Normalization with 3 silent retries and specific error feedback for validation failures." />
+      <artifact path="dev/prd.md" title="Product Requirements Document" section="Functional Requirements" snippet="MVP scope: Local-first CLI tool for generating git commit messages via Ollama with sub-1s response time and zero-config philosophy." />
+      <artifact path="dev/ux-design-specification.md" title="UX Design Specification" section="Error Message System" snippet="Error messages provide actionable remediation with clear guidance for users and proper exit codes." />
+      <artifact path="dev/epics.md" title="Epic Breakdown" section="Epic 4: AI Generation Logic" snippet="Epic 4 contains 2 consolidated stories including Story 4.2: Generate Commit Strategy as the core orchestration use case." />
+      <artifact path="dev/sprint-artifacts/4-1-implement-message-processing-utilities.md" title="Previous Story Implementation" section="Message Processing Utilities" snippet="All message processing utilities are implemented and tested: PromptBuilder, FormatValidator, TypeEnforcer, MessageNormalizer." />
+    </docs>
+    <code>
+      <artifact path="src/features/commit/utils/index.ts" kind="barrel-export" symbol="*" lines="1-5" reason="Clean import access to all message processing utilities (PromptBuilder, FormatValidator, TypeEnforcer, MessageNormalizer)" />
+      <artifact path="src/features/commit/utils/prompt-builder.ts" kind="utility" symbol="buildUserPrompt" lines="15-29" reason="Creates formatted prompts for LLM with commit type, diff, and status parameters" />
+      <artifact path="src/features/commit/utils/format-validator.ts" kind="utility" symbol="validateStructure" lines="14-25" reason="Structural validation using regex pattern /^\w+: .+$/ with detailed error messages" />
+      <artifact path="src/features/commit/utils/type-enforcer.ts" kind="utility" symbol="enforceType" lines="1-1" reason="Overwrites model's type with user selection (TypeEnforcer utility)" />
+      <artifact path="src/features/commit/utils/message-normalizer.ts" kind="utility" symbol="normalizeFormat" lines="1-1" reason="Ensures proper spacing and blank line separation between subject and body" />
+      <artifact path="src/core/ports/llm-port.ts" kind="port-interface" symbol="LlmPort" lines="8-56" reason="Defines contract for LLM operations including generate() method with proper error handling" />
+      <artifact path="src/core/types/errors.types.ts" kind="error-types" symbol="ValidationError" lines="93-99" reason="Error class hierarchy with proper error codes and remediation support for validation failures" />
+      <artifact path="src/core/types/errors.types.ts" kind="error-types" symbol="SystemError" lines="85-91" reason="Error class for LLM provider failures and system-level issues" />
+    </code>
+    <dependencies>
+      <artifact path="package.json" kind="dependency-manifest" ecosystem="node" packages="typescript, vitest, commander.js, @clack/prompts, ollama, execa, debug" />
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+  <constraint type="architecture-patterns" description="Use Case Pattern: Orchestrate domain logic without external dependencies; Hexagonal Architecture: Use ports/adapters; Dependency Injection: Constructor injection for testability" />
+  <constraint type="class-design" description="Class Member Ordering: Constructor → Private Properties → Public Properties → Public Methods → Private Methods; Methods ≤15 lines, extract private helpers as needed" />
+  <constraint type="performance" description="Generation Time: <1s for successful commit message generation; sub-1s response time target from PRD; Critical: No auto-pull during commit to preserve performance" />
+  <constraint type="external-dependencies" description="No External Dependencies: Use only injected LlmProvider and existing utilities; Pure Function Delegation: All processing should delegate to utilities, no embedded logic" />
+  <constraint type="error-handling" description="Error Propagation: SystemError from LLM provider, ValidationError for generation failures with remediation options '[R]egenerate [E]dit manually [C]ancel'" />
+  <constraint type="retry-logic" description="Silent Retry Logic: Up to 3 silent retries with specific error feedback; Retry visibility: Completely silent - no user-facing retry indicators" />
+</constraints>
+  <interfaces>
+  <interface name="LlmPort" kind="port-interface" signature="interface LlmPort { checkConnection(): Promise<boolean>; checkModel(modelName: string): Promise<boolean>; generate(prompt: string, options: GenerationOptions): Promise<string>; }" path="src/core/ports/llm-port.ts" description="Defines contract for LLM operations including generate() method with proper error handling" />
+  <interface name="GenerateCommit Use Case" kind="use-case-interface" signature="class GenerateCommit { constructor(private readonly llmProvider: LlmPort); async execute(commitType: string, diff: string, status: string): Promise<string>; }" path="src/features/commit/use-cases/generate-commit.ts" description="Orchestrates the complete commit generation workflow from LLM call to final formatted message" />
+  <interface name="PromptParameters" kind="utility-interface" signature="interface PromptParameters { readonly commitType: string; readonly diff: string; readonly status: string; }" path="src/features/commit/utils/prompt-builder.ts" description="Parameters for building user prompts" />
+  <interface name="ValidationResult" kind="utility-interface" signature="interface ValidationResult { readonly isValid: boolean; readonly error?: string; }" path="src/features/commit/utils/format-validator.ts" description="Result of validation operation with error details" />
+</interfaces>
+  <tests>
+    <standards>Testing Framework: Vitest for modern, fast test execution with native ESM support; Co-located tests: Each component has its own .test.ts file in the same directory; Test Coverage: ≥80% line coverage including all error paths and retry logic; Mock Pattern: Use vi.fn() for creating test doubles; Test Quality: No redundant comments, self-documenting test code following previous story standards.</standards>
+    <locations>src/features/commit/use-cases/generate-commit.test.ts (primary use case tests); src/features/commit/utils/ (existing utility test files); tests/helpers/ (test utilities and factories for mock LlmProvider and test scenarios)</locations>
+    <ideas>Test successful generation scenarios with different commit types (feat, fix, docs, etc.); Test retry logic with invalid LLM responses that trigger validation failures; Test error handling for LLM failures and max retry exceeded scenarios; Test integration of all four processing phases (parsing → validation → type enforcement → normalization); Verify utilities are called correctly with expected parameters using mock spies; Test edge cases (empty diff, network issues, malformed LLM responses).</ideas>
+  </tests>
+</story-context>

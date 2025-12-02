@@ -4,9 +4,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import type { SetupUiPort } from '../../src/core/ports/setup-ui-port.js';
 import type { OllamaModelConfig } from '../../src/core/types/llm-types.js';
-import { SetupCommand } from '../../src/features/setup/setup-command.js';
+import { SetupController } from '../../src/features/setup/controllers/setup-controller.js';
 import { ProvisionEnvironment } from '../../src/features/setup/use-cases/provision-environment.js';
 import { OllamaAdapter } from '../../src/infrastructure/adapters/ollama/ollama-adapter.js';
+
+// TODO refactor to use getInstance. Our intergration tests at least should be really clean.
+// TODO fix imports
 
 // Stub UI implementation for integration tests (no console output)
 class StubUi implements SetupUiPort {
@@ -58,14 +61,14 @@ describe('Setup Command Business Logic Integration Tests', () => {
       stubUi,
       testConfig
     );
-    const setupCommand = new SetupCommand(
+    const setupController = new SetupController(
       testConfig,
       provisionEnvironment,
       stubUi
     );
     const program = new Command();
 
-    setupCommand.register(program);
+    setupController.register(program);
 
     await program.parseAsync(['node', 'test', 'setup']);
 
@@ -89,14 +92,14 @@ describe('Setup Command Business Logic Integration Tests', () => {
       stubUi,
       testConfig
     );
-    const setupCommand = new SetupCommand(
+    const setupController = new SetupController(
       testConfig,
       provisionEnvironment,
       stubUi
     );
     const program = new Command();
 
-    setupCommand.register(program);
+    setupController.register(program);
 
     await program.parseAsync(['node', 'test', 'setup']);
 

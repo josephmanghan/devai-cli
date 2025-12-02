@@ -1,10 +1,4 @@
-/**
- * Result of validation operation
- */
-export interface ValidationResult {
-  readonly isValid: boolean;
-  readonly error?: string;
-}
+import { ValidationResult } from '../../../core/index.js';
 
 /**
  * Validates basic commit message structure using regex pattern /^\w+: .+$/

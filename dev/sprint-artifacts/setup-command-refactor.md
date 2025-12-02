@@ -87,31 +87,31 @@ This refactor successfully achieves all architectural objectives. The implementa
 
 ### Acceptance Criteria Coverage
 
-| AC # | Description | Status | Evidence |
-|------|-------------|--------|----------|
-| AC #1 | **Separation of Concerns** - SetupCommand must NOT contain any conditional business logic | **IMPLEMENTED** | ✅ `setup-command.ts:35-42` - Only delegates to `provisionEnvironment.execute()`, no business logic present |
-| AC #2 | **Use Case Pattern** - All provisioning logic resides in `provision-environment.ts` | **IMPLEMENTED** | ✅ `provision-environment.ts:23-257` - Complete provisioning workflow with daemon, base-model, and custom-model validation |
-| AC #3 | **Test Isolation** - Business logic tests verify Use Case directly; Command tests verify wiring | **IMPLEMENTED** | ✅ `provision-environment.test.ts:49-238` - Direct Use Case testing; `setup-command.test.ts:45-113` - Command wiring only |
-| AC #4 | **Thin Adapter** - SetupCommand serves purely as Primary Adapter | **IMPLEMENTED** | ✅ `setup-command.ts:23-30` - Only registers command and delegates, no business rules |
-| AC #5 | **Behavior Parity** - `ollatool setup` command behaves exactly as before | **IMPLEMENTED** | ✅ `main.ts:20-42` - Same dependency injection and wiring; same CLI interface |
+| AC #  | Description                                                                                     | Status          | Evidence                                                                                                                   |
+| ----- | ----------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| AC #1 | **Separation of Concerns** - SetupCommand must NOT contain any conditional business logic       | **IMPLEMENTED** | ✅ `setup-command.ts:35-42` - Only delegates to `provisionEnvironment.execute()`, no business logic present                |
+| AC #2 | **Use Case Pattern** - All provisioning logic resides in `provision-environment.ts`             | **IMPLEMENTED** | ✅ `provision-environment.ts:23-257` - Complete provisioning workflow with daemon, base-model, and custom-model validation |
+| AC #3 | **Test Isolation** - Business logic tests verify Use Case directly; Command tests verify wiring | **IMPLEMENTED** | ✅ `provision-environment.test.ts:49-238` - Direct Use Case testing; `setup-command.test.ts:45-113` - Command wiring only  |
+| AC #4 | **Thin Adapter** - SetupCommand serves purely as Primary Adapter                                | **IMPLEMENTED** | ✅ `setup-command.ts:23-30` - Only registers command and delegates, no business rules                                      |
+| AC #5 | **Behavior Parity** - `ollatool setup` command behaves exactly as before                        | **IMPLEMENTED** | ✅ `main.ts:20-42` - Same dependency injection and wiring; same CLI interface                                              |
 
 **Summary:** 5 of 5 acceptance criteria fully implemented
 
 ### Task Completion Validation
 
-| Task | Marked As | Verified As | Evidence |
-|------|-----------|-------------|----------|
-| **1.1** Create provision-environment.ts | [x] Complete | **VERIFIED COMPLETE** | ✅ `src/features/setup/use-cases/provision-environment.ts:1-258` |
+| Task                                               | Marked As    | Verified As           | Evidence                                                                                        |
+| -------------------------------------------------- | ------------ | --------------------- | ----------------------------------------------------------------------------------------------- |
+| **1.1** Create provision-environment.ts            | [x] Complete | **VERIFIED COMPLETE** | ✅ `src/features/setup/use-cases/provision-environment.ts:1-258`                                |
 | **1.2** Move private validation logic from command | [x] Complete | **VERIFIED COMPLETE** | ✅ Methods like `validateDaemon()`, `validateBaseModel()`, `provisionCustomModel()` in use case |
-| **1.3** Inject LlmPort and SetupUiPort | [x] Complete | **VERIFIED COMPLETE** | ✅ `provision-environment.ts:11-15` - Constructor injection |
-| **2.1** Create provision-environment.test.ts | [x] Complete | **VERIFIED COMPLETE** | ✅ `src/features/setup/use-cases/provision-environment.test.ts:1-239` |
-| **2.2** Move logic-heavy tests from command test | [x] Complete | **VERIFIED COMPLETE** | ✅ Auto-pull, error handling tests in `provision-environment.test.ts:78-237` |
-| **2.3** Refactor tests to target Use Case directly | [x] Complete | **VERIFIED COMPLETE** | ✅ `provision-environment.test.ts:23-47` - Mocks ports directly, no Commander |
-| **3.1** Update SetupCommand constructor | [x] Complete | **VERIFIED COMPLETE** | ✅ `setup-command.ts:13-17` - Accepts ProvisionEnvironment |
-| **3.2** Remove private business logic methods | [x] Complete | **VERIFIED COMPLETE** | ✅ `setup-command.ts:59` - Only error handling remains, no provisioning logic |
-| **3.3** Update execute method to delegate | [x] Complete | **VERIFIED COMPLETE** | ✅ `setup-command.ts:35-42` - Simple delegation to use case |
-| **4.1** Update main.ts composition | [x] Complete | **VERIFIED COMPLETE** | ✅ `main.ts:34-41` - Composes ProvisionEnvironment before SetupCommand |
-| **4.2** Update createSetupCommand factory | [x] Complete | **VERIFIED COMPLETE** | ✅ `main.ts:20-42` - Updated factory with use case injection |
+| **1.3** Inject LlmPort and SetupUiPort             | [x] Complete | **VERIFIED COMPLETE** | ✅ `provision-environment.ts:11-15` - Constructor injection                                     |
+| **2.1** Create provision-environment.test.ts       | [x] Complete | **VERIFIED COMPLETE** | ✅ `src/features/setup/use-cases/provision-environment.test.ts:1-239`                           |
+| **2.2** Move logic-heavy tests from command test   | [x] Complete | **VERIFIED COMPLETE** | ✅ Auto-pull, error handling tests in `provision-environment.test.ts:78-237`                    |
+| **2.3** Refactor tests to target Use Case directly | [x] Complete | **VERIFIED COMPLETE** | ✅ `provision-environment.test.ts:23-47` - Mocks ports directly, no Commander                   |
+| **3.1** Update SetupCommand constructor            | [x] Complete | **VERIFIED COMPLETE** | ✅ `setup-command.ts:13-17` - Accepts ProvisionEnvironment                                      |
+| **3.2** Remove private business logic methods      | [x] Complete | **VERIFIED COMPLETE** | ✅ `setup-command.ts:59` - Only error handling remains, no provisioning logic                   |
+| **3.3** Update execute method to delegate          | [x] Complete | **VERIFIED COMPLETE** | ✅ `setup-command.ts:35-42` - Simple delegation to use case                                     |
+| **4.1** Update main.ts composition                 | [x] Complete | **VERIFIED COMPLETE** | ✅ `main.ts:34-41` - Composes ProvisionEnvironment before SetupCommand                          |
+| **4.2** Update createSetupCommand factory          | [x] Complete | **VERIFIED COMPLETE** | ✅ `main.ts:20-42` - Updated factory with use case injection                                    |
 
 **Summary:** 11 of 11 completed tasks verified, 0 questionable, 0 falsely marked complete
 
@@ -141,9 +141,11 @@ No security concerns identified. Error handling does not expose sensitive inform
 ### Action Items
 
 **Code Changes Required:**
+
 - None
 
 **Advisory Notes:**
+
 - Note: This refactor serves as an excellent reference for future command-to-use-case migrations
 - Note: Consider documenting the thin adapter pattern in the architecture documentation for consistency
 

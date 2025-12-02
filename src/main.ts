@@ -4,7 +4,7 @@ import { Command } from 'commander';
 import { Ollama } from 'ollama';
 
 import { OllamaModelConfig } from './core/index.js';
-import { SetupCommand } from './features/setup/setup-command.js';
+import { SetupController } from './features/setup/controllers/setup-controller.js';
 import { ProvisionEnvironment } from './features/setup/use-cases/provision-environment.js';
 import {
   CONVENTIONAL_COMMIT_MODEL_CONFIG,
@@ -19,7 +19,7 @@ const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
  */
 export function createSetupCommand(
   modelConfig: OllamaModelConfig
-): SetupCommand {
+): SetupController {
   const ollamaClient = new Ollama();
   const ollamaAdapter = new OllamaAdapter(
     ollamaClient,
@@ -37,8 +37,8 @@ export function createSetupCommand(
     modelConfig
   );
 
-  // Inject ProvisionEnvironment into SetupCommand
-  return new SetupCommand(modelConfig, provisionEnvironment, setupUi);
+  // Inject ProvisionEnvironment into SetupController
+  return new SetupController(modelConfig, provisionEnvironment, setupUi);
 }
 
 /**

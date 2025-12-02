@@ -41,3 +41,11 @@ export interface OllamaModelConfig {
     readonly keep_alive: number;
   };
 }
+
+/**
+ * Result of validation operation
+ */
+export interface ValidationResult {
+  readonly isValid: boolean;
+  readonly error?: string;
+}

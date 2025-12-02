@@ -1,11 +1,11 @@
 import { Command } from 'commander';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SetupUiPort } from '../../core/ports/setup-ui-port.js';
-import { SystemError } from '../../core/types/errors.types.js';
-import type { OllamaModelConfig } from '../../core/types/llm-types.js';
-import { SetupCommand } from './setup-command.js';
-import { ProvisionEnvironment } from './use-cases/provision-environment.js';
+import { SetupUiPort } from '../../../core/ports/setup-ui-port.js';
+import { SystemError } from '../../../core/types/errors.types.js';
+import type { OllamaModelConfig } from '../../../core/types/llm-types.js';
+import { ProvisionEnvironment } from '../use-cases/provision-environment.js';
+import { SetupController } from './setup-controller.js';
 
 function createMockModelConfig(): OllamaModelConfig {
   return {
@@ -16,8 +16,8 @@ function createMockModelConfig(): OllamaModelConfig {
   };
 }
 
-describe('SetupCommand', () => {
-  let setupCommand: SetupCommand;
+describe('SetupController', () => {
+  let setupController: SetupController;
   let mockProgram: Command;
   let mockProvisionEnvironment: ProvisionEnvironment;
   let mockUi: SetupUiPort;
@@ -39,7 +39,7 @@ describe('SetupCommand', () => {
     };
 
     const mockConfig = createMockModelConfig();
-    setupCommand = new SetupCommand(
+    setupController = new SetupController(
       mockConfig,
       mockProvisionEnvironment,
       mockUi
@@ -48,7 +48,7 @@ describe('SetupCommand', () => {
 
   describe('Command Registration', () => {
     it('should register setup command with program', () => {
-      setupCommand.register(mockProgram);
+      setupController.register(mockProgram);
 
       expect(mockProgram.command).toHaveBeenCalledWith('setup');
       expect(mockProgram.description).toHaveBeenCalledWith(
@@ -69,7 +69,7 @@ describe('SetupCommand', () => {
         return mockProgram;
       });
 
-      setupCommand.register(mockProgram);
+      setupController.register(mockProgram);
       await actionHandler!();
 
       expect(mockUi.showIntro).toHaveBeenCalled();
@@ -90,7 +90,7 @@ describe('SetupCommand', () => {
         return mockProgram;
       });
 
-      setupCommand.register(mockProgram);
+      setupController.register(mockProgram);
 
       await expect(actionHandler!()).rejects.toThrow('Test error');
       expect(mockUi.showIntro).toHaveBeenCalled();
@@ -111,7 +111,7 @@ describe('SetupCommand', () => {
         return mockProgram;
       });
 
-      setupCommand.register(mockProgram);
+      setupController.register(mockProgram);
 
       await expect(actionHandler!()).rejects.toThrow(SystemError);
       await expect(actionHandler!()).rejects.toThrow(
@@ -123,12 +123,12 @@ describe('SetupCommand', () => {
   describe('Dependency Injection', () => {
     it('should accept ProvisionEnvironment and UI port via constructor', () => {
       const mockConfig = createMockModelConfig();
-      const command = new SetupCommand(
+      const controller = new SetupController(
         mockConfig,
         mockProvisionEnvironment,
         mockUi
       );
-      expect(command).toBeDefined();
+      expect(controller).toBeDefined();
     });
   });
 });

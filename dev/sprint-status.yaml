@@ -76,15 +76,16 @@ development_status:
 
   # Epic 4: AI Generation Logic (2 stories)
   epic-4: contexted
-  4-1-implement-message-processing-utilities: backlog
-  4-2-implement-generate-commit-strategy: backlog
+  4-1-implement-message-processing-utilities: done
+  4-2-implement-generate-commit-strategy: done
   epic-4-retrospective: optional
 
   # Epic 5: Interactive Workflow & CLI (3 stories)
   epic-5: contexted
-  5-1-implement-ui-components: backlog
+  5-1-implement-ui-components: drafted
   5-2-implement-commit-controller: backlog
   5-3-wiring-cli-entry: backlog
+  5-4-happy-path-integration-test-: backlog
   epic-5-retrospective: optional
 
   # Epic 6: Performance & Error Handling (8 stories)
@@ -106,3 +107,8 @@ development_status:
   7-4-implement-manual-acceptance-testing-framework: backlog
   7-5-execute-manual-acceptance-testing-50-scenarios: backlog
   epic-7-retrospective: optional
+
+  # Epic SETUP-COMMAND: Architecture Refactor (1 story)
+  epic-SETUP-COMMAND: contexted
+  setup-command-refactor: done
+  epic-SETUP-COMMAND-retrospective: optional

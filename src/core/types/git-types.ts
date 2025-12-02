@@ -8,3 +8,20 @@ export interface CommitContext {
   /** The current git branch name */
   branch: string;
 }
+
+/**
+ * Parameters for generating a commit message
+ */
+export interface GenerateCommitInput {
+  readonly commitType: string;
+  readonly diff: string;
+  readonly status: string;
+}
+
+/**
+ * Result of commit generation operation
+ */
+export interface GenerateCommitOutput {
+  readonly commitMessage: string;
+  readonly attemptsMade: number;
+}
