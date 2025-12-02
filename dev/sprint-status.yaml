@@ -1,0 +1,114 @@
+# Sprint Status
+# Generated: 2025-11-28
+# Project: Ollama-CLI-application
+# Project Key: ollatool
+# Tracking System: file-system
+# Story Location: dev/sprint-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic exists in epic file but not contexted
+#   - contexted: Epic tech context created (required before drafting stories)
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Under SM review (via code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+
+# WORKFLOW NOTES:
+# ===============
+# - Epics should be 'contexted' before stories can be 'drafted'
+# - Stories are typically worked in order to incorporate learnings
+# - Dev moves story to 'review', SM reviews, then Dev moves to 'done'
+
+generated: 2025-11-28
+project: Ollama-CLI-application
+project_key: ollatool
+tracking_system: file-system
+story_location: dev/sprint-artifacts
+
+development_status:
+  # Epic 0: Test Infrastructure & CI Setup (5 stories)
+  epic-0: contexted
+  0-1-create-test-infrastructure-core: done
+  0-2-configure-vitest-test-framework: done
+  0-3-implement-debug-logging-system: done
+  0-4-setup-ci-cd-pipeline-structure: closed
+  0-5-validate-ollama-integration-architecture: done
+  epic-0-retrospective: done
+
+  # Epic 1: Foundation & Project Setup (6 stories)
+  epic-1: contexted
+  1-1-initialize-typescript-project-with-esm: done
+  1-2-configure-build-tooling-tsup: done
+  1-3-setup-testing-framework-vitest: done
+  1-4-setup-cli-framework-commander-js: done
+  1-5-setup-hexagonal-architecture-structure: done
+  1-6-setup-linting-formatting: done
+  epic-1-retrospective: done
+
+  # Epic 2: Ollama Integration & Model Management (6 stories)
+  epic-2: contexted
+  2-1-create-ollama-port-interface: done
+  2-2-implement-ollama-adapter: done
+  2-3-implement-model-existence-check: closed
+  2-4-implement-custom-model-creation: done
+  2-5-implement-setup-command: done
+  2-5-1-implement-base-model-auto-pull: done
+  2-6-implement-setup-validation-error-handling: closed
+  2-7-architecture-refactor: done
+  epic-2-retrospective: done
+
+  # Epic 3: Git & Editor Infrastructure (3 stories)
+  epic-3: contexted
+  3-1-implement-git-infrastructure: done
+  3-2-implement-editor-infrastructure: done
+  3-3-implement-precondition-validation: done
+  epic-3-retrospective: optional
+
+  # Epic 4: AI Generation Logic (2 stories)
+  epic-4: contexted
+  4-1-implement-message-processing-utilities: done
+  4-2-implement-generate-commit-strategy: done
+  epic-4-retrospective: optional
+
+  # Epic 5: Interactive Workflow & CLI (3 stories)
+  epic-5: contexted
+  5-1-implement-ui-components: done
+  5-2-implement-commit-controller: done
+  5-2-1-implement-commit-controller-refactor: done
+  5-3-wiring-cli-entry: done
+  epic-5-retrospective: optional
+
+  # Epic 6: Performance & Error Handling (8 stories)
+  epic-6: backlog
+  6-1-implement-spinner-for-ai-generation: backlog
+  6-2-implement-typed-error-classes: backlog
+  6-3-implement-error-message-formatting: backlog
+  6-4-implement-global-error-handler: backlog
+  6-5-implement-resource-cleanup-on-exit: backlog
+  6-6-add-context-window-overflow-detection: backlog
+  6-7-implement-performance-monitoring-optional: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7: Model Validation & Manual Acceptance Testing (5 stories)
+  epic-7: backlog
+  7-1-create-model-evaluation-framework: backlog
+  7-2-execute-model-evaluation-and-document-decision: backlog
+  7-3-setup-e2e-testing-with-real-ollama: backlog
+  7-4-implement-manual-acceptance-testing-framework: backlog
+  7-5-execute-manual-acceptance-testing-50-scenarios: backlog
+  epic-7-retrospective: optional
+
+  # Epic SETUP-COMMAND: Architecture Refactor (1 story)
+  epic-SETUP-COMMAND: contexted
+  setup-command-refactor: done
+  epic-SETUP-COMMAND-retrospective: optional

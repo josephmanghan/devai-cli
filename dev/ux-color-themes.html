@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ollatool - Terminal Color Theme</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'JetBrains Mono', monospace;
+        background: #0a0a0a;
+        color: #e0e0e0;
+        line-height: 1.6;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .terminal {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      .prompt {
+        color: #4ade80;
+        font-weight: 600;
+      }
+
+      .command {
+        color: #60a5fa;
+        font-weight: 600;
+      }
+
+      .success {
+        color: #4ade80;
+      }
+
+      .error {
+        color: #f87171;
+      }
+
+      .warning {
+        color: #fbbf24;
+      }
+
+      .info {
+        color: #60a5fa;
+      }
+
+      .highlight {
+        color: #38bdf8;
+        font-weight: 600;
+      }
+
+      .dim {
+        color: #9ca3af;
+      }
+
+      .spinner {
+        color: #38bdf8;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          content: '|';
+        }
+        25% {
+          content: '/';
+        }
+        50% {
+          content: '-';
+        }
+        75% {
+          content: '\\';
+        }
+        100% {
+          content: '|';
+        }
+      }
+
+      .progress-bar {
+        background: #374151;
+        border-radius: 4px;
+        height: 8px;
+        margin: 10px 0;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        background: linear-gradient(90deg, #4ade80, #38bdf8);
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      .selection-list {
+        margin: 10px 0;
+      }
+
+      .selection-item {
+        margin: 5px 0;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+      }
+
+      .selected {
+        background: rgba(96, 165, 250, 0.2);
+        border-left: 3px solid #60a5fa;
+        padding-left: 5px;
+      }
+
+      .shortcuts {
+        display: flex;
+        gap: 15px;
+        margin: 15px 0;
+        flex-wrap: wrap;
+      }
+
+      .shortcut {
+        background: #374151;
+        border: 1px solid #4b5563;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 0.9em;
+      }
+
+      .shortcut-key {
+        color: #fbbf24;
+        font-weight: 600;
+      }
+
+      .theme-section {
+        margin-bottom: 30px;
+      }
+
+      .theme-title {
+        color: #38bdf8;
+        font-weight: 700;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #374151;
+        padding-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 style="color: #38bdf8; margin-bottom: 30px; text-align: center">
+        ollatool - Terminal Color Theme
+      </h1>
+
+      <div class="theme-section">
+        <div class="theme-title">Core Success/Error States</div>
+        <div class="terminal">
+          <div>
+            <span class="success">✓ Committed: </span
+            ><span class="highlight"
+              >feat: add user authentication service</span
+            >
+          </div>
+          <div>
+            <span class="error">✗ Error: </span>No staged changes detected
+          </div>
+          <div>
+            <span class="warning">⚠ Warning: </span>Model download in
+            progress...
+          </div>
+          <div>
+            <span class="info">ℹ Info: </span>Ollama detected at
+            localhost:11434
+          </div>
+        </div>
+      </div>
+
+      <div class="theme-section">
+        <div class="theme-title">Interactive Type Selection</div>
+        <div class="terminal">
+          <div class="prompt">ollatool commit</div>
+          <div style="margin: 10px 0">Select commit type:</div>
+          <div class="selection-list">
+            <div class="selection-item">
+              <span class="dim">[1]</span> feat: A new feature
+            </div>
+            <div class="selection-item selected">
+              <span class="highlight">[2]</span> fix: A bug fix
+            </div>
+            <div class="selection-item">
+              <span class="dim">[3]</span> docs: Documentation only changes
+            </div>
+            <div class="selection-item">
+              <span class="dim">[4]</span> style: Code style changes
+            </div>
+            <div class="selection-item">
+              <span class="dim">[5]</span> refactor: Code refactoring
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="theme-section">
+        <div class="theme-title">Progress Feedback</div>
+        <div class="terminal">
+          <div style="margin-top: 10px">
+            <div>
+              <span class="dim">ℹ</span> Downloading model
+              (qwen2.5-coder:1.5b)... <span class="spinner">⠋⠙⠹⠸⠼⠴</span>
+            </div>
+          </div>
+          <div style="margin-top: 10px">
+            <div>
+              <span class="dim">ℹ</span> Generating commit message...
+              <span class="spinner">⠋⠙⠹⠸⠼⠴</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="theme-section">
+        <div class="theme-title">Interactive Confirmation</div>
+        <div class="terminal">
+          <div>
+            <span class="highlight">feat:</span> add user authentication with
+            JWT tokens
+          </div>
+          <div style="margin: 5px 0; color: #9ca3af; font-size: 0.9em">
+            Added timeout handling and retry logic for OAuth2 token refresh.<br />
+            Prevents infinite loops when API services are temporarily
+            unavailable.
+          </div>
+          <div style="margin: 15px 0"></div>
+          <div class="shortcuts">
+            <div class="shortcut">
+              <span class="shortcut-key">[A]</span>pprove
+            </div>
+            <div class="shortcut"><span class="shortcut-key">[E]</span>dit</div>
+            <div class="shortcut">
+              <span class="shortcut-key">[R]</span>egenerate
+            </div>
+            <div class="shortcut">
+              <span class="shortcut-key">[C]</span>ancel
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="theme-section">
+        <div class="theme-title">Terminal Performance Feel</div>
+        <div class="terminal">
+          <div>
+            <span class="prompt">$</span>
+            <span class="command">ollatool commit</span>
+          </div>
+          <div style="margin: 5px 0">
+            <span class="dim">ℹ</span> Detecting staged changes...
+            <span class="success">✓</span>
+          </div>
+          <div style="margin: 5px 0">
+            <span class="dim">ℹ</span> Connecting to Ollama...
+            <span class="success">✓</span>
+          </div>
+          <div style="margin: 5px 0">
+            <span class="dim">ℹ</span> Model loaded...
+            <span class="success">✓</span>
+          </div>
+          <div style="margin: 5px 0">
+            <span class="dim">ℹ</span> Analyzing changes...
+            <span class="success">✓</span>
+          </div>
+          <div style="margin: 5px 0">
+            <span class="dim">ℹ</span> Generating message...
+            <span class="success">✓</span>
+          </div>
+          <div
+            style="
+              margin: 10px 0;
+              padding: 10px;
+              background: rgba(74, 222, 128, 0.1);
+              border-radius: 4px;
+              border-left: 3px solid #4ade80;
+            "
+          >
+            <div style="color: #4ade80; font-weight: 600">
+              fix: resolve authentication timeout issue
+            </div>
+            <div style="margin: 5px 0; color: #9ca3af; font-size: 0.9em">
+              Added timeout handling and retry logic for OAuth2 token
+              refresh.<br />
+              Prevents infinite loops when API services are temporarily
+              unavailable.
+            </div>
+          </div>
+          <div class="shortcuts" style="margin-top: 15px">
+            <div class="shortcut">
+              <span class="shortcut-key">[A]</span>pprove & Commit
+            </div>
+            <div class="shortcut">
+              <span class="shortcut-key">[E]</span>dit Message
+            </div>
+            <div class="shortcut">
+              <span class="shortcut-key">[R]</span>egenerate
+            </div>
+            <div class="shortcut">
+              <span class="shortcut-key">[C]</span>ancel
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style="
+          text-align: center;
+          margin-top: 30px;
+          color: #9ca3af;
+          font-size: 0.9em;
+        "
+      >
+        <div>Color Accessibility: Respects NO_COLOR environment variable</div>
+        <div>
+          Performance: Immediate visual feedback for sub-1s response times
+        </div>
+        <div>Standards: Follows CLIG guidelines (https://clig.dev/)</div>
+      </div>
+    </div>
+  </body>
+</html>

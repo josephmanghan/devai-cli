@@ -1,0 +1,77 @@
+<story-context id="1-3-setup-testing-framework-vitest" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>3</storyId>
+    <title>setup-testing-framework-vitest</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>dev/sprint-artifacts/1-3-setup-testing-framework-vitest.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a modern testing framework with Vitest configured</iWant>
+    <soThat>I can write and run reliable tests for the CLI application</soThat>
+    <tasks>Install Vitest dependencies, Configure test discovery, Setup test scripts and coverage, Create example test file, Integrate with Epic 0 test infrastructure</tasks>
+  </story>
+
+  <acceptanceCriteria>1. Vitest installed and configured in vitest.config.ts
+2. Test discovery configured for co-located `*.test.ts` files
+3. Test execution with `npm test` and `npm run test:coverage`
+4. Example test file demonstrating testing patterns
+5. Integration with existing Epic 0 test infrastructure</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="dev/sprint-artifacts/tech-spec-epic-1.md" title="Epic Technical Specification: Foundation &amp; Project Setup" section="Test Strategy Summary" snippet="Epic 1 focuses on infrastructure validation rather than business logic testing. Testing verifies that tooling works correctly. Smoke Tests: Verify `npm install` completes successfully, `npm run build` produces executable bundle, `npm test` discovers and runs tests, `npm run typecheck` passes, `npm run lint` and `npm run format` work."/>
+      <doc path="dev/epics.md" title="ollatool - Epics and Stories" section="Testing Requirements" snippet="Unit Tests Are Mandatory: Every epic that produces implementation code must include co-located unit tests (`.test.ts` files adjacent to implementation files). Test-First Development: Tests should be written as implementation proceeds, not as an afterthought. Coverage Target: Aim for ≥80% coverage of core logic (git integration, prompt construction, validation)."/>
+      <doc path="dev/sprint-artifacts/tech-spec-epic-1.md" title="Epic Technical Specification: Foundation &amp; Project Setup" section="ADR-004 (Testing Strategy)" snippet="Vitest with co-located `*.test.ts` files, globals enabled, node environment."/>
+      <doc path="dev/sprint-artifacts/tech-spec-epic-1.md" title="Epic Technical Specification: Foundation &amp; Project Setup" section="Test Configuration Interface" snippet="vitest.config.ts: vitest configuration with Node environment, globals enabled, test environment: node."/>
+    </docs>
+    <code>
+      <code path="package.json" kind="config" symbol="scripts" lines="N/A" reason="Package scripts for test execution need to be configured"/>
+      <code path="tsup.config.ts" kind="config" symbol="build configuration" lines="N/A" reason="Example configuration file that needs corresponding test file"/>
+      <code path="dev/sprint-artifacts/1-2-configure-build-tooling-tsup.md" kind="story" symbol="previous story" lines="N/A" reason="Previous story established build system - tests should verify build functionality"/>
+      <code path="dev/sprint-artifacts/1-1-initialize-typescript-project-with-esm.md" kind="story" symbol="foundation" lines="N/A" reason="Foundation story established ESM project structure - tests must support ESM"/>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="typescript" version="^5.9.3"/>
+        <package name="@types/node" version="^24.10.1"/>
+        <package name="tsup" version="latest"/>
+        <package name="debug" version="^4.4.3"/>
+        <package name="@types/debug" version="^4.1.12"/>
+        <package name="execa" version="^9.6.0"/>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint name="Testing Framework">Must use Vitest per ADR-004 [Source: dev/sprint-artifacts/tech-spec-epic-1.md#ADR-004]</constraint>
+    <constraint name="Test Location">Co-located tests: `*.test.ts` files adjacent to implementation files [Source: dev/sprint-artifacts/tech-spec-epic-1.md#ADR-004]</constraint>
+    <constraint name="Test Environment">Node environment for CLI testing (no browser setup needed)</constraint>
+    <constraint name="Coverage Target">≥80% coverage of core logic [Source: dev/epics.md#Testing-Requirements]</constraint>
+    <constraint name="ESM Compatibility">Project uses `"type": "module"` - Vitest must support ESM imports [Source: foundation story 1-1]</constraint>
+    <constraint name="Clean Code Standards">All test code must follow dev/styleguides/clean-code.md standards</constraint>
+    <constraint name="Integration">Must integrate with Epic 0 test infrastructure and DEBUG logging</constraint>
+    <constraint name="Performance">Test suite should execute in &lt;1 second [Source: dev/sprint-artifacts/tech-spec-epic-1.md#Test-Strategy-Summary]</constraint>
+  </constraints>
+  <interfaces>
+    <interface name="Vitest Configuration" kind="configuration" signature="vitest.config.ts - Node environment with globals enabled" path="vitest.config.ts"/>
+    <interface name="Package Scripts" kind="npm scripts" signature="'test': 'vitest', 'test:coverage': 'vitest --coverage'" path="package.json"/>
+    <interface name="Test Pattern" kind="glob pattern" signature="'**/*.test.ts' - co-located test files" path="vitest.config.ts"/>
+  </interfaces>
+  <tests>
+    <standards>Follow Epic 0 testing patterns and helper utilities. Use Vitest framework with Node environment. Mock external dependencies using vi.mock. Test coverage target: ≥80% for core logic.</standards>
+    <locations>Co-located pattern: src/module.test.ts next to src/module.ts. Coverage reports generated in coverage/ directory.</locations>
+    <ideas>
+      <test idea="vitest-config-validation" ac="1">Test that vitest.config.ts loads correctly and recognizes test files"/>
+      <test idea="test-discovery-verification" ac="2">Verify that `npm test` discovers and runs all *.test.ts files"/>
+      <test idea="test-execution-basic" ac="3">Create basic test file and verify `npm test` executes successfully"/>
+      <test idea="coverage-reporting" ac="3">Test that `npm run test:coverage` generates coverage reports in coverage/ directory"/>
+      <test idea="example-test-patterns" ac="4">Create test file for tsup.config.ts demonstrating mock patterns and assertions"/>
+      <test idea="epic0-integration" ac="5">Verify integration with Epic 0 DEBUG logging and test harness utilities"/>
+    </ideas>
+  </tests>
+</story-context>

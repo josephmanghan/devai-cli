@@ -1,0 +1,182 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>3</storyId>
+    <title>Verify Commit Command Wiring & Create End-to-End Test</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-02</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>dev/sprint-artifacts/5-3-wiring-cli-entry.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a developer using ollatool</asA>
+    <iWant>verification that the commit command is correctly wired and working end-to-end</iWant>
+    <soThat>I can confidently deploy the application knowing the full workflow executes correctly</soThat>
+    <tasks>- Task 1: Verify existing wiring (AC: #1)
+  - Subtask 1.1: Review main.ts createCommitCommand() dependency injection
+  - Subtask 1.2: Verify CommitController.register() is called
+  - Subtask 1.3: Confirm all required adapters and use cases are instantiated
+  - Subtask 1.4: Document any issues or gaps found
+- Task 2: Create happy path test file (AC: #2)
+  - Subtask 2.1: Create `tests/e2e/commit-happy-path.test.ts`
+  - Subtask 2.2: Run `npm run format && npm run lint:fix` immediately after file creation
+  - Subtask 2.3: Import git-harness helper for repo simulation
+  - Subtask 2.4: Import mock-llm-provider for Ollama simulation
+  - Subtask 2.5: Set up test suite structure with proper describe blocks
+  - Subtask 2.6: Run `npm run format && npm run lint:fix` before proceeding to Task 3
+- Task 3: Implement happy path test (AC: #4)
+  - Subtask 3.1: Set up test git repository with staged changes using git-harness
+  - Subtask 3.2: Mock Ollama responses for commit message generation (mock-llm-provider)
+  - Subtask 3.3: Simulate user selecting commit type via mocked UI port
+  - Subtask 3.4: Simulate user approving generated message via mocked UI port
+  - Subtask 3.5: Execute full workflow through CommitController
+  - Subtask 3.6: Verify commit exists using git-harness (check git log or commit count)
+- Task 4: Create error paths test file (AC: #3)
+  - Subtask 4.1: Create `tests/e2e/commit-error-paths.test.ts`
+  - Subtask 4.2: Run `npm run format && npm run lint:fix` immediately after file creation
+  - Subtask 4.3: Import git-harness helper for repo simulation
+  - Subtask 4.4: Set up test suite structure with proper describe blocks
+  - Subtask 4.5: Run `npm run format && npm run lint:fix` before proceeding to Task 5
+- Task 5: Implement error path tests (AC: #5)
+  - Subtask 5.1: Test "no staged changes" error path → verify UserError thrown
+  - Subtask 5.2: Test "not a git repository" error path → verify UserError thrown
+  - Subtask 5.3: Verify error handling works end-to-end (wiring validation)
+- Task 6: Run full test suite and verify (AC: #7)
+  - Subtask 6.1: Run `npm run format && npm run lint:fix` to ensure clean state
+  - Subtask 6.2: Verify zero linting errors before running tests
+  - Subtask 6.3: Run `npm run test:e2e` and verify all pass
+  - Subtask 6.4: Run `npm run pr:lite` and verify build succeeds
+  - Subtask 6.5: Document test coverage and any edge cases not covered</tasks>
+  </story>
+
+  <acceptanceCriteria>1. [ ] Verify existing wiring in main.ts is complete and correct
+2. [ ] Create end-to-end test: `tests/e2e/commit-happy-path.test.ts` (happy path only)
+3. [ ] Create end-to-end test: `tests/e2e/commit-error-paths.test.ts` (error scenarios)
+4. [ ] Happy path test simulates full workflow: stage changes → select type → generate message → approve → verify commit
+5. [ ] Error path tests validate wiring handles errors correctly
+6. [ ] Tests use existing test infrastructure (git-harness, mock-llm-provider)
+7. [ ] All end-to-end tests pass with `npm run test:e2e`</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>dev/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>CLI Tool Specific Requirements</section>
+        <snippet>Interactive vs Scriptable: Primary Mode: Interactive TUI with rich prompts, spinners, and progress indicators. Scriptable Mode: Support for --dry-run (output to stdout) and --auto (non-interactive) flags for CI/CD integration.</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Project Structure (Pragmatic Hexagonal / Ports & Adapters)</section>
+        <snippet>src/main.ts - Application bootstrap & DI composition root (contains CLI logic). The CLI Layer (Commander.js) with CommitController orchestrates use cases.</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Dependency Injection Pattern</section>
+        <snippet>Constructor injection only: Always use constructor injection for testable code. Composition root (main.ts) where dependencies are wired up.</snippet>
+      </doc>
+      <doc>
+        <path>dev/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Primary Happy Path Flow</section>
+        <snippet>Step-by-step complete workflow from staging changes through commit approval with immediate visual feedback at each step and one-key approval for frictionless workflow.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/main.ts</path>
+        <kind>composition-root</kind>
+        <symbol>createCommitCommand</symbol>
+        <lines>45-66</lines>
+        <reason>CLI dependency injection - creates all adapters and use cases for commit command, validates wiring completeness</reason>
+      </artifact>
+      <artifact>
+        <path>src/main.ts</path>
+        <kind>composition-root</kind>
+        <symbol>createProgram</symbol>
+        <lines>90-107</lines>
+        <reason>CLI program setup - registers commit command with Commander.js via commitCommand.register(program)</reason>
+      </artifact>
+      <artifact>
+        <path>src/features/commit/controllers/commit-controller.ts</path>
+        <kind>controller</kind>
+        <symbol>CommitController.execute</symbol>
+        <lines>42-62</lines>
+        <reason>Core workflow orchestration - validates preconditions, gets commit type, generates message, handles user action</reason>
+      </artifact>
+      <artifact>
+        <path>src/features/commit/controllers/commit-controller.ts</path>
+        <kind>controller</kind>
+        <symbol>CommitController.register</symbol>
+        <lines>28-37</lines>
+        <reason>Commander.js integration - registers 'commit' command with description and action handler</reason>
+      </artifact>
+      <artifact>
+        <path>tests/helpers/git-harness.ts</path>
+        <kind>test-helper</kind>
+        <symbol>TestGitHarness</symbol>
+        <lines>21-127</lines>
+        <reason>Git repository simulation for end-to-end testing - creates isolated repos, stages files, verifies commits</reason>
+      </artifact>
+      <artifact>
+        <path>tests/helpers/mock-llm-provider.ts</path>
+        <kind>test-helper</kind>
+        <symbol>MockLlmProvider</symbol>
+        <lines>12-98</lines>
+        <reason>Ollama API simulation - queues responses/errors, tracks call counts for deterministic testing</reason>
+      </artifact>
+      <artifact>
+        <path>tests/integration/setup-auto-pull.test.ts</path>
+        <kind>integration-test</kind>
+        <symbol>Integration Test Pattern</symbol>
+        <lines>31-89</lines>
+        <reason>Reference pattern for end-to-end CLI testing - shows Commander.js integration, real infrastructure, clean test structure</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <nodejs>
+        <package name="commander" version="14.0.2" purpose="CLI framework for command parsing and registration" />
+        <package name="ollama" version="0.6.3" purpose="Official Ollama SDK for model inference" />
+        <package name="execa" version="9.6.1" purpose="Git command execution via shell" />
+        <package name="@clack/prompts" version="0.11.0" purpose="Interactive terminal prompts for commit type selection" />
+        <package name="ora" version="9.0.0" purpose="Terminal spinners for loading feedback" />
+      </nodejs>
+      <devDependencies>
+        <package name="vitest" version="4.0.14" purpose="Test runner for unit and integration tests" />
+        <package name="tsx" version="latest" purpose="TypeScript execution for development and testing" />
+      </devDependencies>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must use existing test infrastructure (git-harness, mock-llm-provider) for consistency
+    - Follow established test patterns from integration tests (setup-auto-pull.test.ts)
+    - Tests must be co-located with features or in tests/integration/ directory per architecture
+    - All code must pass linting and formatting checks before test execution
+    - Use mocked UI adapters to simulate user interactions without real terminal I/O
+    - Follow hexagonal architecture patterns - test through controller boundaries
+    - Ensure clean test isolation with proper setup/teardown
+  </constraints>
+
+  <interfaces>
+    <interface name="GitPort" kind="domain-interface" signature="getStagedDiff(): Promise<string>, commitChanges(message: string): Promise<void>" path="src/core/ports/git-service.ts" />
+    <interface name="CommitUiPort" kind="domain-interface" signature="selectCommitType(): Promise<string>, previewMessage(message: string): Promise<void>, selectCommitAction(): Promise<CommitAction>" path="src/core/ports/commit-ui-port.ts" />
+    <interface name="LlmProvider" kind="domain-interface" signature="generateCommitMessage(prompt: string): Promise<string>, isServiceAvailable(): Promise<boolean>" path="src/core/ports/llm-provider.ts" />
+    <interface name="EditorPort" kind="domain-interface" signature="edit(content: string): Promise<string>" path="src/core/ports/editor-service.ts" />
+  </interfaces>
+
+  <tests>
+    <standards>Tests follow co-located pattern with .test.ts files adjacent to source files. Integration tests use real infrastructure via test helpers. Mock all external dependencies for deterministic testing. Use vitest with node environment. All tests must pass linting and type checking before execution.</standards>
+    <locations>tests/e2e/ for end-to-end CLI workflow tests, tests/helpers/ for shared test utilities, tests/integration/ for existing integration tests with real Ollama integration</locations>
+    <ideas>
+      <test id="ac1" idea="Verify createCommitCommand dependency injection - test that all required adapters (GitPort, EditorPort, CommitUiPort, ValidatePreconditions, GenerateCommit) are correctly instantiated and wired in main.ts" />
+      <test id="ac2" idea="Happy path E2E test - stage files in git-harness repo, mock UI responses for commit type selection and approval, execute full controller workflow, verify commit exists via git log" />
+      <test id="ac3" idea="Error path test - simulate 'no staged changes' scenario, expect UserError with proper exit code, verify error message includes remediation guidance" />
+      <test id="ac4" idea="Error path test - execute outside git repository, expect SystemError for git failure, verify graceful error handling" />
+      <test id="ac5" idea="Integration pattern test - follow setup-auto-pull.test.ts pattern for Commander.js integration testing with real dependency injection" />
+    </ideas>
+  </tests>
+</story-context>

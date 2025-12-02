@@ -1,0 +1,179 @@
+<story-context id="{bmad_folder}/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3</storyId>
+    <title>Implement Validate Preconditions</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>dev/sprint-artifacts/3-3-implement-precondition-validation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a CLI user</asA>
+    <iWant>the application to validate all prerequisites before starting expensive AI generation</iWant>
+    <soThat>I get fast, clear feedback about what needs to be fixed</soThat>
+    <tasks>- Create CommitContext interface (AC: #4)
+- Implement ValidatePreconditions use case class (AC: #1, #2, #3)
+  - Constructor accepts GitPort and LlmPort dependencies
+  - execute() method with sequential validation chain
+- Create unit tests for ValidatePreconditions (AC: #1, #2, #3, #4)
+  - Test daemon failure throws SystemError (exit 3)
+  - Test non-git repo throws UserError (exit 2)
+  - Test no staged changes throws UserError (exit 2)
+  - Test success returns CommitContext with diff and branch
+- Verify error messages are actionable and clear
+- Run npm run pr to ensure quality gates pass</tasks>
+  </story>
+
+  <acceptanceCriteria>1. When Ollama daemon is not running, throw SystemError with exit code 3
+2. When current directory is not a git repository, throw UserError with exit code 2
+3. When no staged changes exist, throw UserError with exit code 2
+4. When all checks pass, return CommitContext containing staged diff and branch name</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>dev/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic Technical Specification: Git & Editor Infrastructure</title>
+        <section>Detailed Design - Precondition Context</section>
+        <snippet>Defines CommitContext interface: { diff: string; branch: string; } as return value from ValidatePreconditions</snippet>
+      </doc>
+      <doc>
+        <path>dev/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic Technical Specification: Git & Editor Infrastructure</title>
+        <section>System Architecture Alignment</section>
+        <snippet>Feature Layer (Use Case): src/features/commit/use-cases/validate-preconditions.ts - contains business rule "We cannot generate a commit if there are no staged changes"</snippet>
+      </doc>
+      <doc>
+        <path>dev/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic Technical Specification: Git & Editor Infrastructure</title>
+        <section>Workflows and Sequencing</section>
+        <snippet>Precondition Validation Flow: sequential checks - LlmPort.checkConnection() → GitPort.isGitRepository() → GitPort.getStagedDiff() → GitPort.getBranchName()</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>System Architecture</title>
+        <section>Hexagonal Architecture</section>
+        <snippet>Core layer defines ports, Infrastructure layer implements adapters, Feature layer contains use cases with business logic</snippet>
+      </doc>
+    </docs>
+    <code>
+      <code>
+        <path>src/core/ports/git-port.ts</path>
+        <kind>interface</kind>
+        <symbol>GitPort</symbol>
+        <lines>1-20</lines>
+        <reason>Required dependency for ValidatePreconditions - provides Git operations like isGitRepository(), getStagedDiff(), getBranchName()</reason>
+      </code>
+      <code>
+        <path>src/core/types/errors.types.ts</path>
+        <kind>types</kind>
+        <symbol>UserError, SystemError</symbol>
+        <lines>1-30</lines>
+        <reason>Required error types - UserError for exit code 2, SystemError for exit code 3 as specified in acceptance criteria</reason>
+      </code>
+      <code>
+        <path>src/infrastructure/adapters/shell-git-adapter.ts</path>
+        <kind>adapter</kind>
+        <symbol>ShellGitAdapter</symbol>
+        <lines>1-100</lines>
+        <reason>Existing GitPort implementation that ValidatePreconditions will use via dependency injection</reason>
+      </code>
+      <code>
+        <path>src/core/ports/llm-port.ts</path>
+        <kind>interface</kind>
+        <symbol>LlmPort</symbol>
+        <lines>1-20</lines>
+        <reason>Required dependency for ValidatePreconditions - provides checkConnection() for Ollama daemon validation</reason>
+      </code>
+      <code>
+        <path>src/infrastructure/adapters/ollama-adapter.ts</path>
+        <kind>adapter</kind>
+        <symbol>OllamaAdapter</symbol>
+        <lines>1-100</lines>
+        <reason>Existing LlmPort implementation that ValidatePreconditions will use for daemon checking</reason>
+      </code>
+    </code>
+    <dependencies>
+      <node>
+        <package>typescript</package>
+        <version>^5.0.0</version>
+        <reason>TypeScript project with strict typing for interfaces</reason>
+      </node>
+      <node>
+        <package>vitest</package>
+        <version>^1.0.0</version>
+        <reason>Testing framework specified in story dev notes</reason>
+      </node>
+      <node>
+        <package>execa</package>
+        <version>^8.0.0</version>
+        <reason>Used by ShellGitAdapter for git command execution</reason>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must follow Hexagonal Architecture patterns established in Epic 2
+    - Use existing UserError and SystemError types from core/types/errors.types.ts
+    - Dependencies injected via constructor (DI pattern)
+    - Pure orchestration logic - no shell commands directly in use case
+    - SystemError for infrastructure failures (daemon down) with exit code 3
+    - UserError for user-fixable issues (not in repo, no staged changes) with exit code 2
+    - File location: src/features/commit/use-cases/validate-preconditions.ts
+    - Test location: src/features/commit/use-cases/validate-preconditions.test.ts
+    - Co-located tests using Vitest
+    - Mock GitPort and LlmPort interfaces in tests
+    - Test all failure paths and success path
+    - Follow async generator mocking patterns from Epic 2
+  </constraints>
+  <interfaces>
+    <interface>
+      <name>CommitContext</name>
+      <kind>interface</kind>
+      <signature>interface CommitContext { diff: string; branch: string; }</signature>
+      <path>src/features/commit/use-cases/validate-preconditions.ts</path>
+    </interface>
+    <interface>
+      <name>ValidatePreconditions</name>
+      <kind>class</kind>
+      <signature>class ValidatePreconditions { constructor(gitPort: GitPort, llmPort: LlmPort); execute(): Promise&lt;CommitContext&gt;; }</signature>
+      <path>src/features/commit/use-cases/validate-preconditions.ts</path>
+    </interface>
+    <interface>
+      <name>GitPort</name>
+      <kind>interface</kind>
+      <signature>interface GitPort { isGitRepository(): Promise&lt;boolean&gt;; getStagedDiff(): Promise&lt;string&gt;; getBranchName(): Promise&lt;string&gt;; commitChanges(message: string): Promise&lt;void&gt;; }</signature>
+      <path>src/core/ports/git-port.ts</path>
+    </interface>
+    <interface>
+      <name>LlmPort</name>
+      <kind>interface</kind>
+      <signature>interface LlmPort { checkConnection(): Promise&lt;boolean&gt;; ... }</signature>
+      <path>src/core/ports/llm-port.ts</path>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>Co-located tests using Vitest framework. Mock GitPort and LlmPort interfaces. Test all failure paths and success path. Follow async generator mocking patterns from Epic 2. All tests must have meaningful assertions and clear setup/teardown.</standards>
+    <locations>src/features/commit/use-cases/validate-preconditions.test.ts</locations>
+    <ideas>
+      <test idea="Test daemon failure throws SystemError (exit 3)">
+        <ac>1</ac>
+        <description>Mock LlmPort.checkConnection() to return false, expect SystemError with exit code 3</description>
+      </test>
+      <test idea="Test non-git repo throws UserError (exit 2)">
+        <ac>2</ac>
+        <description>Mock GitPort.isGitRepository() to return false, expect UserError with exit code 2</description>
+      </test>
+      <test idea="Test no staged changes throws UserError (exit 2)">
+        <ac>3</ac>
+        <description>Mock successful daemon and repo checks, but GitPort.getStagedDiff() returns empty string, expect UserError with exit code 2</description>
+      </test>
+      <test idea="Test success returns CommitContext with diff and branch">
+        <ac>4</ac>
+        <description>Mock all checks to pass, verify returned CommitContext contains proper diff and branch name</description>
+      </test>
+    </ideas>
+  </tests>
+</story-context>

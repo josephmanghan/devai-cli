@@ -1,0 +1,120 @@
+<story-context id="2-2-implement-ollama-adapter" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2-2-implement-ollama-adapter</storyId>
+    <title>Implement Ollama Adapter</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-30</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>dev/sprint-artifacts/2-2-implement-ollama-adapter.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>As a developer,</asA>
+    <iWant>a concrete Ollama adapter implementation of the LLM port interface,</iWant>
+    <soThat>the application can communicate with Ollama for model operations.</soThat>
+    <tasks>- [ ] Create OllamaAdapter class structure (AC: 1)
+  - [ ] Create `src/infrastructure/llm/ollama-adapter.ts` file
+  - [ ] Import LlmPort interface and Ollama SDK
+  - [ ] Define class constructor with readonly dependency injection
+  - [ ] Ensure infrastructure/llm directory exists per hexagonal architecture
+- [ ] Implement checkConnection method (AC: 2, 3, 4)
+  - [ ] Use Ollama client.list() to test daemon connectivity
+  - [ ] Return boolean for successful connection
+  - [ ] Handle connection errors with SystemError and actionable remediation
+- [ ] Implement checkModel method (AC: 3, 4, 5)
+  - [ ] Use Ollama client.list() to check for specific model existence
+  - [ ] Return boolean indicating model availability
+  - [ ] Handle API errors appropriately
+- [ ] Implement createModel method (AC: 3, 4, 5)
+  - [ ] Use Ollama client.create() with modelfile content
+  - [ ] Handle model creation failures with ValidationError
+  - [ ] Include proper error context in failure messages
+- [ ] Implement generate method (AC: 3, 4, 5)
+  - [ ] Use Ollama client.generate() with model and parameters
+  - [ ] Support GenerationOptions interface parameters
+  - [ ] Handle inference errors with proper error types
+  - [ ] Return trimmed response string
+- [ ] Add comprehensive error handling (AC: 4)
+  - [ ] Import custom error classes from core/types/errors.types.ts
+  - [ ] Wrap Ollama SDK errors in appropriate error types
+  - [ ] Include remediation steps for common failures (connection, model not found)
+  - [ ] Handle edge cases (timeout, network issues)
+- [ ] Apply clean code standards (AC: 6)
+  - [ ] Keep methods under 15 lines each
+  - [ ] Use constructor dependency injection pattern
+  - [ ] Extract private helper methods for complex logic
+  - [ ] Ensure self-documenting method and variable names
+- [ ] Create unit tests (AC: 7)
+  - [ ] Create `src/infrastructure/llm/ollama-adapter.test.ts` file
+  - [ ] Mock Ollama client using Vitest vi.fn()
+  - [ ] Test all public methods with success and error scenarios
+  - [ ] Verify error types and messages are correct
+  - [ ] Test error handling for connection failures, missing models</tasks>
+  </story>
+
+  <acceptanceCriteria>1. [ ] OllamaAdapter class created in `src/infrastructure/llm/ollama-adapter.ts` implementing LlmPort interface
+2. [ ] Constructor accepts Ollama client instance and optional model name configuration
+3. [ ] All port methods implemented: checkConnection(), checkModel(), createModel(), generate()
+4. [ ] Error handling with proper error types (UserError, SystemError, ValidationError)
+5. [ ] Method implementations use official Ollama SDK correctly
+6. [ ] Code adheres to clean-code.md: functions ≤15 lines, proper DI pattern
+7. [ ] Unit tests created with mocked Ollama SDK responses</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="dev/prd.md" title="Product Requirements Document" section="Ollama & Model Lifecycle Management" snippet="The PRD defines Ollama integration requirements including daemon detection, model lifecycle management, and local-first privacy requirements with zero data egress."/>
+      <doc path="dev/architecture.md" title="Architecture Document" section="Ollama Model Architecture" snippet="Defines custom model instance design with ollatool-commit, Modelfile-based system prompts, and Ollama integration parameters including temperature=0.2 and num_ctx=131072."/>
+      <doc path="dev/architecture.md" title="Architecture Document" section="Project Structure" snippet="Specifies hexagonal architecture with infrastructure/llm/ directory for adapters, dependency injection patterns, and clean code standards."/>
+      <doc path="dev/architecture.md" title="Architecture Document" section="Technology Stack" snippet="Specifies official Ollama SDK v0.6.3 with TypeScript support and streaming capabilities for model inference."/>
+      <doc path="dev/sprint-artifacts/2-1-create-ollama-port-interface.md" title="LlmPort Interface" section="Quality Improvement Learning" snippet="Critical lesson: Core ports should be implementation-agnostic and never reference specific epics or implementation details. Use generic terminology throughout port interfaces (service, model, configuration vs specific tech terms)."/>
+      <doc path="dev/sprint-artifacts/2-1-create-ollama-port-interface.md" title="LlmPort Interface" section="Validation Requirements" snippet="Interface follows hexagonal architecture with zero external dependencies in core layer, TypeScript strict mode compilation."/>
+      <doc path="dev/epics.md" title="Epics and Stories" section="Epic 2: Ollama Integration" snippet="Epic 2 covers FR7-FR12 including Ollama daemon detection, model provisioning, connection validation, and error handling with actionable remediation."/>
+    </docs>
+    <code>
+      <code kind="interface" path="src/core/ports/llm-port.ts" symbol="LlmPort" lines="5-45" reason="Port interface that OllamaAdapter must implement - defines checkConnection(), checkModel(), createModel(), and generate() method signatures."/>
+      <code kind="interface" path="src/core/types/llm-types.ts" symbol="GenerationOptions" lines="1-33" reason="Type definition for model generation parameters - must be used by OllamaAdapter.generate() method with model, temperature, num_ctx, keep_alive fields."/>
+      <code kind="type" path="src/core/types/errors.types.ts" symbol="AppError" lines="16-82" reason="Base error class that OllamaAdapter must use for error handling - provides exit codes and remediation with debug logging capabilities."/>
+      <code kind="type" path="src/core/types/errors.types.ts" symbol="SystemError" lines="92-98" reason="Error type for Ollama connection failures and daemon issues - exit code 3 with actionable remediation."/>
+      <code kind="type" path="src/core/types/errors.types.ts" symbol="ValidationError" lines="100-106" reason="Error type for model creation failures and validation errors - exit code 4 with optional remediation."/>
+      <code kind="type" path="src/core/types/errors.types.ts" symbol="UserError" lines="84-90" reason="Error type for user-resolvable issues like missing models - exit code 2 with clear remediation steps."/>
+    </code>
+    <dependencies>
+      <npm name="ollama" version="0.6.3" purpose="Official Ollama SDK for model inference and API calls"/>
+      <npm name="debug" version="4.4.3" purpose="Debug logging library for conditional debug output"/>
+      <npm name="@types/node" version="24.10.1" purpose="Node.js type definitions for file system and HTTP operations"/>
+      <dev name="vitest" version="4.0.14" purpose="Modern test framework for unit testing with mocking capabilities"/>
+      <dev name="execa" version="9.6.0" purpose="Process execution for testing external command integration"/>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="Architecture">Hexagonal Architecture - Infrastructure layer implements core ports with zero external dependencies in core/ layer.</constraint>
+    <constraint type="Clean Code">Methods must be ≤15 lines with clear, self-documenting names and constructor dependency injection.</constraint>
+    <constraint type="Error Handling">Use typed error classes with exit codes: UserError (2), SystemError (3), ValidationError (4).</constraint>
+    <constraint type="Testing">Co-located tests (.test.ts) mocking Ollama SDK responses with Vitest vi.fn() utilities.</constraint>
+    <constraint type="Context7 Validation">All Ollama SDK usage must be validated against current Node.js best practices via Context7 MCP server.</constraint>
+    <constraint type="Documentation Quality">Implementation-specific details should never leak into core ports. Use generic terminology in documentation (service vs daemon, model configuration vs Modelfile) to maintain interface reusability.</constraint>
+    <constraint type="Type Organization">Follow proper architectural separation: port interfaces in src/core/ports/, type definitions in src/core/types/. Group related types in logical files (e.g., llm-types.ts) to avoid file-per-type explosion while maintaining clean separation.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="LlmPort" kind="port" signature="checkConnection(): Promise<boolean>, checkModel(modelName: string): Promise<boolean>, createModel(modelName: string, modelfileContent: string): Promise<void>, generate(prompt: string, options: GenerationOptions): Promise<string>" path="src/core/ports/llm-port.ts"/>
+    <interface name="GenerationOptions" kind="type" signature="model: string, temperature?: number, num_ctx?: number, keep_alive?: number" path="src/core/types/llm-types.ts"/>
+  </interfaces>
+
+  <tests>
+    <standards>Vitest framework with co-located tests, mock-first approach using vi.fn() for Ollama SDK, test user-visible outcomes not internal implementation details, no comments in tests, minimal destructuring of test data.</standards>
+    <locations>src/infrastructure/llm/ollama-adapter.test.ts (adjacent to implementation), following clean code naming patterns with clear test descriptions.</locations>
+    <ideas>
+      <test idea="Check connection success - mock Ollama client.list() to return models list and verify true return" ac="3"/>
+      <test idea="Check connection failure - mock ECONNREFUSED error and verify false return" ac="3"/>
+      <test idea="Model exists - mock Ollama client.list() to include target model and verify true return" ac="3"/>
+      <test idea="Model missing - mock Ollama client.list() without target model and verify false return" ac="3"/>
+      <test idea="Create model success - mock Ollama client.create() to resolve and verify no error thrown" ac="3"/>
+      <test idea="Create model failure - mock Ollama client.create() to throw and wrap in ValidationError" ac="4"/>
+      <test idea="Generate success - mock Ollama client.generate() to return response and verify trimmed string" ac="3"/>
+      <test idea="Generate error - mock Ollama client.generate() to throw and wrap in appropriate error type" ac="4"/>
+    </ideas>
+  </tests>
+</story-context>

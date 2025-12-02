@@ -1,0 +1,196 @@
+<story-context id="{bmad_folder}/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>1</storyId>
+    <title>Implement Message Processing Utilities</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>dev/sprint-artifacts/4-1-implement-message-processing-utilities.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>commit message generator</asA>
+    <iWant>to have pure logic utilities for processing LLM responses and building prompts</iWant>
+    <soThat>I can generate high-quality, format-compliant conventional commit messages</soThat>
+    <tasks>Task 1: Create PromptBuilder utility (AC: #1)
+  - Subtask 1.1: Implement buildUserPrompt function with template literals
+  - Subtask 1.2: Add TypeScript types for prompt parameters
+  - Subtask 1.3: Create unit tests for prompt building scenarios
+- Task 2: Create FormatValidator utility (AC: #2)
+  - Subtask 2.1: Implement validateStructure function with regex
+  - Subtask 2.2: Add specific validation for type, description, and body
+  - Subtask 2.3: Create unit tests for valid/invalid message formats
+- Task 3: Create TypeEnforcer utility (AC: #3)
+  - Subtask 3.1: Implement enforceType function to overwrite model type
+  - Subtask 3.2: Handle edge cases for malformed commit messages
+  - Subtask 3.3: Create unit tests for type enforcement scenarios
+- Task 4: Create MessageNormalizer utility (AC: #4)
+  - Subtask 4.1: Implement normalizeFormat function for proper spacing
+  - Subtask 4.2: Ensure blank line between subject and body
+  - Subtask 4.3: Create unit tests for normalization scenarios
+- Task 5: Ensure pure function design (AC: #5, #6)
+  - Subtask 5.1: Verify no external dependencies or side effects
+  - Subtask 5.2: Add TypeScript interfaces for all inputs/outputs
+  - Subtask 5.3: Review code for pure function principles
+- Task 6: Comprehensive unit testing (AC: #7)
+  - Subtask 6.1: Create test files for each utility
+  - Subtask 6.2: Achieve ≥80% test coverage
+  - Subtask 6.3: Test edge cases and error conditions</tasks>
+  </story>
+
+  <acceptanceCriteria>1. **PromptBuilder** - Build user prompts from commit type, diff, and status using template literals
+2. **FormatValidator** - Validate commit message structure using regex pattern `/^\w+: .+$/`
+3. **TypeEnforcer** - Overwrite model's commit type with user-selected type (user selection is truth)
+4. **MessageNormalizer** - Ensure proper format with blank line separator between subject and body
+5. **Pure Functions** - All utilities are pure functions with no external dependencies
+6. **Type Safety** - All functions have proper TypeScript interfaces and error handling
+7. **Unit Tests** - All utilities have co-located unit tests with ≥80% coverage</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>Prompt Engineering Architecture</title>
+        <section>Prompt Engineering Architecture</section>
+        <snippet>System Prompt (Configuration-Based - Static): Location: src/infrastructure/config/conventional-commit-model.config.ts. Content: Role definition, format rules, few-shot examples (TypeScript configuration). Creation: Direct SDK parameter passing via ollama.create() during setup.</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>User Prompt Construction</title>
+        <section>User Prompt (Dynamic - Per Request)</section>
+        <snippet>Location: src/features/commit/prompts/user-prompt-builder.ts. Method: Simple TypeScript template literals (NO Handlebars for MVP). MVP: Simple string concatenation using template literals.</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>Validation Strategy</title>
+        <section>Validation & Error Recovery Strategy</section>
+        <snippet>Four-Phase Processing Pipeline: Phase 1: Intelligent Parsing (Strip Preamble), Phase 2: Structural Validation (Require Body), Phase 3: Type Enforcement (User Selection is Truth), Phase 4: Normalization (Ensure Blank Line Separator). Regex pattern: `/^\w+: .+$/` for structural validation.</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>Deterministic Type Enforcement</title>
+        <section>Deterministic Type Enforcement</section>
+        <snippet>Strategy: Force Overwrite. The user's selection is the absolute source of truth. Logic: User selects type (e.g., feat). Model generates message (e.g., fix: add login button). Application Logic: Programmatically strip the model's type prefix and replace it with the user's selection. Result: feat: add login button.</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>Clean Code Standards</title>
+        <section>Code Quality Standards Reference</section>
+        <snippet>Key requirements enforced during implementation: Function Size: Maximum 15 lines per function. Argument Limits: 0-2 arguments preferred, 3 acceptable for simple data passing. Self-Documenting Code: Comments for "why" only, not "what". Context7 Validation: All library usage validated against current best practices.</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>Pure Functions Pattern</title>
+        <section>Implementation Patterns</section>
+        <snippet>Pure Functions: All utilities must be pure functions with no side effects. Type Safety: Use TypeScript strict mode with proper interfaces. Unit Testing: Co-located tests with Vitest framework. Clean Code: Functions ≤15 lines, camelCase naming, self-documenting code.</snippet>
+      </doc>
+      <doc>
+        <path>dev/architecture.md</path>
+        <title>Model Parameters</title>
+        <section>Ollama Integration Parameters</section>
+        <snippet>temperature=0.2, num_ctx=131072, keep_alive=0. Low randomness for determinism, full 128K context window, unload after use (clean lifecycle).</snippet>
+      </doc>
+      <doc>
+        <path>dev/epics.md</path>
+        <title>Epic 4 Implementation Details</title>
+        <section>Epic 4: AI Generation Logic (Consolidated)</section>
+        <snippet>Story 4.1: Message Processing Utilities - Implement pure logic helpers: PromptBuilder, FormatValidator (Regex), TypeEnforcer (Overwrite logic), and MessageNormalizer.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/core/types/errors.types.ts</path>
+        <kind>types</kind>
+        <symbol>AppError, UserError, SystemError, ValidationError</symbol>
+        <lines>10-115</lines>
+        <reason>Error handling pattern for validation failures and system errors. Utilities should throw ValidationError for format validation failures.</reason>
+      </artifact>
+      <artifact>
+        <path>src/infrastructure/config/conventional-commit-model.config.ts</path>
+        <kind>config</kind>
+        <symbol>CONVENTIONAL_COMMIT_MODEL_CONFIG</symbol>
+        <lines>7-40</lines>
+        <reason>Model configuration with system prompt and examples. Utilities should align with Conventional Commits format defined in system prompt.</reason>
+      </artifact>
+      <artifact>
+        <path>src/core/types/git-types.ts</path>
+        <kind>types</kind>
+        <symbol>CommitContext</symbol>
+        <lines>5-11</lines>
+        <reason>Existing git context interface. Utilities will work with diff content from git context for prompt building.</reason>
+      </artifact>
+      <artifact>
+        <path>src/infrastructure/adapters/git/shell-git-adapter.test.ts</path>
+        <kind>test</kind>
+        <symbol>vitest testing patterns</symbol>
+        <lines>1-351</lines>
+        <reason>Testing patterns and standards: vitest setup, mock patterns, error testing, interface compliance. Follow same structure for utility tests.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <packages>
+          <package name="typescript" version="5.9.3" reason="Type safety and interfaces for utility functions"/>
+        </packages>
+      </ecosystem>
+      <ecosystem name="vitest">
+        <packages>
+          <package name="vitest" version="4.0.14" reason="Testing framework for co-located unit tests"/>
+          <package name="@vitest/coverage-v8" version="4.0.14" reason="Coverage reporting to meet ≥80% requirement"/>
+        </packages>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+  <constraint name="Pure Functions" source="dev/architecture.md">
+    All utilities must be pure functions with no side effects, no external dependencies, and deterministic outputs for same inputs.
+  </constraint>
+  <constraint name="Function Size Limit" source="dev/architecture.md">
+    Maximum 15 lines per function. Extract private helper methods if logic exceeds limit.
+  </constraint>
+  <constraint name="Type Safety" source="dev/architecture.md">
+    TypeScript strict mode with proper interfaces for all inputs/outputs. No 'any' types.
+  </constraint>
+  <constraint name="Self-Documenting Code" source="dev/architecture.md">
+    Functions ≤15 lines, camelCase naming, self-documenting code. Comments only for "why" not "what".
+  </constraint>
+  <constraint name="No External Dependencies" source="Story Dev Notes">
+    Utilities must have zero external dependencies (ollama, execa, etc.) - pure business logic only.
+  </constraint>
+  <constraint name="Location Pattern" source="Story Dev Notes">
+    Must be placed in src/features/commit/utils/ directory with kebab-case file naming.
+  </constraint>
+  <constraint name="Import Pattern" source="Story Dev Notes">
+    Must import from index barrel files and update local index file to export.
+  </constraint>
+  <constraint name="No Implementation Comments" source="Story Dev Notes">
+    No JSDoc on private methods, no implementation comments - self-documenting code only.
+  </constraint>
+</constraints>
+  <interfaces>
+  <interface name="ValidationError" source="src/core/types/errors.types.ts" reason="Use for format validation failures">
+    Thrown when commit message format validation fails. Provides clear error messages and remediation.
+  </interface>
+  <interface name="CommitContext" source="src/core/types/git-types.ts" reason="Input for prompt building">
+    Contains git diff and branch information needed for constructing user prompts.
+  </interface>
+  <interface name="CONVENTIONAL_COMMIT_MODEL_CONFIG" source="src/infrastructure/config/conventional-commit-model.config.ts" reason="Format compliance reference">
+    System prompt defines expected commit message format, types, and examples that utilities should enforce.
+  </interface>
+</interfaces>
+  <tests>
+    <standards>Co-located tests with Vitest framework following patterns from shell-git-adapter.test.ts. Use vi.mock for external libraries, vi.fn() for mocks, descriptive test names, and comprehensive edge case coverage. No redundant explanatory comments in tests. Aim for ≥80% line coverage across all utility functions.</standards>
+    <locations>Test files must be co-located with implementation: src/features/commit/utils/prompt-builder.test.ts, src/features/commit/utils/format-validator.test.ts, src/features/commit/utils/type-enforcer.test.ts, src/features/commit/utils/message-normalizer.test.ts</locations>
+    <ideas>
+      <testIdea acId="1" description="PromptBuilder builds correct prompt with commit type, diff, and status using template literals"/>
+      <testIdea acId="2" description="FormatValidator validates structure using regex pattern /^\w+: .+$/ and rejects invalid formats"/>
+      <testIdea acId="3" description="TypeEnforcer overwrites model's type with user-selected type (user selection is truth)"/>
+      <testIdea acId="4" description="MessageNormalizer ensures proper format with blank line separator between subject and body"/>
+      <testIdea acId="5" description="All utilities are pure functions - same input always produces same output"/>
+      <testIdea acId="6" description="Error handling for malformed commit messages and edge cases"/>
+      <testIdea acId="7" description="Performance tests to ensure functions execute in <10ms for utility functions"/>
+    </ideas>
+  </tests>
+</story-context>
