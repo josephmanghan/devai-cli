@@ -1,14 +1,16 @@
 1. We need a spinner on generating
 2. We could do with providing some form of intent to the agent
 3. It's not reading git diff very well, tends to read deletion as removal
-4. It's terrible at reading REMOVAL in general
-5. It feels like we need to work on the PROMPTING side of things tbh. Which is fine, to be expected. We were supposed to work in a mock repo and test.
-6. I would really like to shows retries as a counter.
-7. I would really like <body> to work.
-8. Add post-install for setup (whilst retaining setup)
-9. Verify upgrade path
-10. Double check that tests prove that setup deletes and then recreates model
-11. Overall refinement
+4. Editor SAVES when you EXIT. I think we probably need a confirm button.
+5. It's terrible at reading REMOVAL in general
+6. It feels like we need to work on the PROMPTING side of things tbh. Which is fine, to be expected. We were supposed to work in a mock repo and test.
+7. I would really like to shows retries as a counter.
+8. I would really like <body> to work.
+9. Add post-install for setup (whilst retaining setup)
+10. Verify upgrade path
+11. Double check that tests prove that setup deletes and then recreates model
+12. Overall refinement
+13. I think it's because we're stripping out the body, but the description can be a little generic. I think we should work on getting the body out, which will require a test repo most likely. We iterate quickly if we study the docs and setup well.
 
 ---
 
