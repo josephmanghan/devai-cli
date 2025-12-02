@@ -1,5 +1,5 @@
+/* eslint-disable n/no-process-exit */
 import { cancel, isCancel, select } from '@clack/prompts';
-
 import { CommitAction } from '../../../../core/index.js';
 
 const ACTION_OPTIONS = [
@@ -37,7 +37,6 @@ export async function selectCommitAction(): Promise<CommitAction> {
 
   if (isCancel(selectedAction)) {
     cancel('Operation cancelled');
-    // eslint-disable-next-line n/no-process-exit
     process.exit(0);
   }
 

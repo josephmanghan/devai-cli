@@ -1,5 +1,5 @@
+/* eslint-disable n/no-process-exit */
 import { cancel, isCancel, select } from '@clack/prompts';
-
 import {
   COMMIT_TYPE_DESCRIPTIONS,
   COMMIT_TYPES,
@@ -24,7 +24,6 @@ export async function selectCommitType(): Promise<CommitType> {
 
   if (isCancel(selectedType)) {
     cancel('Operation cancelled');
-    // eslint-disable-next-line n/no-process-exit
     process.exit(0);
   }
 

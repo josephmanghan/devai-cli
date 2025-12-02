@@ -4,40 +4,78 @@ import { Command } from 'commander';
 import { Ollama } from 'ollama';
 
 import { OllamaModelConfig } from './core/index.js';
+import { CommitController } from './features/commit/controllers/commit-controller.js';
+import {
+  GenerateCommit,
+  ValidatePreconditions,
+} from './features/commit/index.js';
 import { SetupController } from './features/setup/controllers/setup-controller.js';
 import { ProvisionEnvironment } from './features/setup/use-cases/provision-environment.js';
 import {
   CONVENTIONAL_COMMIT_MODEL_CONFIG,
   OllamaAdapter,
+  ShellEditorAdapter,
+  ShellGitAdapter,
 } from './infrastructure/index.js';
+import { CommitAdapter } from './ui/adapters/commit-adapter.js';
 import { ConsoleSetupRenderer } from './ui/index.js';
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 /**
- * Composition root - creates and wires all dependencies.
+ * Create shared infrastructure adapters for CLI commands.
  */
-export function createSetupCommand(
-  modelConfig: OllamaModelConfig
-): SetupController {
+function createSharedAdapters(modelConfig: OllamaModelConfig) {
   const ollamaClient = new Ollama();
-  const ollamaAdapter = new OllamaAdapter(
+  return new OllamaAdapter(
     ollamaClient,
     modelConfig.baseModel,
     modelConfig.systemPrompt,
     modelConfig.parameters
   );
+}
 
+/**
+ * Composition root - creates and wires all dependencies for commit command.
+ */
+export function createCommitCommand(
+  modelConfig: OllamaModelConfig
+): CommitController {
+  const ollamaAdapter = createSharedAdapters(modelConfig);
+  const gitAdapter = new ShellGitAdapter();
+  const editorAdapter = new ShellEditorAdapter();
+  const commitUi = new CommitAdapter();
+
+  const validatePreconditions = new ValidatePreconditions(
+    gitAdapter,
+    ollamaAdapter
+  );
+  const generateCommit = new GenerateCommit(ollamaAdapter);
+
+  return new CommitController(
+    gitAdapter,
+    editorAdapter,
+    commitUi,
+    validatePreconditions,
+    generateCommit
+  );
+}
+
+/**
+ * Composition root - creates and wires all dependencies for setup command.
+ */
+export function createSetupCommand(
+  modelConfig: OllamaModelConfig
+): SetupController {
+  const ollamaAdapter = createSharedAdapters(modelConfig);
   const setupUi = new ConsoleSetupRenderer();
 
-  // Create the ProvisionEnvironment use case
   const provisionEnvironment = new ProvisionEnvironment(
     ollamaAdapter,
     setupUi,
     modelConfig
   );
 
-  // Inject ProvisionEnvironment into SetupController
   return new SetupController(modelConfig, provisionEnvironment, setupUi);
 }
 
@@ -57,6 +95,9 @@ export function createProgram(): Command {
 
   const setupCommand = createSetupCommand(CONVENTIONAL_COMMIT_MODEL_CONFIG);
   setupCommand.register(program);
+
+  const commitCommand = createCommitCommand(CONVENTIONAL_COMMIT_MODEL_CONFIG);
+  commitCommand.register(program);
 
   return program;
 }
