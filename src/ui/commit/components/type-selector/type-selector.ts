@@ -1,5 +1,6 @@
 /* eslint-disable n/no-process-exit */
 import { cancel, isCancel, select } from '@clack/prompts';
+
 import {
   COMMIT_TYPE_DESCRIPTIONS,
   COMMIT_TYPES,

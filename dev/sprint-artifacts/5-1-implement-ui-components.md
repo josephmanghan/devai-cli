@@ -240,3 +240,18 @@ Story implementation is functionally complete with all 8 acceptance criteria imp
 
 - Agent tries to run tests before resolving format and lint issues.
 - The exit/throw issue was because eslint said no process exist but I've deemed it appropriate for these outter CLI calls and have inline disabled.
+
+## Architectural Refactoring Note (Story 5.2 Context)
+
+**Date:** 2025-12-02  
+**Completed During:** Story 5.2 - Implement Commit Controller
+
+The UI components created in this story were integrated into Story 5.2 via a **primary adapter pattern**:
+
+- **Created:** `src/ui/adapters/commit-adapter.ts` - `CommitAdapter` class implementing `CommitUiPort`
+- **Purpose:** Thin wrapper coordinating the three UI components (`selectCommitType`, `previewMessage`, `selectCommitAction`) into a single port interface
+- **Architecture:** Primary adapter (hexagonal architecture) - located in `src/ui/adapters/` alongside other UI adapters like `ConsoleSetupRenderer`
+- **Pattern:** Matches the established `ConsoleSetupRenderer` pattern but uses composition of existing component functions
+- **Dependency Injection:** All UI components are now injected into `CommitController` via the port interface, enabling clean testing and swappable implementations
+
+This refactoring ensures clean architecture separation and proper dependency inversion without modifying these UI components.

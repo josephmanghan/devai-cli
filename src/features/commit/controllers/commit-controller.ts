@@ -1,5 +1,6 @@
 /* eslint-disable n/no-process-exit */
 import { Command } from 'commander';
+
 import {
   CommitAction,
   CommitUiPort,

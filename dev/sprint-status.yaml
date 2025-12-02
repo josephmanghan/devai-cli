@@ -83,7 +83,7 @@ development_status:
   # Epic 5: Interactive Workflow & CLI (3 stories)
   epic-5: contexted
   5-1-implement-ui-components: done
-  5-2-implement-commit-controller: drafted
+  5-2-implement-commit-controller: done
   5-3-wiring-cli-entry: backlog
   5-4-happy-path-integration-test-: backlog
   epic-5-retrospective: optional
