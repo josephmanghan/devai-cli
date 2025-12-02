@@ -101,7 +101,8 @@ export function createProgram(): Command {
     .description(
       'Local-first CLI tool for AI-powered git commit message generation using Ollama'
     )
-    .version(pkg.version, '--version', 'Show version number');
+    .version(pkg.version, '-v, --version', 'Show version number')
+    .option('-a, --all', 'Stage all changes before generating commit');
 
   const setupCommand = createSetupCommand(CONVENTIONAL_COMMIT_MODEL_CONFIG);
   setupCommand.register(program);

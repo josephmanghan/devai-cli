@@ -83,10 +83,6 @@ describe('CommitController', () => {
       expect(mockProgram.description).toHaveBeenCalledWith(
         'Generate a conventional commit message and commit staged changes'
       );
-      expect(mockProgram.option).toHaveBeenCalledWith(
-        '-a, --all',
-        'Stage all changes before generating commit'
-      );
       expect(mockProgram.action).toHaveBeenCalledWith(expect.any(Function));
     });
   });

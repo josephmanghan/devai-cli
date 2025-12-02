@@ -33,8 +33,8 @@ export class CommitController {
       .description(
         'Generate a conventional commit message and commit staged changes'
       )
-      .option('-a, --all', 'Stage all changes before generating commit')
-      .action(async options => {
+      .action(async () => {
+        const options = program.opts();
         await this.execute(options.all);
       });
   }
