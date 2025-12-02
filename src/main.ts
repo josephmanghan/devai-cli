@@ -1,4 +1,6 @@
 import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { Command } from 'commander';
 import { Ollama } from 'ollama';
@@ -24,12 +26,15 @@ import {
 import { CommitAdapter } from './ui/adapters/commit-adapter.js';
 import { ConsoleSetupRenderer } from './ui/index.js';
 
-const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(
+  readFileSync(join(currentDir, '../package.json'), 'utf-8')
+);
 
 /**
- * Create shared infrastructure adapters for CLI commands.
+ * Create Ollama adapter for CLI commands.
  */
-function createSharedAdapters(modelConfig: OllamaModelConfig) {
+function createOllamaAdapter(modelConfig: OllamaModelConfig): OllamaAdapter {
   const ollamaClient = new Ollama();
   return new OllamaAdapter(
     ollamaClient,
@@ -45,7 +50,7 @@ function createSharedAdapters(modelConfig: OllamaModelConfig) {
 export function createCommitCommand(
   modelConfig: OllamaModelConfig
 ): CommitController {
-  const ollamaAdapter = createSharedAdapters(modelConfig);
+  const ollamaAdapter = createOllamaAdapter(modelConfig);
   const gitAdapter = new ShellGitAdapter();
   const editorAdapter = new ShellEditorAdapter();
   const commitUi = new CommitAdapter();
@@ -71,7 +76,7 @@ export function createCommitCommand(
 export function createSetupCommand(
   modelConfig: OllamaModelConfig
 ): SetupController {
-  const ollamaAdapter = createSharedAdapters(modelConfig);
+  const ollamaAdapter = createOllamaAdapter(modelConfig);
   const setupUi = new ConsoleSetupRenderer();
 
   return new SetupController(
@@ -111,7 +116,11 @@ export function createProgram(): Command {
  * Executes the CLI program
  */
 export function main(): void {
-  const program = createProgram();
-
-  program.parse();
+  try {
+    const program = createProgram();
+    program.parse();
+  } catch (error) {
+    console.error('Fatal error:', error);
+    throw error;
+  }
 }
