@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { validateMessage, validateStructure } from './format-validator';
+import { validateMessage, validateStructure } from './format-validator.js';
 
 describe('validateStructure', () => {
   it('accepts valid conventional commit format', () => {

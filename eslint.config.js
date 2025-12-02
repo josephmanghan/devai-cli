@@ -31,7 +31,7 @@ export default [
   prettierConfig,
   {
     files: ['src/**/*.ts'],
-    ignores: ['src/**/*.test.ts'], // Exclude test files from type-aware parsing
+    ignores: ['src/**/*.test.ts', '**/*.demo.ts'], // Exclude test and demo files from type-aware parsing
     settings: {
       'import/resolver': {
         typescript: {
@@ -115,6 +115,35 @@ export default [
   // Test files: Basic parsing (no type-aware checking)
   {
     files: ['src/**/*.test.ts', 'tests/**/*.ts'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      parser: tsparser,
+      parserOptions: {
+        // Explicitly disable projectService to override production config
+        projectService: false,
+      },
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+      },
+    },
+    rules: {
+      'no-console': 'off',
+      'no-debugger': 'off',
+      'max-lines-per-function': 'off',
+      'n/no-unpublished-import': 'off',
+      'n/no-missing-import': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^_' },
+      ],
+    },
+  },
+  // Demo files: Basic parsing (no type-aware checking)
+  {
+    files: ['**/*.demo.ts'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',

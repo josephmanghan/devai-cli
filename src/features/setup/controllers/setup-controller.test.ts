@@ -36,6 +36,13 @@ describe('SetupController', () => {
     mockUi = {
       showIntro: vi.fn(),
       showOutro: vi.fn(),
+      onCheckStarted: vi.fn(),
+      onCheckSuccess: vi.fn(),
+      onCheckFailure: vi.fn(),
+      onProgress: vi.fn(),
+      showBaseModelMissingWarning: vi.fn(),
+      showPullStartMessage: vi.fn(),
+      startPullSpinner: vi.fn(),
     };
 
     const mockConfig = createMockModelConfig();

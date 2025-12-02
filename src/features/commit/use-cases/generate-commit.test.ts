@@ -44,7 +44,7 @@ describe('GenerateCommit', () => {
       expect(mockLlmProvider.generate).toHaveBeenCalledWith('mock prompt', {
         model: 'qwen2.5-coder:1.5b',
         temperature: 0.3,
-        num_ctx: 100,
+        num_ctx: 10000,
       });
     });
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildUserPrompt, PromptParameters } from './prompt-builder';
+import { buildUserPrompt, PromptParameters } from './prompt-builder.js';
 
 describe('buildUserPrompt', () => {
   it('builds prompt with all required parameters', () => {

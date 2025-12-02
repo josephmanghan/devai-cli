@@ -13,7 +13,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup --tsconfig tsconfig.build.json",
     "dev": "tsx src/index.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -22,6 +22,7 @@
     "test": "vitest run",
     "test:unit": "vitest run --dir src",
     "test:integration": "vitest run --dir tests",
+    "test:demo": "find src -name '*.demo.ts' | xargs tsx",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
@@ -49,7 +50,20 @@
     "typescript": "^5.9.3",
     "vitest": "^4.0.14"
   },
+  "keywords": [
+    "git",
+    "commit",
+    "cli",
+    "ollama",
+    "ai",
+    "conventional-commits"
+  ],
   "author": "Dr Joe (Joseph Manghan)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jmanghan/ollatool"
+  },
   "dependencies": {
     "commander": "14.0.2",
     "debug": "^4.4.3",

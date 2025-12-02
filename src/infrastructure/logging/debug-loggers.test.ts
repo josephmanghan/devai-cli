@@ -16,7 +16,7 @@ import {
   llmLogger,
   perfLogger,
   validationLogger,
-} from './debug-loggers';
+} from './debug-loggers.js';
 
 const originalDebug = process.env.DEBUG;
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { enforceType } from './type-enforcer';
+import { enforceType } from './type-enforcer.js';
 
 describe('enforceType', () => {
   it('overwrites existing commit type with new type', () => {

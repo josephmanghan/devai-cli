@@ -119,7 +119,7 @@ export class ConsoleSetupRenderer implements SetupUiPort {
   showBaseModelMissingWarning(baseModel: string): void {
     if (this.activeSpinner !== null) {
       this.activeSpinner.warn(
-        `⚠ Base model '${baseModel}' not found - will auto-pull`
+        `Base model '${baseModel}' not found - will auto-pull`
       );
       this.activeSpinner = null;
     }

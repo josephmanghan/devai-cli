@@ -4,7 +4,25 @@ import type { LlmPort } from '../../../core/ports/llm-port.js';
 import type { SetupUiPort } from '../../../core/ports/setup-ui-port.js';
 import { SystemError } from '../../../core/types/errors.types.js';
 import type { OllamaModelConfig } from '../../../core/types/llm-types.js';
+import type { ProgressUpdate } from '../../../core/types/ui.types.js';
 import { ProvisionEnvironment } from './provision-environment.js';
+
+// Test helper: Creates a mock async generator that yields items from an array
+function createMockProgressStream(items: ProgressUpdate[]) {
+  return vi.fn(async function* () {
+    for (const item of items) {
+      yield item;
+    }
+  });
+}
+
+// Test helper: Creates a mock async generator that yields once then throws
+function createMockFailingStream(item: ProgressUpdate, error: Error) {
+  return vi.fn(async function* () {
+    yield item;
+    throw error;
+  });
+}
 
 describe('ProvisionEnvironment', () => {
   let provisionEnvironment: ProvisionEnvironment;
@@ -17,7 +35,7 @@ describe('ProvisionEnvironment', () => {
       model: 'ollatool-commit:latest',
       baseModel: 'qwen2.5-coder:1.5b',
       systemPrompt: 'Test system prompt',
-      parameters: { temperature: 0.2 },
+      parameters: { temperature: 0.2, num_ctx: 2048, keep_alive: 5 },
     };
 
     mockLlmPort = {
@@ -25,6 +43,7 @@ describe('ProvisionEnvironment', () => {
       checkModel: vi.fn(),
       pullModel: vi.fn(),
       createModel: vi.fn(),
+      generate: vi.fn(),
     };
 
     mockUiPort = {
@@ -81,19 +100,13 @@ describe('ProvisionEnvironment', () => {
         .mockResolvedValueOnce(false) // base model missing
         .mockResolvedValueOnce(true); // custom model exists
 
-      const mockStream = [
-        { status: 'pulling manifest' },
-        { status: 'pulling config' },
-        { status: 'pulling model' },
-      ];
-      const mockAsyncIterable = {
-        [Symbol.asyncIterator]: async function* () {
-          for (const item of mockStream) {
-            yield item;
-          }
-        },
-      };
-      vi.mocked(mockLlmPort.pullModel).mockReturnValue(mockAsyncIterable);
+      vi.mocked(mockLlmPort.pullModel).mockImplementation(
+        createMockProgressStream([
+          { status: 'pulling manifest' },
+          { status: 'pulling config' },
+          { status: 'pulling model' },
+        ])
+      );
 
       await expect(provisionEnvironment.execute()).resolves.toBeUndefined();
 
@@ -117,18 +130,12 @@ describe('ProvisionEnvironment', () => {
         .mockResolvedValueOnce(true) // base model exists
         .mockResolvedValueOnce(false); // custom model missing
 
-      const mockStream = [
-        { status: 'creating model' },
-        { status: 'modifying model' },
-      ];
-      const mockAsyncIterable = {
-        [Symbol.asyncIterator]: async function* () {
-          for (const item of mockStream) {
-            yield item;
-          }
-        },
-      };
-      vi.mocked(mockLlmPort.createModel).mockReturnValue(mockAsyncIterable);
+      vi.mocked(mockLlmPort.createModel).mockImplementation(
+        createMockProgressStream([
+          { status: 'creating model' },
+          { status: 'modifying model' },
+        ])
+      );
 
       await expect(provisionEnvironment.execute()).resolves.toBeUndefined();
 
@@ -197,13 +204,9 @@ describe('ProvisionEnvironment', () => {
         .mockResolvedValueOnce(true); // custom model exists
 
       const pullError = new Error('Network error');
-      const mockAsyncIterable = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { status: 'starting' };
-          throw pullError;
-        },
-      };
-      vi.mocked(mockLlmPort.pullModel).mockReturnValue(mockAsyncIterable);
+      vi.mocked(mockLlmPort.pullModel).mockImplementation(
+        createMockFailingStream({ status: 'starting' }, pullError)
+      );
 
       await expect(provisionEnvironment.execute()).rejects.toThrow(SystemError);
 
@@ -223,13 +226,9 @@ describe('ProvisionEnvironment', () => {
         .mockResolvedValueOnce(false); // custom model missing
 
       const createError = new Error('Model creation failed');
-      const mockAsyncIterable = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { status: 'starting' };
-          throw createError;
-        },
-      };
-      vi.mocked(mockLlmPort.createModel).mockReturnValue(mockAsyncIterable);
+      vi.mocked(mockLlmPort.createModel).mockImplementation(
+        createMockFailingStream({ status: 'starting' }, createError)
+      );
 
       await expect(provisionEnvironment.execute()).rejects.toThrow(SystemError);
 

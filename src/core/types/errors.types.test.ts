@@ -10,7 +10,7 @@ import {
   UnexpectedError,
   UserError,
   ValidationError,
-} from './errors.types';
+} from './errors.types.js';
 
 vi.mock('debug', () => {
   return {

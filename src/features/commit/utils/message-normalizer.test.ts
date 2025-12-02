@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { normalizeFormat } from './message-normalizer';
+import { normalizeFormat } from './message-normalizer.js';
 
 describe('normalizeFormat', () => {
   it('normalizes simple commit message with subject only', () => {

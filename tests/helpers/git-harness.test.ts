@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { TestGitHarness } from './git-harness';
+import { TestGitHarness } from './git-harness.js';
 
 describe('GitTestHarness', () => {
   let harness: TestGitHarness;

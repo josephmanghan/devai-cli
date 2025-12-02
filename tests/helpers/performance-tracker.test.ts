@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { PerformanceTracker } from './performance-tracker';
+import { PerformanceTracker } from './performance-tracker.js';
 
 describe('PerformanceTracker', () => {
   let tracker: PerformanceTracker;

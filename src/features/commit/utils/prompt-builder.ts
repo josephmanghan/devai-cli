@@ -1,5 +1,7 @@
 import { PromptParameters } from '../../../core/index.js';
 
+export type { PromptParameters };
+
 /**
  * Builds a user prompt for generating conventional commit messages
  * @param params - Object containing commit type, diff, status, and optional retry error
