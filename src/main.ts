@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { Command } from 'commander';
+import { Command, CommanderError } from 'commander';
 import { Ollama } from 'ollama';
 
 import { AppError, OllamaModelConfig } from './core/index.js';
@@ -127,6 +127,9 @@ export function main(): void {
   try {
     program.parse();
   } catch (error) {
+    if (error instanceof CommanderError && error.exitCode === 0) {
+      process.exit(0);
+    }
     handleError(error);
   }
 }
