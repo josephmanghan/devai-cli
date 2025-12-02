@@ -10,7 +10,11 @@ import {
   ValidatePreconditions,
 } from './features/commit/index.js';
 import { SetupController } from './features/setup/controllers/setup-controller.js';
-import { ProvisionEnvironment } from './features/setup/use-cases/provision-environment.js';
+import {
+  EnsureBaseModel,
+  ProvisionCustomModel,
+  ValidateOllamaConnection,
+} from './features/setup/use-cases/index.js';
 import {
   CONVENTIONAL_COMMIT_MODEL_CONFIG,
   OllamaAdapter,
@@ -70,13 +74,13 @@ export function createSetupCommand(
   const ollamaAdapter = createSharedAdapters(modelConfig);
   const setupUi = new ConsoleSetupRenderer();
 
-  const provisionEnvironment = new ProvisionEnvironment(
-    ollamaAdapter,
-    setupUi,
-    modelConfig
+  return new SetupController(
+    modelConfig,
+    new ValidateOllamaConnection(ollamaAdapter),
+    new EnsureBaseModel(ollamaAdapter, modelConfig.baseModel),
+    new ProvisionCustomModel(ollamaAdapter, modelConfig),
+    setupUi
   );
-
-  return new SetupController(modelConfig, provisionEnvironment, setupUi);
 }
 
 /**

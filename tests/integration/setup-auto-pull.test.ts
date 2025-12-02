@@ -5,7 +5,11 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { SetupUiPort } from '../../src/core/ports/setup-ui-port.js';
 import type { OllamaModelConfig } from '../../src/core/types/llm-types.js';
 import { SetupController } from '../../src/features/setup/controllers/setup-controller.js';
-import { ProvisionEnvironment } from '../../src/features/setup/use-cases/provision-environment.js';
+import {
+  EnsureBaseModel,
+  ProvisionCustomModel,
+  ValidateOllamaConnection,
+} from '../../src/features/setup/use-cases/index.js';
 import { OllamaAdapter } from '../../src/infrastructure/adapters/ollama/ollama-adapter.js';
 
 // TODO refactor to use getInstance. Our intergration tests at least should be really clean.
@@ -56,14 +60,20 @@ describe('Setup Command Business Logic Integration Tests', () => {
 
   it('should execute complete setup workflow with auto-pull', async () => {
     const stubUi = new StubUi();
-    const provisionEnvironment = new ProvisionEnvironment(
+    const validateConnection = new ValidateOllamaConnection(testAdapter);
+    const ensureBaseModel = new EnsureBaseModel(
       testAdapter,
-      stubUi,
+      testConfig.baseModel
+    );
+    const provisionCustomModel = new ProvisionCustomModel(
+      testAdapter,
       testConfig
     );
     const setupController = new SetupController(
       testConfig,
-      provisionEnvironment,
+      validateConnection,
+      ensureBaseModel,
+      provisionCustomModel,
       stubUi
     );
     const program = new Command();
@@ -87,14 +97,20 @@ describe('Setup Command Business Logic Integration Tests', () => {
     }
 
     const stubUi = new StubUi();
-    const provisionEnvironment = new ProvisionEnvironment(
+    const validateConnection = new ValidateOllamaConnection(testAdapter);
+    const ensureBaseModel = new EnsureBaseModel(
       testAdapter,
-      stubUi,
+      testConfig.baseModel
+    );
+    const provisionCustomModel = new ProvisionCustomModel(
+      testAdapter,
       testConfig
     );
     const setupController = new SetupController(
       testConfig,
-      provisionEnvironment,
+      validateConnection,
+      ensureBaseModel,
+      provisionCustomModel,
       stubUi
     );
     const program = new Command();

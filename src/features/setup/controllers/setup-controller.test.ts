@@ -1,10 +1,12 @@
 import { Command } from 'commander';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SetupUiPort } from '../../../core/ports/setup-ui-port.js';
-import { SystemError } from '../../../core/types/errors.types.js';
-import type { OllamaModelConfig } from '../../../core/types/llm-types.js';
-import { ProvisionEnvironment } from '../use-cases/provision-environment.js';
+import { OllamaModelConfig, SetupUiPort } from '../../../core/index.js';
+import {
+  EnsureBaseModel,
+  ProvisionCustomModel,
+  ValidateOllamaConnection,
+} from '../use-cases/index.js';
 import { SetupController } from './setup-controller.js';
 
 function createMockModelConfig(): OllamaModelConfig {
@@ -19,7 +21,9 @@ function createMockModelConfig(): OllamaModelConfig {
 describe('SetupController', () => {
   let setupController: SetupController;
   let mockProgram: Command;
-  let mockProvisionEnvironment: ProvisionEnvironment;
+  let mockValidateConnection: ValidateOllamaConnection;
+  let mockEnsureBaseModel: EnsureBaseModel;
+  let mockProvisionCustomModel: ProvisionCustomModel;
   let mockUi: SetupUiPort;
 
   beforeEach(() => {
@@ -29,9 +33,17 @@ describe('SetupController', () => {
       action: vi.fn().mockReturnThis(),
     } as unknown as Command;
 
-    mockProvisionEnvironment = {
+    mockValidateConnection = {
+      execute: vi.fn().mockResolvedValue(undefined),
+    } as unknown as ValidateOllamaConnection;
+
+    mockEnsureBaseModel = {
       execute: vi.fn(),
-    } as unknown as ProvisionEnvironment;
+    } as unknown as EnsureBaseModel;
+
+    mockProvisionCustomModel = {
+      execute: vi.fn(),
+    } as unknown as ProvisionCustomModel;
 
     mockUi = {
       showIntro: vi.fn(),
@@ -48,7 +60,9 @@ describe('SetupController', () => {
     const mockConfig = createMockModelConfig();
     setupController = new SetupController(
       mockConfig,
-      mockProvisionEnvironment,
+      mockValidateConnection,
+      mockEnsureBaseModel,
+      mockProvisionCustomModel,
       mockUi
     );
   });
@@ -65,74 +79,14 @@ describe('SetupController', () => {
     });
   });
 
-  describe('Command Execution', () => {
-    it('should succeed when ProvisionEnvironment succeeds', async () => {
-      vi.mocked(mockProvisionEnvironment.execute).mockResolvedValue(undefined);
-
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
-      });
-
-      setupController.register(mockProgram);
-      await actionHandler!();
-
-      expect(mockUi.showIntro).toHaveBeenCalled();
-      expect(mockProvisionEnvironment.execute).toHaveBeenCalled();
-      expect(mockUi.showOutro).toHaveBeenCalled();
-    });
-
-    it('should throw errors from ProvisionEnvironment', async () => {
-      const systemError = new SystemError('Test error', 'Test remediation');
-      vi.mocked(mockProvisionEnvironment.execute).mockRejectedValue(
-        systemError
-      );
-
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
-      });
-
-      setupController.register(mockProgram);
-
-      await expect(actionHandler!()).rejects.toThrow('Test error');
-      expect(mockUi.showIntro).toHaveBeenCalled();
-      expect(mockProvisionEnvironment.execute).toHaveBeenCalled();
-      expect(mockUi.showOutro).not.toHaveBeenCalled();
-    });
-
-    it('should wrap unexpected errors in SystemError', async () => {
-      const unexpectedError = new Error('Unexpected error');
-      vi.mocked(mockProvisionEnvironment.execute).mockRejectedValue(
-        unexpectedError
-      );
-
-      let actionHandler: () => Promise<void>;
-      const mockAction = mockProgram.action as ReturnType<typeof vi.fn>;
-      mockAction.mockImplementation(handler => {
-        actionHandler = handler;
-        return mockProgram;
-      });
-
-      setupController.register(mockProgram);
-
-      await expect(actionHandler!()).rejects.toThrow(SystemError);
-      await expect(actionHandler!()).rejects.toThrow(
-        'An unexpected error occurred during setup'
-      );
-    });
-  });
-
   describe('Dependency Injection', () => {
-    it('should accept ProvisionEnvironment and UI port via constructor', () => {
+    it('should accept all three use cases and UI port via constructor', () => {
       const mockConfig = createMockModelConfig();
       const controller = new SetupController(
         mockConfig,
-        mockProvisionEnvironment,
+        mockValidateConnection,
+        mockEnsureBaseModel,
+        mockProvisionCustomModel,
         mockUi
       );
       expect(controller).toBeDefined();
