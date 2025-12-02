@@ -6,6 +6,7 @@ yarn-error.log*
 # IDE
 .DS_Store
 **/.DS_Store
+coverage/
 
 # Private 
 .claude/settings.json
