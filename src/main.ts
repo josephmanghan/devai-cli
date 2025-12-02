@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { Command } from 'commander';
+import { Command, CommanderError } from 'commander';
 import { Ollama } from 'ollama';
 
 import { AppError, OllamaModelConfig } from './core/index.js';
@@ -101,7 +101,8 @@ export function createProgram(): Command {
     .description(
       'Local-first CLI tool for AI-powered git commit message generation using Ollama'
     )
-    .version(pkg.version, '--version', 'Show version number');
+    .version(pkg.version, '-v, --version', 'Show version number')
+    .option('-a, --all', 'Stage all changes before generating commit');
 
   const setupCommand = createSetupCommand(CONVENTIONAL_COMMIT_MODEL_CONFIG);
   setupCommand.register(program);
@@ -126,6 +127,9 @@ export function main(): void {
   try {
     program.parse();
   } catch (error) {
+    if (error instanceof CommanderError && error.exitCode === 0) {
+      process.exit(0);
+    }
     handleError(error);
   }
 }

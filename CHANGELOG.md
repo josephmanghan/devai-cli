@@ -1,0 +1,15 @@
+## [0.2.0] - 02/12/2025
+
+### Fixed
+
+- **Help documentation completeness**: Updated help command to include the `-a, --all` global option for staging all changes before commit generation
+- **Commander.js error handling**: Fixed error messages appearing when using `--help` and `--version` flags by properly detecting Commander.js success exit codes (exit code 0) and handling them without routing to the error handler
+
+## [0.1.0] - 02/12/2025
+
+### Added
+
+- **Core CLI functionality**: Complete command-line interface with help and version support
+- **Setup command**: Configure Ollama integration and provision custom model for commit generation
+- **Commit command**: Generate conventional commit messages using AI and commit staged changes
+- **All changes staging**: Added `-a, --all` flag to automatically stage all changes before generating commit messages
