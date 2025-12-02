@@ -1,8 +1,10 @@
 import ora, { type Ora } from 'ora';
 
-import { SetupUiPort } from '../../core/ports/setup-ui-port.js';
-import type { OllamaModelConfig } from '../../core/types/llm-types.js';
-import type { ProgressUpdate } from '../../core/types/ui.types.js';
+import {
+  OllamaModelConfig,
+  ProgressUpdate,
+  SetupUiPort,
+} from '../../core/index.js';
 
 /**
  * Console implementation of the SetupUiPort interface.

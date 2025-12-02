@@ -1,5 +1,4 @@
-import { GenerationOptions } from '../types/llm-types.js';
-import type { ProgressUpdate } from '../types/ui.types.js';
+import { GenerationOptions, ProgressUpdate } from '../types/index.js';
 
 /**
  * Defines the contract for Large Language Model provider operations.

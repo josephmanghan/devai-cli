@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { LlmPort } from '../../../core/ports/llm-port.js';
-import type { SetupUiPort } from '../../../core/ports/setup-ui-port.js';
-import { SystemError } from '../../../core/types/errors.types.js';
-import type { OllamaModelConfig } from '../../../core/types/llm-types.js';
-import type { ProgressUpdate } from '../../../core/types/ui.types.js';
+import {
+  LlmPort,
+  OllamaModelConfig,
+  ProgressUpdate,
+  SetupUiPort,
+  SystemError,
+} from '../../../core/index.js';
 import { ProvisionEnvironment } from './provision-environment.js';
 
 // Test helper: Creates a mock async generator that yields items from an array

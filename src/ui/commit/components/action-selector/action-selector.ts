@@ -1,0 +1,44 @@
+import { cancel, isCancel, select } from '@clack/prompts';
+
+import { CommitAction } from '../../../../core/index.js';
+
+const ACTION_OPTIONS = [
+  {
+    value: 'APPROVE' as CommitAction,
+    label: 'Approve',
+    hint: 'Accept and commit this message',
+  },
+  {
+    value: 'EDIT' as CommitAction,
+    label: 'Edit',
+    hint: 'Edit the message before committing',
+  },
+  {
+    value: 'REGENERATE' as CommitAction,
+    label: 'Regenerate',
+    hint: 'Generate a new commit message',
+  },
+  {
+    value: 'CANCEL' as CommitAction,
+    label: 'Cancel',
+    hint: 'Cancel the commit process',
+  },
+];
+
+/**
+ * Provides [A]pprove, [E]dit, [R]egenerate, [C]ancel options with keyboard shortcuts
+ * Uses @clack/prompts.select with proper cancel handling
+ */
+export async function selectCommitAction(): Promise<CommitAction> {
+  const selectedAction = await select({
+    message: 'What would you like to do with this commit message?',
+    options: ACTION_OPTIONS,
+  });
+
+  if (isCancel(selectedAction)) {
+    cancel('Operation cancelled');
+    throw new Error('Operation cancelled by user');
+  }
+
+  return selectedAction as CommitAction;
+}

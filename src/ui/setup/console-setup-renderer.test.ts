@@ -1,9 +1,8 @@
 import ora, { type Ora } from 'ora';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { OllamaModelConfig } from '../../core/types/llm-types.js';
-import type { ProgressUpdate } from '../../core/types/ui.types.js';
-import { ConsoleSetupRenderer } from './console-setup-renderer.js';
+import { OllamaModelConfig, ProgressUpdate } from '../../core/index.js';
+import { ConsoleSetupRenderer } from '../index.js';
 
 vi.mock('ora');
 

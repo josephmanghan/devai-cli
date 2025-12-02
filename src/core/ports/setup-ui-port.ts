@@ -1,5 +1,4 @@
-import type { OllamaModelConfig } from '../types/llm-types.js';
-import type { ProgressUpdate } from '../types/ui.types.js';
+import { OllamaModelConfig, ProgressUpdate } from '../types/index.js';
 
 /**
  * UI port for setup operations.
