@@ -31,7 +31,8 @@
     "pr:lite": "npm run format && npm run lint && npm run typecheck && npm run test:unit && npm run build",
     "validate:setup": "tsx scripts/validate-setup.ts",
     "build:link": "npm run build && npm link",
-    "unlink": "npm unlink devai-cli"
+    "unlink": "npm unlink devai-cli",
+    "release:prep": "rm -rf dev docs .prompt-assets"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
