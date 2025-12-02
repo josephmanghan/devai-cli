@@ -24,7 +24,8 @@ export async function selectCommitType(): Promise<CommitType> {
 
   if (isCancel(selectedType)) {
     cancel('Operation cancelled');
-    throw new Error('Operation cancelled by user');
+    // eslint-disable-next-line n/no-process-exit
+    process.exit(0);
   }
 
   return selectedType as CommitType;

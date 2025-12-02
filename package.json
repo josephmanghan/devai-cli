@@ -22,7 +22,7 @@
     "test": "vitest run",
     "test:unit": "vitest run --dir src",
     "test:integration": "vitest run --dir tests",
-    "test:demo": "find src -name '*.demo.ts' | xargs tsx",
+    "test:demo": "tsx scripts/run-demos.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
@@ -66,6 +66,7 @@
     "url": "https://github.com/jmanghan/ollatool"
   },
   "dependencies": {
+    "@clack/prompts": "^0.11.0",
     "commander": "14.0.2",
     "debug": "^4.4.3",
     "execa": "^9.6.1",

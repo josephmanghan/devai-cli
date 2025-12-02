@@ -6,6 +6,9 @@ import { selectCommitAction } from './action-selector.js';
 
 vi.mock('@clack/prompts');
 
+const mockProcessExit = vi.fn();
+vi.stubGlobal('process', { ...process, exit: mockProcessExit });
+
 describe('ActionSelector', () => {
   const mockSelect = vi.mocked(clackPrompts.select);
   const mockIsCancel = vi.mocked(clackPrompts.isCancel);
@@ -15,6 +18,7 @@ describe('ActionSelector', () => {
     mockSelect.mockClear();
     mockIsCancel.mockClear();
     mockCancel.mockClear();
+    mockProcessExit.mockClear();
   });
 
   describe('selectCommitAction', () => {
@@ -29,22 +33,22 @@ describe('ActionSelector', () => {
         message: 'What would you like to do with this commit message?',
         options: [
           {
-            value: 'APPROVE',
+            value: CommitAction.APPROVE,
             label: 'Approve',
             hint: 'Accept and commit this message',
           },
           {
-            value: 'EDIT',
+            value: CommitAction.EDIT,
             label: 'Edit',
             hint: 'Edit the message before committing',
           },
           {
-            value: 'REGENERATE',
+            value: CommitAction.REGENERATE,
             label: 'Regenerate',
             hint: 'Generate a new commit message',
           },
           {
-            value: 'CANCEL',
+            value: CommitAction.CANCEL,
             label: 'Cancel',
             hint: 'Cancel the commit process',
           },
@@ -87,13 +91,14 @@ describe('ActionSelector', () => {
       mockSelect.mockResolvedValue(undefined);
       mockIsCancel.mockReturnValue(true);
 
-      await expect(selectCommitAction()).rejects.toThrow('Operation cancelled');
+      await selectCommitAction();
 
       expect(mockCancel).toHaveBeenCalledWith('Operation cancelled');
+      expect(mockProcessExit).toHaveBeenCalledWith(0);
     });
 
     it('should provide all four commit action options', async () => {
-      mockSelect.mockResolvedValue('APPROVE' as CommitAction);
+      mockSelect.mockResolvedValue(CommitAction.APPROVE);
       mockIsCancel.mockReturnValue(false);
 
       await selectCommitAction();
@@ -101,37 +106,43 @@ describe('ActionSelector', () => {
       const options = mockSelect.mock.calls[0][0].options;
       expect(options).toHaveLength(4);
 
-      const approveOption = options.find(opt => opt.value === 'APPROVE');
+      const approveOption = options.find(
+        opt => opt.value === CommitAction.APPROVE
+      );
       expect(approveOption).toEqual({
-        value: 'APPROVE',
+        value: CommitAction.APPROVE,
         label: 'Approve',
         hint: 'Accept and commit this message',
       });
 
-      const editOption = options.find(opt => opt.value === 'EDIT');
+      const editOption = options.find(opt => opt.value === CommitAction.EDIT);
       expect(editOption).toEqual({
-        value: 'EDIT',
+        value: CommitAction.EDIT,
         label: 'Edit',
         hint: 'Edit the message before committing',
       });
 
-      const regenerateOption = options.find(opt => opt.value === 'REGENERATE');
+      const regenerateOption = options.find(
+        opt => opt.value === CommitAction.REGENERATE
+      );
       expect(regenerateOption).toEqual({
-        value: 'REGENERATE',
+        value: CommitAction.REGENERATE,
         label: 'Regenerate',
         hint: 'Generate a new commit message',
       });
 
-      const cancelOption = options.find(opt => opt.value === 'CANCEL');
+      const cancelOption = options.find(
+        opt => opt.value === CommitAction.CANCEL
+      );
       expect(cancelOption).toEqual({
-        value: 'CANCEL',
+        value: CommitAction.CANCEL,
         label: 'Cancel',
         hint: 'Cancel the commit process',
       });
     });
 
     it('should use appropriate message for the prompt', async () => {
-      mockSelect.mockResolvedValue('APPROVE' as CommitAction);
+      mockSelect.mockResolvedValue(CommitAction.APPROVE);
       mockIsCancel.mockReturnValue(false);
 
       await selectCommitAction();

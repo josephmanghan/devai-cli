@@ -6,6 +6,10 @@ import { selectCommitType } from './type-selector.js';
 
 vi.mock('@clack/prompts');
 
+// Mock process.exit to prevent actual exit during tests
+const mockProcessExit = vi.fn();
+vi.stubGlobal('process', { ...process, exit: mockProcessExit });
+
 describe('TypeSelector', () => {
   const mockSelect = vi.mocked(clackPrompts.select);
   const mockIsCancel = vi.mocked(clackPrompts.isCancel);
@@ -15,6 +19,7 @@ describe('TypeSelector', () => {
     mockSelect.mockClear();
     mockIsCancel.mockClear();
     mockCancel.mockClear();
+    mockProcessExit.mockClear();
   });
 
   describe('selectCommitType', () => {
@@ -80,9 +85,10 @@ describe('TypeSelector', () => {
       mockSelect.mockResolvedValue(undefined);
       mockIsCancel.mockReturnValue(true);
 
-      await expect(selectCommitType()).rejects.toThrow('Operation cancelled');
+      await selectCommitType();
 
       expect(mockCancel).toHaveBeenCalledWith('Operation cancelled');
+      expect(mockProcessExit).toHaveBeenCalledWith(0);
     });
 
     it('should map all 11 commit types with descriptions', async () => {

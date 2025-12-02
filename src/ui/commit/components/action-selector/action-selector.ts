@@ -4,22 +4,22 @@ import { CommitAction } from '../../../../core/index.js';
 
 const ACTION_OPTIONS = [
   {
-    value: 'APPROVE' as CommitAction,
+    value: CommitAction.APPROVE,
     label: 'Approve',
     hint: 'Accept and commit this message',
   },
   {
-    value: 'EDIT' as CommitAction,
+    value: CommitAction.EDIT,
     label: 'Edit',
     hint: 'Edit the message before committing',
   },
   {
-    value: 'REGENERATE' as CommitAction,
+    value: CommitAction.REGENERATE,
     label: 'Regenerate',
     hint: 'Generate a new commit message',
   },
   {
-    value: 'CANCEL' as CommitAction,
+    value: CommitAction.CANCEL,
     label: 'Cancel',
     hint: 'Cancel the commit process',
   },
@@ -37,8 +37,9 @@ export async function selectCommitAction(): Promise<CommitAction> {
 
   if (isCancel(selectedAction)) {
     cancel('Operation cancelled');
-    throw new Error('Operation cancelled by user');
+    // eslint-disable-next-line n/no-process-exit
+    process.exit(0);
   }
 
-  return selectedAction as CommitAction;
+  return selectedAction;
 }
