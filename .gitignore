@@ -35,7 +35,9 @@ tmp/
 # BMad
 .bmad-core
 web-bundles
-.claude/commands/BMad
+.claude/commands
+.claude/commands
+.claude/hooks
 .cursor/rules/bmad
 .bmad
 .agent
