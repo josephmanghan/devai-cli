@@ -57,6 +57,19 @@ export class OllamaAdapter implements LlmPort {
   }
 
   /**
+   * Deletes a model from Ollama.
+   * @param modelName - The name of the model to delete
+   * @throws {AppError} When deletion fails or daemon is unavailable
+   */
+  async deleteModel(modelName: string): Promise<void> {
+    try {
+      await this.ollamaClient.delete({ model: modelName });
+    } catch (error) {
+      throw this.wrapOllamaError(error, 'Failed to delete model', 'system');
+    }
+  }
+
+  /**
    * Creates a new model in Ollama using constructor-injected configuration.
    * Returns async generator yielding progress updates.
    * @param modelName - The name for the new model

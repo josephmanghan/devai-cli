@@ -21,7 +21,7 @@ describe('createModel Integration Tests', () => {
 Rules:
 - Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
 - Description: imperative mood, lowercase, no period, under 50 characters
-- Body: explain WHAT and WHY, not HOW, 2-3 sentences maximum
+- Body: explain WHAT and WHY, not HOW, 1-2 sentences maximum
 - NO conversational text, explanations, or markdown formatting
 - Output ONLY the commit message, nothing else
 

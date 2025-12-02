@@ -22,6 +22,15 @@ export interface LlmPort {
   checkModel(modelName: string): Promise<boolean>;
 
   /**
+   * Delete a model from local registry.
+   *
+   * @param modelName - Model identifier to delete
+   * @returns Promise that resolves when deletion completes
+   * @throws {SystemError} When deletion fails
+   */
+  deleteModel(modelName: string): Promise<void>;
+
+  /**
    * Create a custom model instance from constructor-injected configuration.
    * Returns async generator for progress updates.
    *

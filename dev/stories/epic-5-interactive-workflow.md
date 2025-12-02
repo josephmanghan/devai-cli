@@ -163,3 +163,7 @@ Before marking any Story or Epic as **Complete**, you must run the full validati
 - User can run `ollatool commit`, select a type, wait for AI generation, and approve the commit.
 - User can edit the generated message in `nano`/`vim` and have the changes preserved.
 - Application handles all defined error states gracefully.
+
+## Extra
+
+I also did extra architecture rework and add --all and renamed from ollatool to devai-cli

@@ -26,6 +26,7 @@ function createMockFailingStream(item: ProgressUpdate, error: Error) {
 const mockLlmPort = {
   checkConnection: vi.fn(),
   checkModel: vi.fn(),
+  deleteModel: vi.fn(),
   createModel: vi.fn(),
   pullModel: vi.fn(),
   generate: vi.fn(),
@@ -53,24 +54,44 @@ describe('ProvisionCustomModel', () => {
   });
 
   describe('execute - model exists', () => {
-    it('should return { existed: true } when custom model exists', async () => {
+    it('should delete and recreate when custom model exists', async () => {
       mockLlmPort.checkModel.mockResolvedValue(true);
+      mockLlmPort.deleteModel.mockResolvedValue(undefined);
+      mockLlmPort.createModel.mockImplementation(
+        createMockProgressStream([{ status: 'creating model' }])
+      );
 
       const generator = provisionCustomModel.execute();
-      const result = await generator.next();
+      let result = await generator.next();
 
-      expect(result.done).toBe(true);
-      expect(result.value).toEqual({ existed: true });
-      expect(mockLlmPort.createModel).not.toHaveBeenCalled();
+      while (!result.done) {
+        result = await generator.next();
+      }
+
+      expect(mockLlmPort.deleteModel).toHaveBeenCalledWith(
+        'devai-cli-commit:latest'
+      );
+      expect(mockLlmPort.createModel).toHaveBeenCalled();
+      expect(result.value).toEqual({ existed: true, created: true });
     });
 
-    it('should not attempt to create when model exists', async () => {
+    it('should call deleteModel before createModel when model exists', async () => {
       mockLlmPort.checkModel.mockResolvedValue(true);
+      mockLlmPort.deleteModel.mockResolvedValue(undefined);
+      mockLlmPort.createModel.mockImplementation(
+        createMockProgressStream([{ status: 'creating model' }])
+      );
 
       const generator = provisionCustomModel.execute();
-      await generator.next();
+      let result = await generator.next();
 
-      expect(mockLlmPort.createModel).not.toHaveBeenCalled();
+      while (!result.done) {
+        result = await generator.next();
+      }
+
+      expect(mockLlmPort.deleteModel).toHaveBeenCalledBefore(
+        mockLlmPort.createModel
+      );
     });
   });
 

@@ -65,6 +65,10 @@ export class MockLlmProvider implements LlmPort {
     return true;
   }
 
+  async deleteModel(): Promise<void> {
+    // Mock implementation
+  }
+
   createModel(): AsyncGenerator<ProgressUpdate> {
     return this.emptyAsyncGenerator();
   }

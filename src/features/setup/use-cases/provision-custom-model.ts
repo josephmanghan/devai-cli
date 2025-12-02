@@ -31,7 +31,7 @@ export class ProvisionCustomModel {
     );
 
     if (customModelExists) {
-      return { existed: true };
+      await this.llmPort.deleteModel(this.modelConfig.model);
     }
 
     const stream = this.llmPort.createModel(this.modelConfig.model);
@@ -44,7 +44,7 @@ export class ProvisionCustomModel {
       this.handleCreationError(error);
     }
 
-    return { existed: false, created: true };
+    return { existed: customModelExists, created: true };
   }
 
   /**

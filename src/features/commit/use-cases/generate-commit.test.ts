@@ -10,6 +10,7 @@ describe('GenerateCommit', () => {
   const mockLlmProvider = {
     checkConnection: vi.fn(),
     checkModel: vi.fn(),
+    deleteModel: vi.fn(),
     createModel: vi.fn(),
     pullModel: vi.fn(),
     generate: vi.fn(),

@@ -1,3 +1,4 @@
+/* eslint-disable n/no-process-exit */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -5,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import { Ollama } from 'ollama';
 
-import { OllamaModelConfig } from './core/index.js';
+import { AppError, OllamaModelConfig } from './core/index.js';
 import { CommitController } from './features/commit/controllers/commit-controller.js';
 import {
   GenerateCommit,
@@ -116,11 +117,49 @@ export function createProgram(): Command {
  * Executes the CLI program
  */
 export function main(): void {
+  setupErrorHandlers();
+
+  const program = createProgram();
+
+  program.exitOverride();
+
   try {
-    const program = createProgram();
     program.parse();
   } catch (error) {
-    console.error('Fatal error:', error);
-    throw error;
+    handleError(error);
   }
+}
+
+/**
+ * Setup global error handlers for uncaught errors
+ */
+function setupErrorHandlers(): void {
+  process.on('unhandledRejection', (error: unknown) => {
+    handleError(error);
+  });
+
+  process.on('uncaughtException', (error: unknown) => {
+    handleError(error);
+  });
+}
+
+/**
+ * Format and display error to user
+ */
+function handleError(error: unknown): never {
+  if (error instanceof AppError) {
+    console.error(`\n❌ ${error.message}`);
+    if (error.remediation !== undefined && error.remediation.length > 0) {
+      console.error(`\n💡 ${error.remediation}\n`);
+    }
+    process.exit(error.code);
+  }
+
+  if (error instanceof Error) {
+    console.error(`\n❌ Unexpected error: ${error.message}\n`);
+    process.exit(1);
+  }
+
+  console.error(`\n❌ Unknown error occurred\n`);
+  process.exit(1);
 }
