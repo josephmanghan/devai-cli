@@ -34,12 +34,8 @@ tmp/
 
 # BMad
 .bmad-core
-web-bundles
 .claude
-.cursor/rules/bmad
+.cursor
 .bmad
 .agent
-.claude/agents/bmad-analysis
-.claude/agents/bmad-planning
-.claude/agents/bmad-research
-.claude/agents/bmad-review
+web-bundles
