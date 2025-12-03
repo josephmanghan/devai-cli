@@ -12,7 +12,7 @@ import {
 } from '../utils/index.js';
 
 export class GenerateCommit {
-  private readonly MAX_RETRIES = 3;
+  private readonly MAX_RETRIES = 5;
   private readonly DEFAULT_GENERATION_OPTIONS: GenerationOptions = {
     model: 'qwen2.5-coder:1.5b',
     temperature: 0.3,
