@@ -10,243 +10,101 @@ import {
 } from 'node:fs';
 import { join, extname, dirname, relative } from 'node:path';
 import { parseArgs } from 'node:util';
+import {
+  INPUT_DIRECTORY,
+  OUTPUT_DIRECTORY,
+  STOP_WORDS,
+} from './caveman.config';
 
-const STOP_WORDS = new Set([
-  'a',
-  'about',
-  'above',
-  'after',
-  'again',
-  'against',
-  'all',
-  'am',
-  'an',
-  'and',
-  'any',
-  'are',
-  "aren't",
-  'as',
-  'at',
-  'be',
-  'because',
-  'been',
-  'before',
-  'being',
-  'below',
-  'between',
-  'both',
-  'but',
-  'by',
-  "can't",
-  'cannot',
-  'could',
-  "couldn't",
-  'did',
-  "didn't",
-  'do',
-  'does',
-  "doesn't",
-  'doing',
-  "don't",
-  'down',
-  'during',
-  'each',
-  'few',
-  'for',
-  'from',
-  'further',
-  'had',
-  "hadn't",
-  'has',
-  "hasn't",
-  'have',
-  "haven't",
-  'having',
-  'he',
-  "he'd",
-  "he'll",
-  "he's",
-  'her',
-  'here',
-  "here's",
-  'hers',
-  'herself',
-  'him',
-  'himself',
-  'his',
-  'how',
-  "how's",
-  'i',
-  "i'd",
-  "i'll",
-  "i'm",
-  "i've",
-  'if',
-  'in',
-  'into',
-  'is',
-  "isn't",
-  'it',
-  "it's",
-  'its',
-  'itself',
-  "let's",
-  'me',
-  'more',
-  'most',
-  "mustn't",
-  'my',
-  'myself',
-  'no',
-  'nor',
-  'not',
-  'of',
-  'off',
-  'on',
-  'once',
-  'only',
-  'or',
-  'other',
-  'ought',
-  'our',
-  'ours',
-  'ourselves',
-  'out',
-  'over',
-  'own',
-  'same',
-  "shan't",
-  'she',
-  "she'd",
-  "she'll",
-  "she's",
-  'should',
-  "shouldn't",
-  'so',
-  'some',
-  'such',
-  'than',
-  'that',
-  "that's",
-  'the',
-  'their',
-  'theirs',
-  'them',
-  'themselves',
-  'then',
-  'there',
-  "there's",
-  'these',
-  'they',
-  "they'd",
-  "they'll",
-  "they're",
-  "they've",
-  'this',
-  'those',
-  'through',
-  'to',
-  'too',
-  'under',
-  'until',
-  'up',
-  'very',
-  'was',
-  "wasn't",
-  'we',
-  "we'd",
-  "we'll",
-  "we're",
-  "we've",
-  'were',
-  "weren't",
-  'what',
-  "what's",
-  'when',
-  "when's",
-  'where',
-  "where's",
-  'which',
-  'while',
-  'who',
-  "who's",
-  'whom',
-  'why',
-  "why's",
-  'with',
-  "won't",
-  'would',
-  "wouldn't",
-  'you',
-  "you'd",
-  "you'll",
-  "you're",
-  "you've",
-  'your',
-  'yours',
-  'yourself',
-  'yourselves',
-]);
-
-// Parse CLI Args
+// ============================================================================
+// CLI ARGUMENT PARSING
+// ============================================================================
 const { values } = parseArgs({
   args: process.argv.slice(2),
   options: {
     input: {
       type: 'string',
       short: 'i',
-      default: './devai-cli-document-project',
+      default: INPUT_DIRECTORY,
     },
-    output: { type: 'string', short: 'o', default: './caveman-docs' },
+    output: {
+      type: 'string',
+      short: 'o',
+      default: OUTPUT_DIRECTORY,
+    },
   },
 });
 
+// ============================================================================
+// CORE CONVERSION LOGIC
+// ============================================================================
+
+/**
+ * Converts text to "caveman" format by removing stop words and compacting whitespace.
+ * Uses different strategies for code vs. text/markdown files.
+ *
+ * @param text - The input text to convert
+ * @param isCode - Whether the text is code (true) or text/markdown (false)
+ * @returns The converted caveman text
+ */
 const toCaveman = (text: string, isCode: boolean): string => {
   if (!text) return '';
 
-  // STRATEGY FOR CODE FILES (Experimental)
-  // Don't remove stopwords from code, it breaks logic. Just compact it.
+  // For code, preserve logic by keeping all words (no stop word removal)
+  // Only strip comments and compact whitespace to reduce size
   if (isCode) {
     return text
-      .replace(/\/\/.*$/gm, '') // Remove single line comments
-      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
-      .replace(/\s+/g, ' '); // Compact whitespace
+      .replace(/\/\/.*$/gm, '') // Remove single-line comments (// ...)
+      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments (/* ... */)
+      .replace(/\s+/g, ' '); // Compact all whitespace to single spaces
   }
 
-  // STRATEGY FOR TEXT/MARKDOWN
+  // Remove stop words while preserving structure (headers, lists, paragraphs)
   let processed = text.toLowerCase();
 
-  // 1. Protect Structure: Turn newlines into a temporary placeholder
+  // Replace newlines with placeholder to preserve document structure
   processed = processed.replace(/\n/g, ' __NEWLINE__ ');
 
-  // 2. Clean Punctuation (Keep # for headers, - for lists)
+  // Keep: word chars (\w), whitespace (\s), # (headers), - (lists), . (extensions), / (paths)
+  // Remove: quotes, commas, parentheses, brackets, etc.
   processed = processed.replace(/[^\w\s#\-\.\/]/g, '');
 
-  // 3. Process Words
+  // Split into words and remove common English stop words
   const words = processed.split(' ').filter(word => {
     const cleanWord = word.trim();
-    if (cleanWord === '__newline__') return true; // Keep structure
-    // Keep headers/lists
+    if (cleanWord === '__newline__') return true;
     if (cleanWord.startsWith('#') || cleanWord.startsWith('-')) return true;
     return !STOP_WORDS.has(cleanWord) && cleanWord.length > 1;
   });
 
-  // 4. Reassemble and restore newlines
+  // Reassemble and clean up whitespace
   return words
     .join(' ')
-    .replace(/__newline__/gi, '\n')
-    .replace(/[ \t]+/g, ' ')
-    .replace(/\n\s*\n\s*\n/g, '\n\n')
+    .replace(/__newline__/gi, '\n') // Restore newlines from placeholders
+    .replace(/[ \t]+/g, ' ') // Compact spaces and tabs to single space
+    .replace(/\n\s*\n\s*\n/g, '\n\n') // Reduce 3+ newlines to 2 (paragraph breaks)
     .trim();
 };
 
-// Recursive file walker
+// ============================================================================
+// FILE SYSTEM UTILITIES
+// ============================================================================
+
+/**
+ * Recursively walks a directory tree and collects all file paths.
+ * Skips node_modules and .git directories.
+ *
+ * @param dirPath - The directory to walk
+ * @param arrayOfFiles - Accumulator for file paths (used during recursion)
+ * @returns Array of absolute file paths found in the directory tree
+ */
 const getAllFiles = (dirPath: string, arrayOfFiles: string[] = []) => {
   const files = readdirSync(dirPath);
 
   files.forEach(file => {
     const fullPath = join(dirPath, file);
     if (statSync(fullPath).isDirectory()) {
+      // Skip common directories that should not be processed
       if (file !== 'node_modules' && file !== '.git') {
         getAllFiles(fullPath, arrayOfFiles);
       }
@@ -258,50 +116,68 @@ const getAllFiles = (dirPath: string, arrayOfFiles: string[] = []) => {
   return arrayOfFiles;
 };
 
+// ============================================================================
+// MAIN PROCESSING FUNCTION
+// ============================================================================
+
+/**
+ * Main function that processes all supported files from input directory,
+ * converts them to caveman format, and writes to output directory.
+ * Preserves directory structure and reports statistics on size reduction.
+ */
 const processFiles = (): void => {
-  const inputDir = values.input!; // Non-null assertion because of default
+  const inputDir = values.input!;
   const outputDir = values.output!;
 
+  // Display startup information
   console.log(`🚀 Starting Caveman Converter`);
   console.log(`   Input:  ${inputDir}`);
   console.log(`   Output: ${outputDir}`);
   console.log('---');
 
+  // Validate input directory exists
   if (!existsSync(inputDir)) {
     console.error(`❌ Input directory not found: ${inputDir}`);
     process.exit(1);
   }
 
+  // Collect all files and define which extensions to process
   const allFiles = getAllFiles(inputDir);
   const supportedExtensions = ['.md', '.txt', '.js', '.ts', '.json'];
 
+  // Track statistics for final report
   let totalOriginal = 0;
   let totalCaveman = 0;
   let processedCount = 0;
 
+  // Process each file
   for (const filePath of allFiles) {
     const ext = extname(filePath);
     if (!supportedExtensions.includes(ext)) continue;
 
-    // Determine output path (mirroring directory structure)
+    // Build output path preserving directory structure
     const relativePath = relative(inputDir, filePath);
     const outputPath = join(outputDir, relativePath);
 
-    // Ensure subdir exists
+    // Create output subdirectories as needed
     mkdirSync(dirname(outputPath), { recursive: true });
 
+    // Read and convert file content
     const content = readFileSync(filePath, 'utf-8');
     const isCode = ['.js', '.ts', '.json'].includes(ext);
 
     const cavemanContent = toCaveman(content, isCode);
 
+    // Write converted content to output
     writeFileSync(outputPath, cavemanContent, 'utf-8');
 
+    // Update statistics
     totalOriginal += content.length;
     totalCaveman += cavemanContent.length;
     processedCount++;
   }
 
+  // Calculate and display final statistics
   const reduction = Math.round((1 - totalCaveman / totalOriginal) * 100);
 
   console.log(`📊 SUMMARY:`);
@@ -310,5 +186,9 @@ const processFiles = (): void => {
   console.log(`   Caveman Size:    ${(totalCaveman / 1024).toFixed(2)} KB`);
   console.log(`   Total Reduction: ${reduction}% 📉`);
 };
+
+// ============================================================================
+// SCRIPT ENTRY POINT
+// ============================================================================
 
 processFiles();
