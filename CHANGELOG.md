@@ -2,6 +2,12 @@
 
 ### Added
 
+- **Provide Prompt feature**: Added option to provide custom intent to the model during commit generation, allowing users to describe the general context and improve commit message accuracy
+
+## [0.4.0] - 03/12/2025
+
+### Added
+
 - **Spinner functionality**: Visual feedback during commit message generation to improve user experience
 - **Post-install notification**: Added npm postinstall script to guide users to run `devai-cli setup` after installation or upgrade
 

@@ -10,15 +10,6 @@ export interface CommitContext {
 }
 
 /**
- * Parameters for generating a commit message
- */
-export interface GenerateCommitInput {
-  readonly commitType: string;
-  readonly diff: string;
-  readonly status: string;
-}
-
-/**
  * Result of commit generation operation
  */
 export interface GenerateCommitOutput {

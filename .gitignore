@@ -34,8 +34,8 @@ tmp/
 
 # BMad
 .bmad-core
-web-bundles
 .claude
+.cursor
 .bmad
 .agent
-.cursor
+web-bundles

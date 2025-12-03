@@ -33,4 +33,10 @@ export interface CommitUiPort {
    * Stop the currently active thinking/loading spinner.
    */
   stopThinking(): void;
+
+  /**
+   * Capture user-provided context/intent for commit generation.
+   * @returns Promise that resolves to user-provided context
+   */
+  captureUserPrompt(): Promise<string>;
 }

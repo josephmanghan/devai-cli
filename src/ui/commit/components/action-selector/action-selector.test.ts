@@ -48,6 +48,11 @@ describe('ActionSelector', () => {
             hint: 'Generate a new commit message',
           },
           {
+            value: CommitAction.PROVIDE_PROMPT,
+            label: 'Provide Prompt',
+            hint: 'Describe what you changed to improve generation',
+          },
+          {
             value: CommitAction.CANCEL,
             label: 'Cancel',
             hint: 'Cancel the commit process',
@@ -87,6 +92,16 @@ describe('ActionSelector', () => {
       expect(result).toBe(expectedAction);
     });
 
+    it('should return PROVIDE_PROMPT when user selects provide prompt action', async () => {
+      const expectedAction: CommitAction = CommitAction.PROVIDE_PROMPT;
+      mockSelect.mockResolvedValue(expectedAction);
+      mockIsCancel.mockReturnValue(false);
+
+      const result = await selectCommitAction();
+
+      expect(result).toBe(expectedAction);
+    });
+
     it('should handle cancel operation when user cancels', async () => {
       mockSelect.mockResolvedValue(undefined);
       mockIsCancel.mockReturnValue(true);
@@ -97,14 +112,14 @@ describe('ActionSelector', () => {
       expect(mockProcessExit).toHaveBeenCalledWith(0);
     });
 
-    it('should provide all four commit action options', async () => {
+    it('should provide all five commit action options', async () => {
       mockSelect.mockResolvedValue(CommitAction.APPROVE);
       mockIsCancel.mockReturnValue(false);
 
       await selectCommitAction();
 
       const options = mockSelect.mock.calls[0][0].options;
-      expect(options).toHaveLength(4);
+      expect(options).toHaveLength(5);
 
       const approveOption = options.find(
         opt => opt.value === CommitAction.APPROVE
@@ -129,6 +144,15 @@ describe('ActionSelector', () => {
         value: CommitAction.REGENERATE,
         label: 'Regenerate',
         hint: 'Generate a new commit message',
+      });
+
+      const providePromptOption = options.find(
+        opt => opt.value === CommitAction.PROVIDE_PROMPT
+      );
+      expect(providePromptOption).toEqual({
+        value: CommitAction.PROVIDE_PROMPT,
+        label: 'Provide Prompt',
+        hint: 'Describe what you changed to improve generation',
       });
 
       const cancelOption = options.find(
@@ -159,6 +183,7 @@ describe('ActionSelector', () => {
         CommitAction.APPROVE,
         CommitAction.EDIT,
         CommitAction.REGENERATE,
+        CommitAction.PROVIDE_PROMPT,
         CommitAction.CANCEL,
       ];
 

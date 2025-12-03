@@ -117,6 +117,7 @@ export class GenerateCommit {
       diff: input.diff,
       status: input.status,
       retryError,
+      userPrompt: input.userPrompt,
     });
   }
 

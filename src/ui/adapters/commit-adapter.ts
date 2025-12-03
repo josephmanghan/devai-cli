@@ -2,6 +2,7 @@ import ora, { Ora } from 'ora';
 
 import { CommitAction, CommitUiPort } from '../../core/index.js';
 import {
+  captureUserPrompt,
   previewMessage,
   selectCommitAction,
   selectCommitType,
@@ -38,5 +39,9 @@ export class CommitAdapter implements CommitUiPort {
       this.spinner.stop();
       this.spinner = null;
     }
+  }
+
+  async captureUserPrompt(): Promise<string> {
+    return await captureUserPrompt();
   }
 }

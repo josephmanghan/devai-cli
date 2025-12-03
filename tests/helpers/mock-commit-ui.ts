@@ -3,11 +3,14 @@ import { CommitAction, CommitUiPort } from '../../src/core/index.js';
 export class MockCommitUi implements CommitUiPort {
   private commitTypeResponse: string = 'feat';
   private commitActionResponse: CommitAction = CommitAction.APPROVE;
+  private userPromptResponse: string = '';
 
   public selectCommitTypeCalled = 0;
   public previewMessageCalled = 0;
   public selectCommitActionCalled = 0;
+  public captureUserPromptCalled = 0;
   public lastPreviewedMessage: string | null = null;
+  public lastCapturedPrompt: string | null = null;
 
   public startThinkingCalled = 0;
   public stopThinkingCalled = 0;
@@ -19,6 +22,10 @@ export class MockCommitUi implements CommitUiPort {
 
   setCommitActionResponse(action: CommitAction): void {
     this.commitActionResponse = action;
+  }
+
+  setUserPromptResponse(prompt: string): void {
+    this.userPromptResponse = prompt;
   }
 
   async selectCommitType(): Promise<string> {
@@ -34,6 +41,12 @@ export class MockCommitUi implements CommitUiPort {
   async selectCommitAction(): Promise<CommitAction> {
     this.selectCommitActionCalled++;
     return this.commitActionResponse;
+  }
+
+  async captureUserPrompt(): Promise<string> {
+    this.captureUserPromptCalled++;
+    this.lastCapturedPrompt = this.userPromptResponse;
+    return this.userPromptResponse;
   }
 
   startThinking(message: string): void {

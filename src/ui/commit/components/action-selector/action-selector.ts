@@ -20,6 +20,11 @@ const ACTION_OPTIONS = [
     hint: 'Generate a new commit message',
   },
   {
+    value: CommitAction.PROVIDE_PROMPT,
+    label: 'Provide Prompt',
+    hint: 'Describe what you changed to improve generation',
+  },
+  {
     value: CommitAction.CANCEL,
     label: 'Cancel',
     hint: 'Cancel the commit process',

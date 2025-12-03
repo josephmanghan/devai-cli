@@ -7,6 +7,7 @@ const demoFiles = [
   'src/ui/commit/components/message-preview/message-preview.demo.ts',
   'src/ui/commit/components/action-selector/action-selector.demo.ts',
   'src/ui/commit/components/type-selector/type-selector.demo.ts',
+  'src/ui/commit/components/prompt-capture/prompt-capture.demo.ts',
 ];
 
 async function runDemo(demoFile: string): Promise<void> {

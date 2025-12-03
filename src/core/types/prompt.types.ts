@@ -6,4 +6,5 @@ export interface PromptParameters {
   readonly diff: string;
   readonly status: string;
   readonly retryError?: string;
+  readonly userPrompt?: string;
 }
