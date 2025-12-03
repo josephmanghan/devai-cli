@@ -53,6 +53,9 @@ describe('Commit Error Paths E2E', () => {
     await expect(controller.execute()).rejects.toThrow(
       'No staged changes found'
     );
+
+    expect(mockCommitUi.startThinkingCalled).toBe(0);
+    expect(mockCommitUi.stopThinkingCalled).toBe(0);
   });
 
   it('should handle user cancel action', async () => {
@@ -94,6 +97,9 @@ describe('Commit Error Paths E2E', () => {
     expect(exitCalled).toBe(true);
     expect(exitCode).toBe(0);
 
+    expect(mockCommitUi.startThinkingCalled).toBe(1);
+    expect(mockCommitUi.stopThinkingCalled).toBe(1);
+
     exitSpy.mockRestore();
   });
 
@@ -121,5 +127,8 @@ describe('Commit Error Paths E2E', () => {
     );
 
     await expect(controller.execute()).rejects.toThrow();
+
+    expect(mockCommitUi.startThinkingCalled).toBe(1);
+    expect(mockCommitUi.stopThinkingCalled).toBe(1);
   });
 });

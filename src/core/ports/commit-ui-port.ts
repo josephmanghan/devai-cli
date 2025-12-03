@@ -22,4 +22,15 @@ export interface CommitUiPort {
    * @returns Selected action (APPROVE, EDIT, REGENERATE, CANCEL)
    */
   selectCommitAction(): Promise<CommitAction>;
+
+  /**
+   * Start thinking/loading spinner with a message.
+   * @param message - The message to display (e.g., "Generating commit message...")
+   */
+  startThinking(message: string): void;
+
+  /**
+   * Stop the currently active thinking/loading spinner.
+   */
+  stopThinking(): void;
 }

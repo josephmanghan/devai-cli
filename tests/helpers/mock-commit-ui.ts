@@ -9,6 +9,10 @@ export class MockCommitUi implements CommitUiPort {
   public selectCommitActionCalled = 0;
   public lastPreviewedMessage: string | null = null;
 
+  public startThinkingCalled = 0;
+  public stopThinkingCalled = 0;
+  public lastThinkingMessage: string | null = null;
+
   setCommitTypeResponse(type: string): void {
     this.commitTypeResponse = type;
   }
@@ -30,5 +34,14 @@ export class MockCommitUi implements CommitUiPort {
   async selectCommitAction(): Promise<CommitAction> {
     this.selectCommitActionCalled++;
     return this.commitActionResponse;
+  }
+
+  startThinking(message: string): void {
+    this.startThinkingCalled++;
+    this.lastThinkingMessage = message;
+  }
+
+  stopThinking(): void {
+    this.stopThinkingCalled++;
   }
 }

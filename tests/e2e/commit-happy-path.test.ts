@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CommitAction } from '../../src/core/types/commit.types.js';
 import { CommitController } from '../../src/features/commit/controllers/commit-controller.js';
@@ -68,6 +68,12 @@ describe('Commit Happy Path E2E', () => {
       'feat: add authentication'
     );
 
+    expect(mockCommitUi.startThinkingCalled).toBe(1);
+    expect(mockCommitUi.stopThinkingCalled).toBe(1);
+    expect(mockCommitUi.lastThinkingMessage).toBe(
+      'Generating commit message...'
+    );
+
     const log = await gitHarness.getLog();
     expect(log).toContain('feat: add authentication module');
 
@@ -132,5 +138,38 @@ describe('Commit Happy Path E2E', () => {
     );
     const statusAfter = await gitHarness.getStatus();
     expect(statusAfter).toContain('?? src/new-file.ts');
+  });
+
+  it('should maintain spinner lifecycle across regeneration', async () => {
+    mockLlmProvider.reset();
+    mockLlmProvider.mockResponse('feat: add authentication module');
+    mockLlmProvider.mockResponse('feat: add enhanced authentication module');
+
+    let callCount = 0;
+    mockCommitUi.selectCommitAction = vi.fn().mockImplementation(async () => {
+      callCount++;
+      return callCount === 1 ? CommitAction.REGENERATE : CommitAction.APPROVE;
+    });
+
+    const gitAdapter = new ShellGitAdapter(repoPath);
+    const editorAdapter = new ShellEditorAdapter();
+
+    const validatePreconditions = new ValidatePreconditions(
+      gitAdapter,
+      mockLlmProvider
+    );
+    const generateCommit = new GenerateCommit(mockLlmProvider);
+    const controller = new CommitController(
+      gitAdapter,
+      editorAdapter,
+      mockCommitUi,
+      validatePreconditions,
+      generateCommit
+    );
+
+    await controller.execute();
+
+    expect(mockCommitUi.startThinkingCalled).toBe(2);
+    expect(mockCommitUi.stopThinkingCalled).toBe(2);
   });
 });

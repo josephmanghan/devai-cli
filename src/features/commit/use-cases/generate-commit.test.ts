@@ -83,8 +83,8 @@ describe('GenerateCommit', () => {
       await expect(generateCommit.execute(validInput)).rejects.toThrow(
         ValidationError
       );
-      expect(mockLlmProvider.generate).toHaveBeenCalledTimes(3);
-      expect(vi.mocked(utils.buildUserPrompt)).toHaveBeenCalledTimes(3);
+      expect(mockLlmProvider.generate).toHaveBeenCalledTimes(5);
+      expect(vi.mocked(utils.buildUserPrompt)).toHaveBeenCalledTimes(5);
     });
 
     it('should propagate SystemError from LlmProvider', async () => {

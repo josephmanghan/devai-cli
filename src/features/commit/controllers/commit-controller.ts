@@ -54,11 +54,11 @@ export class CommitController {
 
       const commitType = await this.ui.selectCommitType();
 
-      const generatedMessage = await this.generateCommit.execute({
-        diff: context.diff,
-        status: context.branch,
-        commitType,
-      });
+      const generatedMessage = await this.generateMessageWithSpinner(
+        context.diff,
+        context.branch,
+        commitType
+      );
 
       await this.ui.previewMessage(generatedMessage);
 
@@ -102,6 +102,26 @@ export class CommitController {
   private async handleEditAction(message: string): Promise<void> {
     const editedMessage = await this.editorPort.edit(message);
     await this.gitPort.commitChanges(editedMessage);
+  }
+
+  private async generateMessageWithSpinner(
+    diff: string,
+    status: string,
+    commitType: string
+  ): Promise<string> {
+    this.ui.startThinking('Generating commit message...');
+    try {
+      const message = await this.generateCommit.execute({
+        diff,
+        status,
+        commitType,
+      });
+      this.ui.stopThinking();
+      return message;
+    } catch (error) {
+      this.ui.stopThinking();
+      throw error;
+    }
   }
 
   private handleError(error: unknown): never {
