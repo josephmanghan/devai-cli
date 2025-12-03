@@ -15,6 +15,7 @@
 ## Lower Priority (Complex Features)
 
 - [ ] **Body Support / Prompting Enhancement**: Get body functionality working and improve prompting side of things (testing in mock repo needed)
+- [ ] **Flaky Test Fix**: Integration test is flaky due to scope introduction - either introduce scope properly or regex remove scopes from commit messages
 - [ ] **Removal reads**: The agent is terrible at seeing in a git diff when lines have been REMOVED. We should rectify this in the system prompt. `gitdiff-reading-instructions.md` should help.
 - [ ] **Add Intent**: Provide greater intent to the agent:
   - [ ] 1. The original plan was to provide <type> to the agent so it has context for prompt. I don't think that made it in. This would hopefully be a slight improvement. Test this before moving on.

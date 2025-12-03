@@ -22,6 +22,7 @@ Rules:
 - Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
 - Description: imperative mood, lowercase, no period, under 50 characters
 - Body: explain WHAT and WHY, not HOW, 1-2 sentences maximum
+- NO SCOPES - Do NOT use parentheses or scopes like (README), (api), etc.
 - NO conversational text, explanations, or markdown formatting
 - Output ONLY the commit message, nothing else
 
@@ -32,7 +33,9 @@ This enables secure user sessions and protects sensitive routes.
 
 fix: resolve memory leak in data processing
 Close database connections properly after query completion.
-Prevents memory growth during long-running batch operations.`
+Prevents memory growth during long-running batch operations.
+
+IMPORTANT: Never use scopes. Always use format "type: description" without parentheses.`
     );
 
     return { ollama, adapter };
@@ -98,6 +101,7 @@ Prevents memory growth during long-running batch operations.`
         stream: false,
       });
 
+      // TODO flaky, scope is being returned sometimes. We may probably need to either introduce scope or regex remove it.
       expect(generateResponse.response).toMatch(/^fix:/);
     }, 120000);
 
