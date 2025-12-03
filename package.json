@@ -1,6 +1,6 @@
 {
   "name": "devai-cli",
-  "version": "0.5.0-rc",
+  "version": "0.5.0",
   "description": "Local-first CLI tool for AI-powered git commit message generation using Ollama",
   "type": "module",
   "bin": {

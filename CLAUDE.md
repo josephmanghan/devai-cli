@@ -1,3 +1,0 @@
-- Challenge the assumptions of the user, do not assume they are correct
-- Use context7 mcp for documentation sources, particularly for Ollama
-- Do not describe your code with comments.
