@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Added
+
+- **Provide Prompt feature**: Added option to provide custom intent to the model during commit generation, allowing users to describe the general context and improve commit message accuracy
+
 ## [0.4.0] - 03/12/2025
 
 ### Added

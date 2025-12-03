@@ -1,15 +1,17 @@
 /**
- * Core types for commit-related functionality
- * Following hexagonal architecture - these types are used across all layers
+ * Available actions for commit message workflow
  */
-
 export enum CommitAction {
   APPROVE = 'APPROVE',
   EDIT = 'EDIT',
   REGENERATE = 'REGENERATE',
+  PROVIDE_PROMPT = 'PROVIDE_PROMPT',
   CANCEL = 'CANCEL',
 }
 
+/**
+ * Available conventional commit types
+ */
 export type CommitType =
   | 'feat'
   | 'fix'
@@ -23,6 +25,9 @@ export type CommitType =
   | 'chore'
   | 'revert';
 
+/**
+ * Array of all supported commit types
+ */
 export const COMMIT_TYPES: readonly CommitType[] = [
   'feat',
   'fix',
@@ -37,6 +42,9 @@ export const COMMIT_TYPES: readonly CommitType[] = [
   'revert',
 ] as const;
 
+/**
+ * Human-readable descriptions for each commit type
+ */
 export const COMMIT_TYPE_DESCRIPTIONS: Record<CommitType, string> = {
   feat: 'A new feature',
   fix: 'A bug fix',
@@ -51,3 +59,13 @@ export const COMMIT_TYPE_DESCRIPTIONS: Record<CommitType, string> = {
   chore: "Other changes that don't modify src or test files",
   revert: 'Reverts a previous commit',
 } as const;
+
+/**
+ * Input parameters for commit generation use case
+ */
+export interface GenerateCommitInput {
+  readonly commitType: string;
+  readonly diff: string;
+  readonly status: string;
+  readonly userPrompt?: string;
+}

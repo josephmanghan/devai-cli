@@ -12,6 +12,9 @@ import {
 } from '../../../core/index.js';
 import { GenerateCommit, ValidatePreconditions } from '../index.js';
 
+/**
+ * Controller for the commit workflow
+ */
 export class CommitController {
   private stageAll = false;
 
@@ -91,6 +94,9 @@ export class CommitController {
       case CommitAction.REGENERATE:
         return async () => await this.execute(this.stageAll);
 
+      case CommitAction.PROVIDE_PROMPT:
+        return async (msg: string) => await this.handleProvidePromptAction(msg);
+
       case CommitAction.CANCEL:
         return async () => process.exit(0);
 
@@ -104,24 +110,82 @@ export class CommitController {
     await this.gitPort.commitChanges(editedMessage);
   }
 
+  private async handleProvidePromptAction(
+    currentMessage: string
+  ): Promise<void> {
+    try {
+      const newMessage = await this.generateNewMessageWithUserPrompt();
+      await this.continueWorkflowWithMessage(newMessage);
+    } catch {
+      await this.continueWorkflowWithMessage(currentMessage);
+    }
+  }
+
+  private async generateNewMessageWithUserPrompt(): Promise<string> {
+    const userPrompt = await this.ui.captureUserPrompt();
+    const context = await this.validatePreconditions.execute();
+    const commitType = await this.ui.selectCommitType();
+
+    return await this.generateMessageWithUserPrompt(
+      context.diff,
+      context.branch,
+      commitType,
+      userPrompt
+    );
+  }
+
+  private async continueWorkflowWithMessage(message: string): Promise<void> {
+    await this.ui.previewMessage(message);
+    const action = await this.ui.selectCommitAction();
+    await this.handleCommitAction(action, message);
+  }
+
+  private async generateMessageWithUserPrompt(
+    diff: string,
+    status: string,
+    commitType: string,
+    userPrompt: string
+  ): Promise<string> {
+    return await this.withSpinner(
+      'Generating commit message with your context...',
+      async () => {
+        return await this.generateCommit.execute({
+          diff,
+          status,
+          commitType,
+          userPrompt,
+        });
+      }
+    );
+  }
+
+  private async withSpinner<T>(
+    message: string,
+    operation: () => Promise<T>
+  ): Promise<T> {
+    this.ui.startThinking(message);
+    try {
+      const result = await operation();
+      this.ui.stopThinking();
+      return result;
+    } catch (error) {
+      this.ui.stopThinking();
+      throw error;
+    }
+  }
+
   private async generateMessageWithSpinner(
     diff: string,
     status: string,
     commitType: string
   ): Promise<string> {
-    this.ui.startThinking('Generating commit message...');
-    try {
-      const message = await this.generateCommit.execute({
+    return await this.withSpinner('Generating commit message...', async () => {
+      return await this.generateCommit.execute({
         diff,
         status,
         commitType,
       });
-      this.ui.stopThinking();
-      return message;
-    } catch (error) {
-      this.ui.stopThinking();
-      throw error;
-    }
+    });
   }
 
   private handleError(error: unknown): never {

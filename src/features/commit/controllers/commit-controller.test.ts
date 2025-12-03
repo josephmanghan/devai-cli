@@ -58,6 +58,7 @@ describe('CommitController', () => {
       selectCommitAction: vi.fn().mockResolvedValue(CommitAction.APPROVE),
       startThinking: vi.fn(),
       stopThinking: vi.fn(),
+      captureUserPrompt: vi.fn().mockResolvedValue('User provided context'),
     } satisfies CommitUiPort;
 
     mockValidatePreconditions = {
