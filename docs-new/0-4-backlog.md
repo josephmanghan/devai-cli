@@ -4,8 +4,8 @@
 
 - [x] **Test Verification**: Double check that tests prove that setup delete and then recreate model
 - [x] **Spinner**: Add spinner on generating output
-- [ ] **Error Message Bug Fix**: Update outdated "[R]egenerate [E]dit manually [C]ancel" messages in generate-commit.ts and generate-commit.test.ts that reference old UI pattern instead of new Commander Select action selector (action-selector.ts)
-- [ ] **Configuration Conflict Bug**: GenerateCommit class has hardcoded default parameters that conflict with CONVENTIONAL_COMMIT_MODEL_CONFIG
+- [x] **Error Message Bug Fix**: Update outdated "[R]egenerate [E]dit manually [C]ancel" messages in generate-commit.ts and generate-commit.test.ts that reference old UI pattern instead of new Commander Select action selector (action-selector.ts)
+- [x] **Configuration Conflict Bug**: GenerateCommit class has hardcoded default parameters that conflict with CONVENTIONAL_COMMIT_MODEL_CONFIG
 
 ## Medium Priority (Implementation Tasks)
 
@@ -15,7 +15,10 @@
 ## Lower Priority (Complex Features)
 
 - [ ] **Body Support / Prompting Enhancement**: Get body functionality working and improve prompting side of things (testing in mock repo needed)
-- [ ] **Removal reads**: The agent is terrible at seeing in a git diff when lines have been REMOVED. We should rectify this in the system prompt.
+- [ ] **Removal reads**: The agent is terrible at seeing in a git diff when lines have been REMOVED. We should rectify this in the system prompt. `gitdiff-reading-instructions.md` should help.
+- [ ] **Add Intent**: Provide greater intent to the agent:
+  - [ ] 1. The original plan was to provide <type> to the agent so it has context for prompt. I don't think that made it in. This would hopefully be a slight improvement. Test this before moving on.
+  - [ ] 2. On the Commander.select() options for edit/refenerate etc, we should offer another solution for Provide Prompt (name to be decided). This lets you describe to the agent the general idea so that you can interact with the agent to an extent to inform it of what happened. This would eradicate - hopefully - some issues around e.g. when it reads jsdocs as actual code changes.
 
 ## Development Notes
 
@@ -80,35 +83,50 @@
 
 ### Error Message Bug Fix
 
-- **Status**: 🔄 Pending
-- **Bug Report**: Failed to generate valid commit message after maximum attempts error shows outdated "[R]egenerate [E]dit manually [C]ancel" text
-- **Root Cause**: Error messages in generate-commit.ts:33-34, 39-40, 62-63, 107-109, 117-120 still reference old UI pattern
-- **Files Affected**:
-  - `src/features/commit/use-cases/generate-commit.ts` - contains outdated error messages
-  - `src/features/commit/use-cases/generate-commit.test.ts` - tests expect old error message format
-  - `src/ui/commit/components/action-selector/action-selector.ts` - reference for new Commander Select implementation
-- **Fix Required**: Replace old error messages with proper reference to new action selector approach
+- **Status**: ✅ Completed (2025-12-03)
+- **Implementation Complete**: ✅
+- **Architecture**: Clean error messages updated to reflect modern action selector UI
+- **Key Changes Implemented**:
+  - **Removed Outdated UI References**: Eliminated "[R]egenerate [E]dit manually [C]ancel" text from all ValidationError instances
+  - **Simplified Error Messages**: Cleaned up error messages to focus on core validation issues without UI pattern references
+  - **Updated Test Cases**: Modified corresponding test expectations to match new error format
+  - **Maintained Functionality**: All validation logic preserved while removing outdated UI hints
+- **Files Modified**:
+  - `src/features/commit/use-cases/generate-commit.ts` - Updated 3 ValidationError instances to remove old UI pattern references
+  - `src/features/commit/use-cases/generate-commit.test.ts` - Updated 2 test cases to expect new error message format
+  - `src/ui/commit/components/action-selector/action-selector.ts` - Reference for new Commander Select implementation (unchanged)
+- **Error Message Changes**:
+  - Empty commit type validation: Now uses clean message without UI hint
+  - Empty git diff validation: Now uses clean message without UI hint
+  - Maximum retries exceeded: Now uses clean message without UI hint
+- **Verification**: All 305 tests passing, build successful, proper error handling maintained
+- **User Experience**: Error messages are now consistent with modern action selector interface that provides "Approve", "Edit", "Regenerate", "Cancel" options via Commander Select
 
 ### Configuration Conflict Bug
 
-- **Status**: 🔄 Pending
-- **Bug Report**: GenerateCommit class ignores CONVENTIONAL_COMMIT_MODEL_CONFIG and uses hardcoded defaults across multiple dimensions
-- **Root Cause**: generate-commit.ts:16-20 defines DEFAULT_GENERATION_OPTIONS with hardcoded values that completely override the proper configuration
-- **Configuration Space Problems**:
-  - **Model Selection**: Uses base model 'qwen2.5-coder:1.5b' instead of custom 'devai-cli-commit:latest' model
-  - **System Prompt**: Bypasses specialized conventional commit system prompt created during setup
-  - **Generation Parameters**: Uses temperature: 0.3, num_ctx: 10000 instead of temperature: 0.2, num_ctx: 131072
-  - **Resource Management**: Missing keep_alive: 0 parameter, causing models to remain loaded in memory
-- **Two Configuration Contexts**:
-  - **Model Creation** (working): CONVENTIONAL_COMMIT_MODEL_CONFIG used for creating custom model with specialized system prompt
-  - **Generation** (broken): GenerateCommit ignores config and uses hardcoded defaults for base model
-- **Expected Behavior**: Should use custom 'devai-cli-commit:latest' model with CONVENTIONAL_COMMIT_MODEL_CONFIG parameters (temperature: 0.2, num_ctx: 131072, keep_alive: 0)
-- **Files Affected**:
-  - `src/features/commit/use-cases/generate-commit.ts` - contains hardcoded DEFAULT_GENERATION_OPTIONS
-  - `src/infrastructure/config/conventional-commit-model.config.ts` - proper configuration not being utilized
-- **Validation**: Test at src/infrastructure/adapters/ollama/ollama-adapter.test.ts:533-541 proves keep_alive: 0 mechanism works when passed correctly
+- **Status**: ✅ Completed (2025-12-03)
+- **Implementation Complete**: ✅
+- **Architecture**: Dependency injection pattern implemented - configuration is now explicitly injected into GenerateCommit use case
+- **Key Changes Implemented**:
+  - **Type System Refactoring**: `OllamaModelConfig` now extends `GenerationOptions` to eliminate duplication between model creation and runtime parameters
+  - **Configuration Flattening**: Removed nested `parameters` object - all generation parameters are now top-level fields
+  - **Dependency Injection**: GenerateCommit constructor now accepts `OllamaModelConfig` and uses injected values instead of hardcoded defaults
+  - **Adapter Cleanup**: Removed `parameters` constructor parameter from OllamaAdapter since runtime parameters are passed explicitly
+  - **Composition Root Update**: Updated main.ts to inject config into GenerateCommit instance
+- **Files Modified**:
+  - `src/core/types/llm-types.ts` - Made OllamaModelConfig extend GenerationOptions
+  - `src/infrastructure/config/conventional-commit-model.config.ts` - Flattened config structure
+  - `src/features/commit/use-cases/generate-commit.ts` - Removed hardcoded defaults, added config injection
+  - `src/infrastructure/adapters/ollama/ollama-adapter.ts` - Removed parameters constructor argument
+  - `src/main.ts` - Updated composition root to inject config
+  - **Tests**: Updated all test files to use new flattened config structure and verify DI behavior
+- **Configuration Flow**:
+  - Model Creation: Uses custom 'devai-cli-commit:latest' with baked-in system prompt
+  - Runtime Generation: Uses injected config parameters (model: 'devai-cli-commit:latest', temperature: 0.2, num_ctx: 131072, keep_alive: 0)
+- **Verification**: All tests passing, proper resource management with keep_alive: 0 ensures models unload immediately after generation
 
 ### Body Support / Prompting Enhancement
 
 - **Status**: 🔄 Pending
 - **Notes**: Get body functionality working and improve prompting side of things (testing in mock repo needed)
+- **System Prompt Architecture**: Consider implementing prompt structure validation tool and strengthening system prompt following Anthropic best practices (persona, context, reasoning, task) - particularly relevant when adding git diff understanding improvements

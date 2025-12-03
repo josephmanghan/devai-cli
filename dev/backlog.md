@@ -1,4 +1,5 @@
 2. We could do with providing some form of intent to the agent
+   1. On this note, I'm not convinced that the type is being provided within the prompt
 3. It's not reading git diff very well, tends to read deletion as removal
 4. Editor SAVES when you EXIT. I think we probably need a confirm button.
 5. It's terrible at reading REMOVAL in general
