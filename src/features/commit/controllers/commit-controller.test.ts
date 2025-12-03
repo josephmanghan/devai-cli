@@ -56,6 +56,8 @@ describe('CommitController', () => {
       selectCommitType: vi.fn().mockResolvedValue(commitType),
       previewMessage: vi.fn().mockResolvedValue(undefined),
       selectCommitAction: vi.fn().mockResolvedValue(CommitAction.APPROVE),
+      startThinking: vi.fn(),
+      stopThinking: vi.fn(),
     } satisfies CommitUiPort;
 
     mockValidatePreconditions = {
@@ -190,6 +192,68 @@ describe('CommitController', () => {
       mockGitPort.stageAllChanges = vi.fn().mockRejectedValue(error);
 
       await expect(controller.execute(true)).rejects.toThrow(UserError);
+    });
+  });
+
+  describe('Spinner Lifecycle', () => {
+    it('should start spinner before generateCommit and stop after success', async () => {
+      await controller.execute();
+
+      expect(mockUi.startThinking).toHaveBeenCalledWith(
+        'Generating commit message...'
+      );
+      expect(mockUi.startThinking).toHaveBeenCalledBefore(
+        mockGenerateCommit.execute as ReturnType<typeof vi.fn>
+      );
+      expect(mockUi.stopThinking).toHaveBeenCalledAfter(
+        mockGenerateCommit.execute as ReturnType<typeof vi.fn>
+      );
+      expect(mockUi.stopThinking).toHaveBeenCalledTimes(1);
+    });
+
+    it('should stop spinner after generateCommit error', async () => {
+      const error = new SystemError('LLM generation failed', 'Check Ollama');
+      mockGenerateCommit.execute = vi.fn().mockRejectedValue(error);
+
+      await expect(controller.execute()).rejects.toThrow(SystemError);
+
+      expect(mockUi.startThinking).toHaveBeenCalledWith(
+        'Generating commit message...'
+      );
+      expect(mockUi.stopThinking).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not start spinner on validation error', async () => {
+      const error = new UserError('Invalid diff', 'Check files');
+      mockValidatePreconditions.execute = vi.fn().mockRejectedValue(error);
+
+      await expect(controller.execute()).rejects.toThrow(UserError);
+
+      expect(mockUi.startThinking).not.toHaveBeenCalled();
+      expect(mockUi.stopThinking).not.toHaveBeenCalled();
+    });
+
+    it('should handle spinner lifecycle during REGENERATE action', async () => {
+      mockUi.selectCommitAction = vi
+        .fn()
+        .mockResolvedValueOnce(CommitAction.REGENERATE)
+        .mockResolvedValueOnce(CommitAction.APPROVE);
+
+      await controller.execute();
+
+      expect(mockUi.startThinking).toHaveBeenCalledTimes(2);
+      expect(mockUi.stopThinking).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle spinner lifecycle for CANCEL action', async () => {
+      mockUi.selectCommitAction = vi
+        .fn()
+        .mockResolvedValue(CommitAction.CANCEL);
+
+      await expect(controller.execute()).rejects.toThrow();
+
+      expect(mockUi.startThinking).toHaveBeenCalledTimes(1);
+      expect(mockUi.stopThinking).toHaveBeenCalledTimes(1);
     });
   });
 });

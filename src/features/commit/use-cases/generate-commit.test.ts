@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { LlmPort, SystemError, ValidationError } from '../../../core/index.js';
+import {
+  LlmPort,
+  OllamaModelConfig,
+  SystemError,
+  ValidationError,
+} from '../../../core/index.js';
 import * as utils from '../utils/index.js';
 import { GenerateCommit } from './generate-commit.js';
 
@@ -16,11 +21,20 @@ describe('GenerateCommit', () => {
     generate: vi.fn(),
   } satisfies LlmPort;
 
+  const mockConfig = {
+    model: 'custom-model:latest',
+    keep_alive: 0,
+    temperature: 0.2,
+    num_ctx: 131072,
+    baseModel: 'qwen2.5-coder:1.5b',
+    systemPrompt: 'Test prompt',
+  } satisfies OllamaModelConfig;
+
   let generateCommit: GenerateCommit;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    generateCommit = new GenerateCommit(mockLlmProvider);
+    generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
     vi.mocked(utils.buildUserPrompt).mockReturnValue('mock prompt');
     vi.mocked(utils.validateStructure).mockReturnValue({ isValid: true });
     vi.mocked(utils.enforceType).mockImplementation(msg => msg);
@@ -43,9 +57,10 @@ describe('GenerateCommit', () => {
 
       expect(result).toBe('feat: Add new feature');
       expect(mockLlmProvider.generate).toHaveBeenCalledWith('mock prompt', {
-        model: 'qwen2.5-coder:1.5b',
-        temperature: 0.3,
-        num_ctx: 10000,
+        model: 'custom-model:latest',
+        keep_alive: 0,
+        temperature: 0.2,
+        num_ctx: 131072,
       });
     });
 
@@ -83,8 +98,8 @@ describe('GenerateCommit', () => {
       await expect(generateCommit.execute(validInput)).rejects.toThrow(
         ValidationError
       );
-      expect(mockLlmProvider.generate).toHaveBeenCalledTimes(3);
-      expect(vi.mocked(utils.buildUserPrompt)).toHaveBeenCalledTimes(3);
+      expect(mockLlmProvider.generate).toHaveBeenCalledTimes(5);
+      expect(vi.mocked(utils.buildUserPrompt)).toHaveBeenCalledTimes(5);
     });
 
     it('should propagate SystemError from LlmProvider', async () => {
@@ -103,10 +118,7 @@ describe('GenerateCommit', () => {
       const invalidInput = { ...validInput, commitType: '' };
 
       await expect(generateCommit.execute(invalidInput)).rejects.toThrow(
-        new ValidationError(
-          'Commit type cannot be empty',
-          '[R]egenerate [E]dit manually [C]ancel'
-        )
+        new ValidationError('Commit type cannot be empty')
       );
     });
 
@@ -114,10 +126,7 @@ describe('GenerateCommit', () => {
       const invalidInput = { ...validInput, diff: '' };
 
       await expect(generateCommit.execute(invalidInput)).rejects.toThrow(
-        new ValidationError(
-          'Git diff cannot be empty',
-          '[R]egenerate [E]dit manually [C]ancel'
-        )
+        new ValidationError('Git diff cannot be empty')
       );
     });
 

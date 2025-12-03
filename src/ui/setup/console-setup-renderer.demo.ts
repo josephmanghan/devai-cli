@@ -13,7 +13,9 @@ const mockConfig: OllamaModelConfig = {
   model: 'devai-cli-commit:latest',
   baseModel: 'qwen2.5-coder:1.5b',
   systemPrompt: '...',
-  parameters: { temperature: 0.2, num_ctx: 1000, keep_alive: 0 },
+  temperature: 0.2,
+  num_ctx: 1000,
+  keep_alive: 0,
 };
 
 async function runDemo() {

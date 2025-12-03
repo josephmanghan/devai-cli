@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CommitAction } from '../../src/core/types/commit.types.js';
+import { CommitAction, OllamaModelConfig } from '../../src/core/types/index.js';
 import { CommitController } from '../../src/features/commit/controllers/commit-controller.js';
 import {
   GenerateCommit,
@@ -17,6 +17,15 @@ describe('Commit Happy Path E2E', () => {
   let mockLlmProvider: MockLlmProvider;
   let mockCommitUi: MockCommitUi;
   let repoPath: string;
+
+  const mockConfig: OllamaModelConfig = {
+    model: 'test-model:latest',
+    baseModel: 'qwen2.5-coder:1.5b',
+    systemPrompt: 'Test prompt',
+    temperature: 0.2,
+    num_ctx: 131072,
+    keep_alive: 0,
+  };
 
   beforeEach(async () => {
     gitHarness = new TestGitHarness();
@@ -49,7 +58,7 @@ describe('Commit Happy Path E2E', () => {
       gitAdapter,
       mockLlmProvider
     );
-    const generateCommit = new GenerateCommit(mockLlmProvider);
+    const generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
 
     const controller = new CommitController(
       gitAdapter,
@@ -66,6 +75,12 @@ describe('Commit Happy Path E2E', () => {
     expect(mockCommitUi.selectCommitActionCalled).toBe(1);
     expect(mockCommitUi.lastPreviewedMessage).toContain(
       'feat: add authentication'
+    );
+
+    expect(mockCommitUi.startThinkingCalled).toBe(1);
+    expect(mockCommitUi.stopThinkingCalled).toBe(1);
+    expect(mockCommitUi.lastThinkingMessage).toBe(
+      'Generating commit message...'
     );
 
     const log = await gitHarness.getLog();
@@ -87,7 +102,7 @@ describe('Commit Happy Path E2E', () => {
       gitAdapter,
       mockLlmProvider
     );
-    const generateCommit = new GenerateCommit(mockLlmProvider);
+    const generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
 
     const controller = new CommitController(
       gitAdapter,
@@ -111,7 +126,7 @@ describe('Commit Happy Path E2E', () => {
       gitAdapter,
       mockLlmProvider
     );
-    const generateCommit = new GenerateCommit(mockLlmProvider);
+    const generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
 
     const controller = new CommitController(
       gitAdapter,
@@ -132,5 +147,38 @@ describe('Commit Happy Path E2E', () => {
     );
     const statusAfter = await gitHarness.getStatus();
     expect(statusAfter).toContain('?? src/new-file.ts');
+  });
+
+  it('should maintain spinner lifecycle across regeneration', async () => {
+    mockLlmProvider.reset();
+    mockLlmProvider.mockResponse('feat: add authentication module');
+    mockLlmProvider.mockResponse('feat: add enhanced authentication module');
+
+    let callCount = 0;
+    mockCommitUi.selectCommitAction = vi.fn().mockImplementation(async () => {
+      callCount++;
+      return callCount === 1 ? CommitAction.REGENERATE : CommitAction.APPROVE;
+    });
+
+    const gitAdapter = new ShellGitAdapter(repoPath);
+    const editorAdapter = new ShellEditorAdapter();
+
+    const validatePreconditions = new ValidatePreconditions(
+      gitAdapter,
+      mockLlmProvider
+    );
+    const generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
+    const controller = new CommitController(
+      gitAdapter,
+      editorAdapter,
+      mockCommitUi,
+      validatePreconditions,
+      generateCommit
+    );
+
+    await controller.execute();
+
+    expect(mockCommitUi.startThinkingCalled).toBe(2);
+    expect(mockCommitUi.stopThinkingCalled).toBe(2);
   });
 });

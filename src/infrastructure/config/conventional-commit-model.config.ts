@@ -32,9 +32,7 @@ Prevents memory growth during long-running batch operations.
 refactor: extract validation logic to service layer
 Move input validation from controllers to dedicated service.
 Improves code reusability and simplifies controller logic.`,
-  parameters: {
-    temperature: 0.2,
-    num_ctx: 131072,
-    keep_alive: 0,
-  },
+  temperature: 0.2,
+  num_ctx: 131072,
+  keep_alive: 0,
 };

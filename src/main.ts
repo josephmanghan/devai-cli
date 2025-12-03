@@ -40,8 +40,7 @@ function createOllamaAdapter(modelConfig: OllamaModelConfig): OllamaAdapter {
   return new OllamaAdapter(
     ollamaClient,
     modelConfig.baseModel,
-    modelConfig.systemPrompt,
-    modelConfig.parameters
+    modelConfig.systemPrompt
   );
 }
 
@@ -60,7 +59,8 @@ export function createCommitCommand(
     gitAdapter,
     ollamaAdapter
   );
-  const generateCommit = new GenerateCommit(ollamaAdapter);
+
+  const generateCommit = new GenerateCommit(ollamaAdapter, modelConfig);
 
   return new CommitController(
     gitAdapter,

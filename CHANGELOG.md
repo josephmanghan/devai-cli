@@ -1,3 +1,15 @@
+## [0.4.0] - 03/12/2025
+
+### Added
+
+- **Spinner functionality**: Visual feedback during commit message generation to improve user experience
+- **Post-install notification**: Added npm postinstall script to guide users to run `devai-cli setup` after installation or upgrade
+
+### Fixed
+
+- **Error message consistency**: Updated outdated UI pattern references in validation error messages to match modern Commander Select interface
+- **Configuration conflicts**: Resolved hardcoded default parameters in GenerateCommit class that conflicted with CONVENTIONAL_COMMIT_MODEL_CONFIG by implementing dependency injection pattern
+
 ## [0.3.0] - 02/12/2025
 
 ### Added

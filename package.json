@@ -1,6 +1,6 @@
 {
   "name": "devai-cli",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Local-first CLI tool for AI-powered git commit message generation using Ollama",
   "type": "module",
   "bin": {
@@ -30,9 +30,10 @@
     "pr": "npm run format && npm run lint && npm run typecheck && npm run test && npm run build",
     "pr:lite": "npm run format && npm run lint && npm run typecheck && npm run test:unit && npm run build",
     "validate:setup": "tsx scripts/validate-setup.ts",
-    "build:link": "npm run build && npm link",
+    "build:link": "devai-cli setup && npm run build && npm link",
     "unlink": "npm unlink devai-cli",
-    "release:prep": "rm -rf dev docs .prompt-assets"
+    "release:prep": "rm -rf dev docs .prompt-assets",
+    "postinstall": "echo '✅ devai-cli installed! Run \"devai-cli setup\" to complete configuration.'"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

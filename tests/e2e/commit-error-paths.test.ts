@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CommitAction, UserError } from '../../src/core/index.js';
+import {
+  CommitAction,
+  OllamaModelConfig,
+  UserError,
+} from '../../src/core/index.js';
 import { CommitController } from '../../src/features/commit/controllers/commit-controller.js';
 import {
   GenerateCommit,
@@ -17,6 +21,15 @@ describe('Commit Error Paths E2E', () => {
   let mockLlmProvider: MockLlmProvider;
   let mockCommitUi: MockCommitUi;
   let repoPath: string;
+
+  const mockConfig: OllamaModelConfig = {
+    model: 'test-model:latest',
+    baseModel: 'qwen2.5-coder:1.5b',
+    systemPrompt: 'Test prompt',
+    temperature: 0.2,
+    num_ctx: 131072,
+    keep_alive: 0,
+  };
 
   beforeEach(async () => {
     gitHarness = new TestGitHarness();
@@ -39,7 +52,7 @@ describe('Commit Error Paths E2E', () => {
       gitAdapter,
       mockLlmProvider
     );
-    const generateCommit = new GenerateCommit(mockLlmProvider);
+    const generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
 
     const controller = new CommitController(
       gitAdapter,
@@ -53,6 +66,9 @@ describe('Commit Error Paths E2E', () => {
     await expect(controller.execute()).rejects.toThrow(
       'No staged changes found'
     );
+
+    expect(mockCommitUi.startThinkingCalled).toBe(0);
+    expect(mockCommitUi.stopThinkingCalled).toBe(0);
   });
 
   it('should handle user cancel action', async () => {
@@ -80,7 +96,7 @@ describe('Commit Error Paths E2E', () => {
       gitAdapter,
       mockLlmProvider
     );
-    const generateCommit = new GenerateCommit(mockLlmProvider);
+    const generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
 
     const controller = new CommitController(
       gitAdapter,
@@ -93,6 +109,9 @@ describe('Commit Error Paths E2E', () => {
     await expect(controller.execute()).rejects.toThrow();
     expect(exitCalled).toBe(true);
     expect(exitCode).toBe(0);
+
+    expect(mockCommitUi.startThinkingCalled).toBe(1);
+    expect(mockCommitUi.stopThinkingCalled).toBe(1);
 
     exitSpy.mockRestore();
   });
@@ -110,7 +129,7 @@ describe('Commit Error Paths E2E', () => {
       gitAdapter,
       mockLlmProvider
     );
-    const generateCommit = new GenerateCommit(mockLlmProvider);
+    const generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
 
     const controller = new CommitController(
       gitAdapter,
@@ -121,5 +140,8 @@ describe('Commit Error Paths E2E', () => {
     );
 
     await expect(controller.execute()).rejects.toThrow();
+
+    expect(mockCommitUi.startThinkingCalled).toBe(1);
+    expect(mockCommitUi.stopThinkingCalled).toBe(1);
   });
 });
