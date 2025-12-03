@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CommitAction } from '../../src/core/types/commit.types.js';
+import { CommitAction, OllamaModelConfig } from '../../src/core/types/index.js';
 import { CommitController } from '../../src/features/commit/controllers/commit-controller.js';
 import {
   GenerateCommit,
@@ -17,6 +17,15 @@ describe('Commit Happy Path E2E', () => {
   let mockLlmProvider: MockLlmProvider;
   let mockCommitUi: MockCommitUi;
   let repoPath: string;
+
+  const mockConfig: OllamaModelConfig = {
+    model: 'test-model:latest',
+    baseModel: 'qwen2.5-coder:1.5b',
+    systemPrompt: 'Test prompt',
+    temperature: 0.2,
+    num_ctx: 131072,
+    keep_alive: 0,
+  };
 
   beforeEach(async () => {
     gitHarness = new TestGitHarness();
@@ -49,7 +58,7 @@ describe('Commit Happy Path E2E', () => {
       gitAdapter,
       mockLlmProvider
     );
-    const generateCommit = new GenerateCommit(mockLlmProvider);
+    const generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
 
     const controller = new CommitController(
       gitAdapter,
@@ -93,7 +102,7 @@ describe('Commit Happy Path E2E', () => {
       gitAdapter,
       mockLlmProvider
     );
-    const generateCommit = new GenerateCommit(mockLlmProvider);
+    const generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
 
     const controller = new CommitController(
       gitAdapter,
@@ -117,7 +126,7 @@ describe('Commit Happy Path E2E', () => {
       gitAdapter,
       mockLlmProvider
     );
-    const generateCommit = new GenerateCommit(mockLlmProvider);
+    const generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
 
     const controller = new CommitController(
       gitAdapter,
@@ -158,7 +167,7 @@ describe('Commit Happy Path E2E', () => {
       gitAdapter,
       mockLlmProvider
     );
-    const generateCommit = new GenerateCommit(mockLlmProvider);
+    const generateCommit = new GenerateCommit(mockLlmProvider, mockConfig);
     const controller = new CommitController(
       gitAdapter,
       editorAdapter,

@@ -1,7 +1,7 @@
 import {
   GenerateCommitInput,
-  GenerationOptions,
   LlmPort,
+  OllamaModelConfig,
   ValidationError,
 } from '../../../core/index.js';
 import {
@@ -17,13 +17,11 @@ import {
  */
 export class GenerateCommit {
   private readonly MAX_RETRIES = 5;
-  private readonly DEFAULT_GENERATION_OPTIONS: GenerationOptions = {
-    model: 'qwen2.5-coder:1.5b',
-    temperature: 0.3,
-    num_ctx: 10000,
-  };
 
-  constructor(private readonly llmProvider: LlmPort) {}
+  constructor(
+    private readonly llmProvider: LlmPort,
+    private readonly config: OllamaModelConfig
+  ) {}
 
   /**
    * Executes the commit message generation process.
@@ -101,10 +99,15 @@ export class GenerateCommit {
     retryError?: string
   ): Promise<string> {
     const prompt = this.buildPrompt(input, retryError);
-    const rawResponse = await this.llmProvider.generate(
-      prompt,
-      this.DEFAULT_GENERATION_OPTIONS
-    );
+
+    // Pass all parameters explicitly from injected config
+    const rawResponse = await this.llmProvider.generate(prompt, {
+      model: this.config.model,
+      keep_alive: this.config.keep_alive,
+      temperature: this.config.temperature,
+      num_ctx: this.config.num_ctx,
+    });
+
     return this.processResponse(rawResponse, input.commitType);
   }
 

@@ -36,7 +36,9 @@ describe('Setup Command Business Logic Integration Tests', () => {
     model: 'test-devai-cli:latest',
     baseModel: 'smollm:135m',
     systemPrompt: 'Test prompt for integration testing',
-    parameters: { temperature: 0.2, num_ctx: 2048, keep_alive: 0 },
+    temperature: 0.2,
+    num_ctx: 2048,
+    keep_alive: 0,
   };
 
   beforeEach(async () => {
@@ -44,8 +46,7 @@ describe('Setup Command Business Logic Integration Tests', () => {
     testAdapter = new OllamaAdapter(
       ollamaClient,
       testConfig.baseModel,
-      testConfig.systemPrompt,
-      testConfig.parameters
+      testConfig.systemPrompt
     );
   });
 

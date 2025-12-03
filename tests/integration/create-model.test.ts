@@ -32,12 +32,7 @@ This enables secure user sessions and protects sensitive routes.
 
 fix: resolve memory leak in data processing
 Close database connections properly after query completion.
-Prevents memory growth during long-running batch operations.`,
-      {
-        temperature: 0.2,
-        num_ctx: 131072,
-        keep_alive: 0,
-      }
+Prevents memory growth during long-running batch operations.`
     );
 
     return { ollama, adapter };

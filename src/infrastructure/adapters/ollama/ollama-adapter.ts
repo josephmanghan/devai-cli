@@ -19,13 +19,11 @@ export class OllamaAdapter implements LlmPort {
    * @param ollamaClient - The Ollama SDK client instance
    * @param baseModel - Optional base model for custom model creation
    * @param systemPrompt - Optional system prompt for custom model creation
-   * @param parameters - Optional model parameters for custom model creation
    */
   constructor(
     private readonly ollamaClient: Ollama,
     private readonly baseModel?: string,
-    private readonly systemPrompt?: string,
-    private readonly parameters?: Record<string, unknown>
+    private readonly systemPrompt?: string
   ) {}
 
   /**
@@ -219,7 +217,6 @@ export class OllamaAdapter implements LlmPort {
         model: modelName,
         from: this.baseModel,
         system: this.systemPrompt,
-        parameters: this.parameters,
         stream: true as const,
       });
     } catch (error) {

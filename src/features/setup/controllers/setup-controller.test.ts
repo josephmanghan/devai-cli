@@ -14,7 +14,9 @@ function createMockModelConfig(): OllamaModelConfig {
     model: 'test-model:latest',
     baseModel: 'test-base:latest',
     systemPrompt: 'Test prompt',
-    parameters: { temperature: 0.1, num_ctx: 1000, keep_alive: 0 },
+    temperature: 0.1,
+    num_ctx: 1000,
+    keep_alive: 0,
   };
 }
 

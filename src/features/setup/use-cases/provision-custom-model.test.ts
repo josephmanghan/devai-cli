@@ -39,7 +39,9 @@ describe('ProvisionCustomModel', () => {
     model: 'devai-cli-commit:latest',
     baseModel: 'qwen2.5-coder:1.5b',
     systemPrompt: 'Test system prompt',
-    parameters: { temperature: 0.2, num_ctx: 2048, keep_alive: 5 },
+    temperature: 0.2,
+    num_ctx: 2048,
+    keep_alive: 5,
   };
 
   beforeEach(() => {

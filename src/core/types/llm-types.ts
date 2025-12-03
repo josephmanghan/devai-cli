@@ -28,18 +28,19 @@ export interface GenerationOptions {
 }
 
 /**
- * Configuration for creating custom Ollama models.
- * Defines model parameters and behavioral characteristics.
+ * Configuration for creating and using custom Ollama models.
+ * Extends GenerationOptions with model creation metadata.
  */
-export interface OllamaModelConfig {
-  readonly model: string;
+export interface OllamaModelConfig extends GenerationOptions {
+  /**
+   * Base model identifier to create the custom model from.
+   */
   readonly baseModel: string;
+
+  /**
+   * System prompt to be baked into the custom model.
+   */
   readonly systemPrompt: string;
-  readonly parameters: {
-    readonly temperature: number;
-    readonly num_ctx: number;
-    readonly keep_alive: number;
-  };
 }
 
 /**

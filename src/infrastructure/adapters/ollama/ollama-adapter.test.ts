@@ -140,7 +140,6 @@ describe('OllamaAdapter', () => {
     shouldGenerateError?: boolean;
     baseModel?: string;
     systemPrompt?: string;
-    parameters?: Record<string, unknown>;
   }
 
   const getInstance = (config?: InstanceConfig) => {
@@ -160,8 +159,7 @@ describe('OllamaAdapter', () => {
     const adapter = new OllamaAdapter(
       mockOllamaClient,
       config?.baseModel,
-      config?.systemPrompt,
-      config?.parameters
+      config?.systemPrompt
     );
 
     return { adapter, mockOllamaClient };
@@ -265,12 +263,10 @@ describe('OllamaAdapter', () => {
     it('should create model with direct SDK parameters', async () => {
       const baseModel = 'qwen2.5-coder:1.5b';
       const systemPrompt = 'You are a commit expert';
-      const parameters = { temperature: 0.2, num_ctx: 131072, keep_alive: 0 };
 
       const { adapter, mockOllamaClient } = getInstance({
         baseModel,
         systemPrompt,
-        parameters,
       });
 
       const mockStream = createMockAsyncIterator([
@@ -301,7 +297,6 @@ describe('OllamaAdapter', () => {
         model: 'test-model',
         from: baseModel,
         system: systemPrompt,
-        parameters,
         stream: true,
       });
 
@@ -320,7 +315,6 @@ describe('OllamaAdapter', () => {
       const { adapter, mockOllamaClient } = getInstance({
         baseModel: 'qwen2.5-coder:1.5b',
         systemPrompt: 'You are a commit expert',
-        parameters: { temperature: 0.2 },
       });
 
       const createError = new Error('Invalid model definition');
@@ -337,7 +331,6 @@ describe('OllamaAdapter', () => {
       const { adapter, mockOllamaClient } = getInstance({
         baseModel: 'qwen2.5-coder:1.5b',
         systemPrompt: 'You are a commit expert',
-        parameters: { temperature: 0.2 },
       });
 
       const connectionError = new Error('ECONNREFUSED');
@@ -379,7 +372,6 @@ describe('OllamaAdapter', () => {
       const { adapter, mockOllamaClient } = getInstance({
         baseModel: 'qwen2.5-coder:1.5b',
         systemPrompt: 'You are a commit expert',
-        parameters: { temperature: 0.2 },
       });
 
       const mockStream = createMockAsyncIterator([
@@ -399,7 +391,6 @@ describe('OllamaAdapter', () => {
         model: 'test-model',
         from: 'qwen2.5-coder:1.5b',
         system: 'You are a commit expert',
-        parameters: { temperature: 0.2 },
         stream: true,
       });
     });
