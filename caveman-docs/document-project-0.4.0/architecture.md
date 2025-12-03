@@ -41,300 +41,185 @@ key characteristics
 
 ### hexagonal ports adapters architecture
 
-application implements clean architecture hexagonal pattern
+application implements clean architecture hexagonal pattern```
+│ CLI Interface Layer │ │ │ │ │ Commander │ │ @clack/prompts│ │ Ora Spinner │ │ │ │ │ │ Application Layer │ │ │ │ │ Controllers │ │ Use Cases │ │ UI Adapters │ │ │ │ │ │ Core Layer │ │ │ │ │ Ports │ │ Types │ │ Domain │ │ │ │ (Interfaces)│ │ │ │ Logic │ │ │ │ │ │ Infrastructure Layer │ │ │ │ │ Git Adapter │ │ Ollama │ │ Editor │ │ │ │ │ │ Adapter │ │ Adapter │ │ │ │
 
-cli interface layer
+````### layer responsibilities
 
-commander clack/prompts ora spinner
+ cli interface layer
 
-application layer
+ - command parsing routing
+ - user interaction prompts
+ - progress indication feedback
 
-controllers use cases ui adapters
+ application layer
 
-core layer
+ - command controllers orchestration
+ - ui adapters cli components
+ - use case coordination
 
-ports types domain
-interfaces logic
+ core layer
 
-infrastructure layer
+ - business logic domain models
+ - port interfaces external contracts
+ - type definitions error handling
 
-git adapter ollama editor
-adapter adapter
+ infrastructure layer
 
-### layer responsibilities
+ - external system integrations
+ - shell command adapters
+ - configuration logging
 
-cli interface layer
+ ## component architecture
 
-- command parsing routing
-- user interaction prompts
-- progress indication feedback
+ ### core domain model
 
-application layer
+ #### types interfaces```typescript
+ interface CommitMessage { type: string; description: string; body?: string; } interface GitDiff { files: FileChange[]; summary: string; } interface OllamaResponse { message: string; model: string; done: boolean; }
+```#### ports external interfaces```typescript
+ interface GitPort { getStagedChanges(): Promise<GitDiff>; commit(message: string): Promise<void>; validateRepository(): Promise<boolean>; } interface LLMPort { generateCommit(diff: GitDiff, type: string): Promise<string>; validateConnection(): Promise<boolean>; } interface CommitUIPort { selectCommitType(): Promise<string>; previewMessage(message: string): Promise<boolean>; editMessage(message: string): Promise<string>; }
+```### feature architecture
 
-- command controllers orchestration
-- ui adapters cli components
-- use case coordination
+ #### commit generation feature```
+CommitController ValidatePreconditions (GitRepo + Ollama Connection) GenerateCommit (AI + Conventional Commits) FormatValidator (Commit Format Rules) MessageNormalizer (Standardization) TypeEnforcer (Conventional Types)
+```#### setup feature```
+SetupController ValidateOllamaConnection (Connectivity Test) EnsureBaseModel (Model Availability) ProvisionCustomModel (Custom Model Creation) ConsoleSetupRenderer (Setup UI)
+```### adapter implementations
 
-core layer
+ #### git adapter
 
-- business logic domain models
-- port interfaces external contracts
-- type definitions error handling
+ - technology shell commands via execa
+ - operations git diff git status git commit git log
+ - error handling git error parsing user-friendly messages
 
-infrastructure layer
+ #### ollama adapter
 
-- external system integrations
-- shell command adapters
-- configuration logging
+ - technology ollama.js library
+ - models qwen2.5-coder1.5b custom system prompt
+ - configuration temperature 0.2 131k context window
+ - error recovery retry logic fallback strategies
 
-## component architecture
+ #### editor adapter
 
-### core domain model
+ - technology shell editor commands
+ - editors support system default editor
+ - integration temporary file creation cleanup
 
-#### types interfaces
+ ## data architecture
 
-typescript
-// core domain types
-interface commitmessage
-type string
-description string
-body string
+ ### data flow patterns
 
-interface gitdiff
-files filechange
-summary string
+ #### commit generation flow```
+1. CLI Command → Controller 2. Controller → ValidatePreconditions (Git + Ollama) 3. UI → SelectCommitType (User Input) 4. Controller → GenerateCommit (AI Processing) 5. UI → PreviewMessage (User Review) 6. Controller → GitAdapter.commit (Git Operation) 7. UI → Success Feedback
+```#### setup flow```
+1. CLI Command → SetupController 2. ValidateOllamaConnection (Connection Test) 3. EnsureBaseModel (Model Check) 4. ProvisionCustomModel (Model Creation) 5. ConsoleSetupRenderer (Progress Feedback) 6. Configuration Validation
+```### configuration management
 
-interface ollamaresponse
-message string
-model string
-done boolean
+ #### model configuration```typescript
+const CONVENTIONAL_COMMIT_MODEL_CONFIG = { model: 'devai-cli-commit:latest', baseModel: 'qwen2.5-coder:1.5b', systemPrompt: 'You are a Conventional Commits expert...', temperature: 0.2, num_ctx: 131072, keep_alive: 0, };
+```#### error handling strategy```typescript
+ AppError GitError (Repository issues) OllamaError (AI service issues) ValidationError (Input validation) ConfigurationError (Setup issues)
+```## integration architecture
 
-#### ports external interfaces
+ ### external system integrations
 
-typescript
-// git operations port
-interface gitport
-getstagedchanges promisegitdiff
-commitmessage string promisevoid
-validaterepository promiseboolean
+ #### ollama integration
 
-// llm integration port
-interface llmport
-generatecommitdiff gitdiff type string promisestring
-validateconnection promiseboolean
+ - protocol http rest api
+ - endpoint http//localhost11434
+ - authentication none local instance
+ - model management automatic provisioning validation
 
-// user interface port
-interface commituiport
-selectcommittype promisestring
-previewmessagemessage string promiseboolean
-editmessagemessage string promisestring
+ #### git integration
 
-### feature architecture
+ - protocol shell commands
+ - operations status diff commit log
+ - repository access current working directory
+ - error handling git exit code parsing
 
-#### commit generation feature
+ #### editor integration
 
-commitcontroller
-validatepreconditions gitrepo ollama connection
-generatecommit ai conventional commits
-formatvalidator commit format rules
-messagenormalizer standardization
-typeenforcer conventional types
+ - protocol shell environment variables
+ - editors editor environment variable
+ - workflow temporary file creation editor launch file read cleanup
 
-#### setup feature
+ ### security architecture
 
-setupcontroller
-validateollamaconnection connectivity test
-ensurebasemodel model availability
-provisioncustommodel custom model creation
-consolesetuprenderer setup ui
+ #### privacy protection
 
-### adapter implementations
+ - local processing ai processing happens locally
+ - external apis network calls external services
+ - data persistence user data stored transmitted
 
-#### git adapter
+ #### command security
 
-- technology shell commands via execa
-- operations git diff git status git commit git log
-- error handling git error parsing user-friendly messages
+ - input validation strict parameter validation
+ - shell injection prevention parameterized shell commands
+ - file system access limited current repository
 
-#### ollama adapter
+ ## development architecture
 
-- technology ollama.js library
-- models qwen2.5-coder1.5b custom system prompt
-- configuration temperature 0.2 131k context window
-- error recovery retry logic fallback strategies
+ ### testing architecture```
+Testing Pyramid │ E2E Tests │ │ (3 tests - complete workflows) │ │ Integration Tests │ │ (1 test - setup validation) │ │ Unit Tests │ │ (70+ tests - individual components) │
+```### test infrastructure
 
-#### editor adapter
+ - mock adapters isolated testing predictable behavior
+ - git harness temporary git repositories testing
+ - performance tracking test execution time monitoring
+ - coverage requirements 80 minimum coverage
 
-- technology shell editor commands
-- editors support system default editor
-- integration temporary file creation cleanup
+ ### build architecture```
+Build Pipeline Source (TypeScript) → tsup → Bundle (ESM) → Executable │ │ │ Type Checking Minification Node.js Shebang Error Prevention Size Reduction CLI Ready
+```## deployment architecture
 
-## data architecture
+ ### distribution model
 
-### data flow patterns
+ - package npm package`devai-cli`- installation`npm install devai-cli`- binary generated javascript executable
+ - dependencies runtime dependencies included
 
-#### commit generation flow
+ ### runtime requirements
 
-1.  cli command controller
-2.  controller validatepreconditions git ollama
-3.  ui selectcommittype user input
-4.  controller generatecommit ai processing
-5.  ui previewmessage user review
-6.  controller gitadapter.commit git operation
-7.  ui success feedback
+ - node.js v20 es2022 module support
+ - ollama local instance compatible model
+ - vram 2gb ai model loading
+ - operating system cross-platform macos linux windows
 
-#### setup flow
+ ## performance architecture
 
-1.  cli command setupcontroller
-2.  validateollamaconnection connection test
-3.  ensurebasemodel model check
-4.  provisioncustommodel model creation
-5.  consolesetuprenderer progress feedback
-6.  configuration validation
+ ### ai model optimization
 
-### configuration management
+ - model selection qwen2.5-coder1.5b optimized code analysis
+ - context management efficient git diff processing
+ - memory management proper model lifecycle management
+ - response time target 2s typical commits
 
-#### model configuration
+ ### git operation optimization
 
-typescript
-const conventional_commit_model_config
-model devai-cli-commitlatest
-basemodel qwen2.5-coder1.5b
-systemprompt conventional commits expert...
-temperature 0.2
-num_ctx 131072
-keep_alive
+ - diff processing streaming large repositories
+ - caching smart caching git operations
+ - error recovery graceful handling git repository issues
 
-#### error handling strategy
+ ### cli performance
 
-typescript
-// custom error hierarchy
-apperror
-giterror repository issues
-ollamaerror ai service issues
-validationerror input validation
-configurationerror setup issues
+ - startup time fast module loading es modules
+ - memory usage efficient memory management
+ - user feedback progress indicators long operations
 
-## integration architecture
+ ## quality assurance architecture
 
-### external system integrations
+ ### code quality metrics
 
-#### ollama integration
+ - test coverage 80 across layers
+ - typescript strictness full strict mode enabled
+ - lint rules comprehensive eslint configuration
+ - code complexity maximum 10 per function
 
-- protocol http rest api
-- endpoint http//localhost11434
-- authentication none local instance
-- model management automatic provisioning validation
+ ### continuous integration
 
-#### git integration
+ - automated testing unit integration e2e tests
+ - code quality linting formatting checks
+ - type safety typescript compilation validation
+ - build verification production build testing
 
-- protocol shell commands
-- operations status diff commit log
-- repository access current working directory
-- error handling git exit code parsing
-
-#### editor integration
-
-- protocol shell environment variables
-- editors editor environment variable
-- workflow temporary file creation editor launch file read cleanup
-
-### security architecture
-
-#### privacy protection
-
-- local processing ai processing happens locally
-- external apis network calls external services
-- data persistence user data stored transmitted
-
-#### command security
-
-- input validation strict parameter validation
-- shell injection prevention parameterized shell commands
-- file system access limited current repository
-
-## development architecture
-
-### testing architecture
-
-testing pyramid
-
-e2e tests
-tests - complete workflows
-
-integration tests
-test - setup validation
-
-unit tests
-70 tests - individual components
-
-### test infrastructure
-
-- mock adapters isolated testing predictable behavior
-- git harness temporary git repositories testing
-- performance tracking test execution time monitoring
-- coverage requirements 80 minimum coverage
-
-### build architecture
-
-build pipeline
-source typescript tsup bundle esm executable
-
-type checking minification node.js shebang
-
-error prevention size reduction cli ready
-
-## deployment architecture
-
-### distribution model
-
-- package npm package devai-cli
-- installation npm install devai-cli
-- binary generated javascript executable
-- dependencies runtime dependencies included
-
-### runtime requirements
-
-- node.js v20 es2022 module support
-- ollama local instance compatible model
-- vram 2gb ai model loading
-- operating system cross-platform macos linux windows
-
-## performance architecture
-
-### ai model optimization
-
-- model selection qwen2.5-coder1.5b optimized code analysis
-- context management efficient git diff processing
-- memory management proper model lifecycle management
-- response time target 2s typical commits
-
-### git operation optimization
-
-- diff processing streaming large repositories
-- caching smart caching git operations
-- error recovery graceful handling git repository issues
-
-### cli performance
-
-- startup time fast module loading es modules
-- memory usage efficient memory management
-- user feedback progress indicators long operations
-
-## quality assurance architecture
-
-### code quality metrics
-
-- test coverage 80 across layers
-- typescript strictness full strict mode enabled
-- lint rules comprehensive eslint configuration
-- code complexity maximum 10 per function
-
-### continuous integration
-
-- automated testing unit integration e2e tests
-- code quality linting formatting checks
-- type safety typescript compilation validation
-- build verification production build testing
-
-architecture ensures maintainability testability reliability providing fast private user-friendly cli experience ai-powered commit message generation.
+ architecture ensures maintainability testability reliability providing fast private user-friendly cli experience ai-powered commit message generation.
+````

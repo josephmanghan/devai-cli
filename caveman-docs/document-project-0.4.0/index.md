@@ -10,7 +10,7 @@
 ## quick reference
 
 - tech stack typescript node.js commander.js ollama vitest
-- entry point src/index.ts cli executable
+- entry point`src/index.ts`cli executable
 - architecture pattern clean architecture dependency inversion
 - ai model qwen2.5-coder1.5b via local ollama instance
 
@@ -34,24 +34,18 @@
 
 ### users
 
-1.  install npm install devai-cli
-2.  setup ollama serve devai-cli setup
-3.  use git add files devai-cli commit
-
-### developers
+1.  install`npm install devai-cli`2. setup`ollama serve && devai-cli setup`3. use`git add <files> && devai-cli commit`### developers
 
 1.  clone repository github
-2.  setup npm install npm run validatesetup
-3.  develop npm run dev development mode
-4.  test npm run test comprehensive testing
-5.  build npm run build production build
+1.  setup`npm install && npm run validate:setup`3. develop`npm run dev`development mode
+1.  test`npm run test`comprehensive testing
+1.  build`npm run build`production build
 
 ### development commands
 
-- development npm run dev hot reload
-- testing npm run test tests npm run testcoverage coverage
-- code quality npm run lint npm run format
-- build npm run build production npm run pr full validation
+- development`npm run dev`hot reload
+- testing`npm run test`tests`npm run test:coverage`coverage
+- code quality`npm run lint``npm run format`- build`npm run build`production`npm run pr`full validation
 
 ### key requirements
 
@@ -93,29 +87,25 @@ repository https//github.com/josephmanghan/devai-cli
 
 ## core commands
 
-### devai-cli setup
+###`devai-cli setup`- configures ollama integration
 
-- configures ollama integration
 - provisions custom ai model
 - validates system requirements
 
-### devai-cli commit
+###`devai-cli commit`- analyzes staged git changes
 
-- analyzes staged git changes
 - generates conventional commit message
 - provides review editing options
 
-### devai-cli commit --all
+###`devai-cli commit --all`- automatically stages changes
 
-- automatically stages changes
 - generates commit message
 - creates commit
 
 ## ai model configuration
 
-model devai-cli-commitlatest custom provisioned
-base model qwen2.5-coder1.5b
-temperature 0.2 consistent responses
+model`devai-cli-commit:latest`custom provisioned
+base model`qwen2.5-coder:1.5b`temperature 0.2 consistent responses
 context window 131072 tokens
 processing local privacy-first
 
@@ -142,12 +132,8 @@ processing local privacy-first
 
 ### feature development
 
-1.  define ports src/core/ports/
-2.  implement adapters src/infrastructure/adapters/
-3.  create use cases src/features/feature/use-cases/
-4.  add controllers src/features/feature/controllers/
-5.  write comprehensive tests
-6.  update documentation
+1.  define ports`src/core/ports/`2. implement adapters`src/infrastructure/adapters/`3. create use cases`src/features/[feature]/use-cases/`4. add controllers`src/features/[feature]/controllers/`5. write comprehensive tests
+2.  update documentation
 
 ### quality gates
 

@@ -52,137 +52,90 @@ code quality eslint prettier 9.39.1 3.0.0 linting formatting code standards
 - deployment npm package distribution
 - runtime node.js executable shebang
 
-## repository structure
+## repository structure```
 
-devai-cli/
-src/ # main source code
-main.ts # cli composition root
-index.ts # executable entry point
-core/ # core business logic
-ports/ # external interfaces
-types/ # domain types
-features/ # feature modules
-commit/ # commit generation
-setup/ # initial setup
-infrastructure/ # external integrations
-adapters/ # port implementations
-config/ # configuration
-logging/ # debug utilities
-ui/ # user interface
-adapters/ # ui implementations
-commit/ # commit ui components
-setup/ # setup ui components
-tests/ # test suites
-e2e/ # end-to-end tests
-integration/ # integration tests
-helpers/ # test utilities
-dist/ # build output
-project-docs/ # project documentation
-dev/ # generated analysis docs
+devai-cli/ src/ # Main source code │ main.ts # CLI composition root │ index.ts # Executable entry point │ core/ # Core business logic │ │ ports/ # External interfaces │ │ types/ # Domain types │ features/ # Feature modules │ │ commit/ # Commit generation │ │ setup/ # Initial setup │ infrastructure/ # External integrations │ │ adapters/ # Port implementations │ │ config/ # Configuration │ │ logging/ # Debug utilities │ ui/ # User interface │ adapters/ # UI implementations │ commit/ # Commit UI components │ setup/ # Setup UI components tests/ # Test suites │ e2e/ # End-to-end tests │ integration/ # Integration tests │ helpers/ # Test utilities dist/ # Build output project-docs/ # Project documentation dev/ # Generated analysis and docs
 
-## current status
+````## current status
 
-### version 0.4.0 stable
+ ### version 0.4.0 stable
 
-- release date december 2025
-- development stage production-ready comprehensive testing
-- installation npm install devai-cli
+ - release date december 2025
+ - development stage production-ready comprehensive testing
+ - installation`npm install devai-cli`### core features implemented
 
-### core features implemented
+ - setup command automatic ollama configuration model provisioning
+ - commit command ai-powered conventional commit generation
+ - validation built-in commit message format validation
+ - error handling comprehensive error recovery user guidance
+ - performance sub-second response times efficient processing
+ - privacy complete local data processing
 
-- setup command automatic ollama configuration model provisioning
-- commit command ai-powered conventional commit generation
-- validation built-in commit message format validation
-- error handling comprehensive error recovery user guidance
-- performance sub-second response times efficient processing
-- privacy complete local data processing
+ ### quality metrics
 
-### quality metrics
+ - test coverage 80 across modules
+ - type safety 100 typescript strict mode
+ - code quality comprehensive linting formatting
+ - documentation complete architectural user documentation
 
-- test coverage 80 across modules
-- type safety 100 typescript strict mode
-- code quality comprehensive linting formatting
-- documentation complete architectural user documentation
+ ## quick reference
 
-## quick reference
+ ### installation commands```bash
+# Install from npm npm install devai-cli # Install and configure Ollama ollama serve devai-cli setup # Generate commit message git add <files> devai-cli commit
+```### available commands
 
-### installation commands
+ -`devai-cli setup`- configure ollama provision ai model
+ -`devai-cli commit`- generate create conventional commit
+ -`devai-cli commit --all`- stage changes generate commit
+ -`devai-cli --version`- show version information
+ -`devai-cli --help`- display usage information
 
-bash
+ ### configuration requirements
 
-# install npm
+ - node.js v20 required
+ - ollama local instance qwen2.5-coder1.5b model
+ - vram 2gb ai model loading
+ - git repository valid git repository staged changes
 
-npm install devai-cli
+ ## development status
 
-# install configure ollama
+ ### active development yes
 
-ollama serve
-devai-cli setup
+ - maintainer dr joe joseph manghan
+ - license mit
+ - repository https//github.com/josephmanghan/devai-cli
+ - issues accepting bug reports feature requests
 
-# generate commit message
+ ### recent releases
 
-git add files
-devai-cli commit
+ - 0.4.0 dec 2025 added spinner ui post-install notifications
+ - 0.3.0 dec 2025 updated documentation help system
+ - 0.2.0 dec 2025 fixed help documentation commander.js error handling
+ - 0.1.0 dec 2025 initial release core functionality
 
-### available commands
+ ### next development priorities
 
-- devai-cli setup - configure ollama provision ai model
-- devai-cli commit - generate create conventional commit
-- devai-cli commit --all - stage changes generate commit
-- devai-cli --version - show version information
-- devai-cli --help - display usage information
+ - performance optimization large repositories
+ - additional ai model support
+ - custom commit type configuration
+ - integration popular git workflows
 
-### configuration requirements
+ ## getting started
 
-- node.js v20 required
-- ollama local instance qwen2.5-coder1.5b model
-- vram 2gb ai model loading
-- git repository valid git repository staged changes
+ ### users
 
-## development status
+ 1. install`npm install devai-cli`2. setup`ollama serve && devai-cli setup`3. use`git add . && devai-cli commit`### developers
 
-### active development yes
+ 1. clone`git clone https://github.com/josephmanghan/devai-cli`2. setup`npm install && npm run validate:setup`3. develop`npm run dev`development mode
+ 4. test`npm run test`comprehensive testing
+ 5. build`npm run build`production build
 
-- maintainer dr joe joseph manghan
-- license mit
-- repository https//github.com/josephmanghan/devai-cli
-- issues accepting bug reports feature requests
+ ### contributors
 
-### recent releases
+ - code style automatic formatting prettier
+ - testing 80 coverage requirement new features
+ - documentation update relevant documentation files
+ - pull requests use`npm run pr`pre-commit validation
 
-- 0.4.0 dec 2025 added spinner ui post-install notifications
-- 0.3.0 dec 2025 updated documentation help system
-- 0.2.0 dec 2025 fixed help documentation commander.js error handling
-- 0.1.0 dec 2025 initial release core functionality
-
-### next development priorities
-
-- performance optimization large repositories
-- additional ai model support
-- custom commit type configuration
-- integration popular git workflows
-
-## getting started
-
-### users
-
-1.  install npm install devai-cli
-2.  setup ollama serve devai-cli setup
-3.  use git add devai-cli commit
-
-### developers
-
-1.  clone git clone https//github.com/josephmanghan/devai-cli
-2.  setup npm install npm run validatesetup
-3.  develop npm run dev development mode
-4.  test npm run test comprehensive testing
-5.  build npm run build production build
-
-### contributors
-
-- code style automatic formatting prettier
-- testing 80 coverage requirement new features
-- documentation update relevant documentation files
-- pull requests use npm run pr pre-commit validation
-
-project represents modern well-architected cli tool prioritizes user privacy performance developer experience maintaining high standards code quality maintainability.
+ project represents modern well-architected cli tool prioritizes user privacy performance developer experience maintaining high standards code quality maintainability.
+````

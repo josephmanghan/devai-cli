@@ -40,50 +40,130 @@ const { values } = parseArgs({
 // ============================================================================
 
 /**
- * Converts text to "caveman" format by removing stop words and compacting whitespace.
- * Uses different strategies for code vs. text/markdown files.
+ * Removes comments and compacts whitespace in code.
+ * Used for both pure code files and code within markdown fences.
+ */
+const compactCode = (code: string): string => {
+  return code
+    .replace(/\/\/.*$/gm, '') // Remove single-line comments
+    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
+    .replace(/\s+/g, ' '); // Compact whitespace to single spaces
+};
+
+/**
+ * Removes English stop words and special characters from text while preserving structure.
+ * Maintains newlines, headers (#), and list markers (-) to preserve document hierarchy.
+ */
+const removeStopWords = (text: string): string => {
+  let processed = text.toLowerCase();
+  processed = processed.replace(/\n/g, ' __NEWLINE__ '); // Preserve newlines with placeholder
+
+  // Keep word chars, spaces, headers (#), list markers (-), file extensions (.), and paths (/)
+  processed = processed.replace(/[^\w\s#\-\.\/]/g, '');
+
+  const words = processed.split(' ').filter(word => {
+    const cleanWord = word.trim();
+    if (cleanWord === '__newline__') return true; // Keep structure markers
+    if (cleanWord.startsWith('#') || cleanWord.startsWith('-')) return true; // Keep markdown syntax
+    return !STOP_WORDS.has(cleanWord) && cleanWord.length > 1; // Filter stop words and single chars
+  });
+
+  return words
+    .join(' ')
+    .replace(/__newline__/gi, '\n') // Restore newlines
+    .replace(/[ \t]+/g, ' ') // Collapse multiple spaces
+    .replace(/\n\s*\n\s*\n/g, '\n\n') // Limit consecutive blank lines to 2
+    .trim();
+};
+
+/**
+ * Represents a segment of markdown content.
+ * Used to preserve code while processing surrounding text separately.
+ */
+type MarkdownSegment = {
+  type: 'text' | 'code-fence' | 'inline-code';
+  content: string;
+};
+
+/**
+ * Parses markdown to identify and separate code fences and inline code from plain text.
+ * Uses regex to find triple-backtick fences (```...```) and single-backtick inline code (`...`).
+ * Returns segments that can be processed according to their type.
+ */
+const parseMarkdown = (text: string): MarkdownSegment[] => {
+  const segments: MarkdownSegment[] = [];
+  const regex = /(```[\s\S]*?```|`[^`]+`)/g; // Match code fences and inline code
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    // Add any text before the matched code block
+    if (match.index > lastIndex) {
+      segments.push({
+        type: 'text',
+        content: text.slice(lastIndex, match.index),
+      });
+    }
+
+    const matchedContent = match[0];
+    if (matchedContent.startsWith('```')) {
+      segments.push({ type: 'code-fence', content: matchedContent });
+    } else {
+      segments.push({ type: 'inline-code', content: matchedContent });
+    }
+
+    lastIndex = regex.lastIndex;
+  }
+
+  // Add any remaining text after the last code block
+  if (lastIndex < text.length) {
+    segments.push({ type: 'text', content: text.slice(lastIndex) });
+  }
+
+  return segments;
+};
+
+/**
+ * Main conversion function that applies caveman format to text.
+ * Strips box-drawing characters globally, then handles code vs text differently:
+ * - Pure code files: compacted
+ * - Markdown files: parses into segments and processes each appropriately
  *
- * @param text - The input text to convert
- * @param isCode - Whether the text is code (true) or text/markdown (false)
- * @returns The converted caveman text
+ * @param text - Content to convert
+ * @param isCode - True if pure code file, false if markdown/text
+ * @returns Caveman-formatted content
  */
 const toCaveman = (text: string, isCode: boolean): string => {
   if (!text) return '';
 
-  // For code, preserve logic by keeping all words (no stop word removal)
-  // Only strip comments and compact whitespace to reduce size
+  // Strip box-drawing characters globally (everywhere, including in code)
+  text = text.replace(/[┌─┐↓↑├┤└┘]/g, '');
+
+  // For pure code files, apply code compaction
   if (isCode) {
-    return text
-      .replace(/\/\/.*$/gm, '') // Remove single-line comments (// ...)
-      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments (/* ... */)
-      .replace(/\s+/g, ' '); // Compact all whitespace to single spaces
+    return compactCode(text);
   }
 
-  // Remove stop words while preserving structure (headers, lists, paragraphs)
-  let processed = text.toLowerCase();
-
-  // Replace newlines with placeholder to preserve document structure
-  processed = processed.replace(/\n/g, ' __NEWLINE__ ');
-
-  // Keep: word chars (\w), whitespace (\s), # (headers), - (lists), . (extensions), / (paths)
-  // Remove: quotes, commas, parentheses, brackets, etc.
-  processed = processed.replace(/[^\w\s#\-\.\/]/g, '');
-
-  // Split into words and remove common English stop words
-  const words = processed.split(' ').filter(word => {
-    const cleanWord = word.trim();
-    if (cleanWord === '__newline__') return true;
-    if (cleanWord.startsWith('#') || cleanWord.startsWith('-')) return true;
-    return !STOP_WORDS.has(cleanWord) && cleanWord.length > 1;
-  });
-
-  // Reassemble and clean up whitespace
-  return words
-    .join(' ')
-    .replace(/__newline__/gi, '\n') // Restore newlines from placeholders
-    .replace(/[ \t]+/g, ' ') // Compact spaces and tabs to single space
-    .replace(/\n\s*\n\s*\n/g, '\n\n') // Reduce 3+ newlines to 2 (paragraph breaks)
-    .trim();
+  // For markdown/text, parse into segments and process each type appropriately
+  const segments = parseMarkdown(text);
+  return segments
+    .map(segment => {
+      if (segment.type === 'inline-code') {
+        return segment.content; // Preserve inline code completely
+      } else if (segment.type === 'code-fence') {
+        // Extract code from fence, apply compaction, restore fence
+        const match = segment.content.match(/^```(\w+)?\n([\s\S]*?)\n```$/);
+        if (match) {
+          const [, lang, code] = match;
+          return `\`\`\`${lang || ''}\n${compactCode(code)}\n\`\`\``;
+        }
+        return segment.content;
+      } else {
+        // Apply stop word removal to plain text segments
+        return removeStopWords(segment.content);
+      }
+    })
+    .join('');
 };
 
 // ============================================================================
