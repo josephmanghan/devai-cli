@@ -18,15 +18,15 @@
 
 ### Tech Stack Summary
 
-| Category | Technology |
-|----------|------------|
-| **Language** | TypeScript 5.9.3 |
-| **Runtime** | Node.js >= 20.0.0 |
-| **CLI Framework** | Commander 14.0.2 |
+| Category           | Technology                        |
+| ------------------ | --------------------------------- |
+| **Language**       | TypeScript 5.9.3                  |
+| **Runtime**        | Node.js >= 20.0.0                 |
+| **CLI Framework**  | Commander 14.0.2                  |
 | **AI Integration** | Ollama 0.6.3 (qwen2.5-coder:1.5b) |
-| **Build Tool** | tsup (esbuild) |
-| **Test Framework** | Vitest 4.0.14 |
-| **UI** | @clack/prompts, ora |
+| **Build Tool**     | tsup (esbuild)                    |
+| **Test Framework** | Vitest 4.0.14                     |
+| **UI**             | @clack/prompts, ora               |
 
 ### Entry Points
 
@@ -37,6 +37,7 @@
 ### Architecture Pattern
 
 **Clean Architecture** with clear separation:
+
 - **Core** (`src/core/`) - Domain logic, ports (interfaces), types
 - **Features** (`src/features/`) - Use cases and controllers
 - **Infrastructure** (`src/infrastructure/`) - Adapters (Ollama, Git, Editor)
@@ -137,11 +138,13 @@ devai-cli/
 ### For Users
 
 1. **Install:**
+
    ```bash
    npm install devai-cli
    ```
 
 2. **Setup (one-time):**
+
    ```bash
    devai-cli setup
    ```
@@ -157,6 +160,7 @@ See [README.md](../README.md) for complete user guide.
 ### For Developers
 
 1. **Clone and setup:**
+
    ```bash
    git clone https://github.com/josephmanghan/devai-cli.git
    cd devai-cli
@@ -164,6 +168,7 @@ See [README.md](../README.md) for complete user guide.
    ```
 
 2. **Run in dev mode:**
+
    ```bash
    npm run dev
    ```
@@ -289,13 +294,13 @@ npm run pr:lite           # Fast validation (unit tests only)
 
 ## System Requirements
 
-| Requirement | Specification |
-|-------------|---------------|
-| **Node.js** | >= 20.0.0 |
-| **Ollama** | Latest version |
-| **Model** | qwen2.5-coder:1.5b (~900MB) |
-| **VRAM** | ~2GB |
-| **Git** | Any recent version |
+| Requirement | Specification               |
+| ----------- | --------------------------- |
+| **Node.js** | >= 20.0.0                   |
+| **Ollama**  | Latest version              |
+| **Model**   | qwen2.5-coder:1.5b (~900MB) |
+| **VRAM**    | ~2GB                        |
+| **Git**     | Any recent version          |
 
 ---
 
@@ -341,6 +346,7 @@ When planning new features for this project:
 4. **Development guide** provides workflow and testing procedures
 
 **Command to use in PRD workflow:**
+
 ```
 Point PRD workflow to: /path/to/dev/index.md
 ```
@@ -360,9 +366,9 @@ Point PRD workflow to: /path/to/dev/index.md
 
 ## Document Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2025-12-02 | Initial documentation generation (exhaustive scan) |
+| Version | Date       | Changes                                            |
+| ------- | ---------- | -------------------------------------------------- |
+| 1.0     | 2025-12-02 | Initial documentation generation (exhaustive scan) |
 
 ---
 

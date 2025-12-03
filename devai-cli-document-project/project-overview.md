@@ -8,17 +8,17 @@
 
 ## Quick Reference
 
-| Attribute | Value |
-|-----------|-------|
-| **Project Name** | devai-cli |
-| **Version** | 0.3.0 |
-| **Project Type** | CLI Tool |
-| **Repository Type** | Monolith |
-| **Primary Language** | TypeScript |
-| **Runtime** | Node.js >= 20.0.0 |
-| **Architecture** | Clean Architecture (Hexagonal / Ports & Adapters) |
-| **License** | MIT |
-| **Author** | Dr Joe (Joseph Manghan) |
+| Attribute            | Value                                             |
+| -------------------- | ------------------------------------------------- |
+| **Project Name**     | devai-cli                                         |
+| **Version**          | 0.3.0                                             |
+| **Project Type**     | CLI Tool                                          |
+| **Repository Type**  | Monolith                                          |
+| **Primary Language** | TypeScript                                        |
+| **Runtime**          | Node.js >= 20.0.0                                 |
+| **Architecture**     | Clean Architecture (Hexagonal / Ports & Adapters) |
+| **License**          | MIT                                               |
+| **Author**           | Dr Joe (Joseph Manghan)                           |
 
 ---
 
@@ -27,6 +27,7 @@
 Generate high-quality conventional commit messages using AI, completely locally with zero telemetry or data exfiltration.
 
 **Core Value Proposition:**
+
 - ✅ **Privacy-First:** 100% local processing, no cloud APIs
 - ✅ **Lightning Fast:** Sub-1 second response with adequate VRAM
 - ✅ **Frictionless:** One-time setup, instant usage
@@ -75,6 +76,7 @@ Infrastructure Layer ← (implements) ← Ports
 ```
 
 **Direction:** Dependencies flow inward
+
 - Infrastructure implements core ports
 - Features use core ports
 - Core has zero dependencies
@@ -88,6 +90,7 @@ Infrastructure Layer ← (implements) ← Ports
 **Usage:** `devai-cli commit [-a]`
 
 **What it does:**
+
 1. Validates git repository and staged changes
 2. Checks Ollama availability
 3. Prompts user to select commit type (feat, fix, docs, etc.)
@@ -97,6 +100,7 @@ Infrastructure Layer ← (implements) ← Ports
 7. Creates git commit
 
 **Options:**
+
 - `-a, --all` - Auto-stage all changes before generating
 
 ### 2. Setup Command
@@ -104,6 +108,7 @@ Infrastructure Layer ← (implements) ← Ports
 **Usage:** `devai-cli setup`
 
 **What it does:**
+
 1. Validates Ollama daemon is running
 2. Ensures base model exists (qwen2.5-coder:1.5b)
 3. Creates custom model with conventional commit system prompt
@@ -157,6 +162,7 @@ devai-cli setup
 ```
 
 This will:
+
 - Validate Ollama connection
 - Pull base model (~2GB download)
 - Create custom conventional commit model
@@ -234,14 +240,14 @@ npm run pr:lite           # Faster version (unit tests only)
 
 ## System Requirements
 
-| Requirement | Specification |
-|-------------|---------------|
-| **Node.js** | >= 20.0.0 (LTS recommended) |
-| **Ollama** | Latest version |
-| **Model** | qwen2.5-coder:1.5b (~900MB) |
-| **VRAM** | ~2GB for model inference |
-| **Git** | Any recent version |
-| **OS** | macOS, Linux, Windows (WSL recommended) |
+| Requirement | Specification                           |
+| ----------- | --------------------------------------- |
+| **Node.js** | >= 20.0.0 (LTS recommended)             |
+| **Ollama**  | Latest version                          |
+| **Model**   | qwen2.5-coder:1.5b (~900MB)             |
+| **VRAM**    | ~2GB for model inference                |
+| **Git**     | Any recent version                      |
+| **OS**      | macOS, Linux, Windows (WSL recommended) |
 
 ---
 

@@ -196,12 +196,14 @@ devai-cli/
 **Purpose:** Pure business logic, zero external dependencies
 
 **Key Characteristics:**
+
 - No imports from infrastructure or UI layers
 - Defines contracts via ports (interfaces)
 - Contains domain entities and value objects
 - 100% testable in isolation
 
 **Critical Files:**
+
 - `ports/*.ts` - Dependency inversion contracts
 - `types/errors.types.ts` - Domain error hierarchy
 
@@ -212,6 +214,7 @@ devai-cli/
 **Purpose:** Orchestrate business workflows using core domain
 
 **Structure Pattern:**
+
 ```
 feature-name/
 ├── controllers/    # Command handlers (register with Commander)
@@ -220,11 +223,13 @@ feature-name/
 ```
 
 **Key Responsibilities:**
+
 - Wire together core ports
 - Implement application workflows
 - Handle feature-specific validation
 
 **Critical Files:**
+
 - `commit/controllers/commit-controller.ts` - Main commit workflow
 - `commit/use-cases/generate-commit.ts` - LLM message generation with retry logic
 - `setup/controllers/setup-controller.ts` - Setup wizard orchestration
@@ -236,11 +241,13 @@ feature-name/
 **Purpose:** Concrete implementations of external dependencies
 
 **Adapter Pattern:**
+
 - Each adapter implements a core port (interface)
 - Wraps external libraries/tools
 - Handles error translation to domain errors
 
 **Critical Files:**
+
 - `adapters/ollama/ollama-adapter.ts` - Ollama SDK integration
 - `adapters/git/shell-git-adapter.ts` - Git CLI wrapper (execa)
 - `config/conventional-commit-model.config.ts` - Model configuration
@@ -252,15 +259,18 @@ feature-name/
 **Purpose:** Terminal user interface components
 
 **Technologies:**
+
 - `@clack/prompts` - Interactive prompts
 - `ora` - Spinners for async operations
 
 **Component Structure:**
+
 - Modular, reusable components
 - Each component has `.demo.ts` for isolated testing
 - Implements UI port interfaces from core
 
 **Critical Files:**
+
 - `adapters/commit-adapter.ts` - Complete commit UI workflow
 - `setup/console-setup-renderer.ts` - Setup wizard UI
 - `commit/components/*` - Reusable prompt components
@@ -273,13 +283,14 @@ feature-name/
 
 **Test Categories:**
 
-| Directory | Purpose | Dependencies |
-|-----------|---------|--------------|
-| `integration/` | Test real Ollama integration | Requires Ollama daemon |
-| `e2e/` | Test full user workflows | Mocked LLM, test git repo |
-| `helpers/` | Shared test utilities | None |
+| Directory      | Purpose                      | Dependencies              |
+| -------------- | ---------------------------- | ------------------------- |
+| `integration/` | Test real Ollama integration | Requires Ollama daemon    |
+| `e2e/`         | Test full user workflows     | Mocked LLM, test git repo |
+| `helpers/`     | Shared test utilities        | None                      |
 
 **Test Strategy:**
+
 - **Unit tests:** Co-located with source (`*.test.ts`)
 - **Integration tests:** Separate directory, real dependencies
 - **E2E tests:** Full user scenarios with mocks for determinism
@@ -291,10 +302,12 @@ feature-name/
 **Purpose:** Developer productivity scripts
 
 **Files:**
+
 - `run-demos.ts` - Launch interactive UI component demos
 - `validate-setup.ts` - Verify development environment (Ollama running, models available)
 
 **Usage:**
+
 ```bash
 npm run test:demo      # Run UI demos
 npm run validate:setup # Check setup
@@ -324,18 +337,21 @@ main();
 **File:** `src/main.ts`
 
 **Responsibilities:**
+
 1. **CLI Configuration** - Commander.js program setup
 2. **Dependency Injection** - Wire all dependencies (composition root pattern)
 3. **Command Registration** - Register commit & setup commands
 4. **Error Handling** - Global error handlers
 
 **Key Functions:**
+
 - `createCommitCommand()` - DI for commit feature
 - `createSetupCommand()` - DI for setup feature
 - `createProgram()` - Configure CLI
 - `main()` - Application entry point
 
 **Why Separate from index.ts?**
+
 - Easier to test (no shebang execution)
 - Cleaner composition root pattern
 - Importable for testing
@@ -359,6 +375,7 @@ Core (Ports + Types)
 **Direction:** Inward (outer layers depend on inner)
 
 **Benefits:**
+
 - Core domain is independent
 - Infrastructure is swappable
 - Testability via dependency injection
@@ -367,16 +384,16 @@ Core (Ports + Types)
 
 ## File Naming Conventions
 
-| Pattern | Purpose | Example |
-|---------|---------|---------|
-| `*.ts` | Source code | `commit-controller.ts` |
-| `*.test.ts` | Unit tests | `commit-controller.test.ts` |
-| `*.demo.ts` | Interactive demos | `type-selector.demo.ts` |
-| `*.types.ts` | Type definitions | `commit.types.ts` |
-| `*-port.ts` | Core interfaces | `llm-port.ts` |
-| `*-adapter.ts` | Port implementations | `ollama-adapter.ts` |
-| `*-controller.ts` | Command handlers | `commit-controller.ts` |
-| `index.ts` | Module exports | `src/core/index.ts` |
+| Pattern           | Purpose              | Example                     |
+| ----------------- | -------------------- | --------------------------- |
+| `*.ts`            | Source code          | `commit-controller.ts`      |
+| `*.test.ts`       | Unit tests           | `commit-controller.test.ts` |
+| `*.demo.ts`       | Interactive demos    | `type-selector.demo.ts`     |
+| `*.types.ts`      | Type definitions     | `commit.types.ts`           |
+| `*-port.ts`       | Core interfaces      | `llm-port.ts`               |
+| `*-adapter.ts`    | Port implementations | `ollama-adapter.ts`         |
+| `*-controller.ts` | Command handlers     | `commit-controller.ts`      |
+| `index.ts`        | Module exports       | `src/core/index.ts`         |
 
 ---
 
@@ -384,13 +401,13 @@ Core (Ports + Types)
 
 ### External Dependencies
 
-| Integration | Location | Purpose |
-|-------------|----------|---------|
-| **Ollama** | `infrastructure/adapters/ollama/` | LLM inference |
-| **Git** | `infrastructure/adapters/git/` | Version control operations |
-| **$EDITOR** | `infrastructure/adapters/editor/` | Text editing |
-| **Commander** | `main.ts` | CLI argument parsing |
-| **@clack/prompts** | `ui/` | Interactive terminal UI |
+| Integration        | Location                          | Purpose                    |
+| ------------------ | --------------------------------- | -------------------------- |
+| **Ollama**         | `infrastructure/adapters/ollama/` | LLM inference              |
+| **Git**            | `infrastructure/adapters/git/`    | Version control operations |
+| **$EDITOR**        | `infrastructure/adapters/editor/` | Text editing               |
+| **Commander**      | `main.ts`                         | CLI argument parsing       |
+| **@clack/prompts** | `ui/`                             | Interactive terminal UI    |
 
 ### Internal Integration
 
@@ -428,12 +445,12 @@ Core (Ports + Types)
 
 **Total Test Files:** 27
 
-| Location | Count | Type |
-|----------|-------|------|
-| `src/**/*.test.ts` | 21 | Unit tests (co-located) |
-| `tests/integration/` | 2 | Integration tests |
-| `tests/e2e/` | 2 | End-to-end tests |
-| `tests/helpers/` | 2 | Test utility tests |
+| Location             | Count | Type                    |
+| -------------------- | ----- | ----------------------- |
+| `src/**/*.test.ts`   | 21    | Unit tests (co-located) |
+| `tests/integration/` | 2     | Integration tests       |
+| `tests/e2e/`         | 2     | End-to-end tests        |
+| `tests/helpers/`     | 2     | Test utility tests      |
 
 **Coverage Target:** 80% (lines, functions, branches, statements)
 
@@ -444,6 +461,7 @@ Core (Ports + Types)
 ### Core Module
 
 **Exports:** (via `src/core/index.ts`)
+
 - All port interfaces
 - All type definitions
 - AppError and subclasses
@@ -455,11 +473,13 @@ Core (Ports + Types)
 ### Features Module
 
 **Exports:** (via `src/features/*/index.ts`)
+
 - Controllers
 - Use cases
 - Public utilities
 
 **Dependencies:**
+
 - `core/*` - Ports & types
 - Infrastructure adapters (via DI)
 
@@ -468,10 +488,12 @@ Core (Ports + Types)
 ### Infrastructure Module
 
 **Exports:** (via `src/infrastructure/index.ts`)
+
 - All adapters
 - Configuration objects
 
 **Dependencies:**
+
 - `core/ports` - Implements these interfaces
 - External packages (ollama, execa)
 
@@ -480,10 +502,12 @@ Core (Ports + Types)
 ### UI Module
 
 **Exports:** (via `src/ui/index.ts`)
+
 - UI adapters
 - Console renderers
 
 **Dependencies:**
+
 - `core/ports` - Implements UI ports
 - `@clack/prompts`, `ora`
 
@@ -491,16 +515,16 @@ Core (Ports + Types)
 
 ## Summary Statistics
 
-| Metric | Count |
-|--------|-------|
-| **Total Source Files** | ~70 TypeScript files |
-| **Core Ports** | 5 (LLM, Git, Editor, CommitUI, SetupUI) |
-| **Features** | 2 (Commit, Setup) |
-| **Infrastructure Adapters** | 3 (Ollama, Git, Editor) |
-| **UI Components** | 4 (TypeSelector, MessagePreview, ActionSelector, SetupRenderer) |
-| **Test Files** | 27 (21 unit + 4 integration + 2 e2e) |
-| **Test Helpers** | 3 (GitHarness, MockLLM, PerformanceTracker) |
-| **Scripts** | 2 (run-demos, validate-setup) |
+| Metric                      | Count                                                           |
+| --------------------------- | --------------------------------------------------------------- |
+| **Total Source Files**      | ~70 TypeScript files                                            |
+| **Core Ports**              | 5 (LLM, Git, Editor, CommitUI, SetupUI)                         |
+| **Features**                | 2 (Commit, Setup)                                               |
+| **Infrastructure Adapters** | 3 (Ollama, Git, Editor)                                         |
+| **UI Components**           | 4 (TypeSelector, MessagePreview, ActionSelector, SetupRenderer) |
+| **Test Files**              | 27 (21 unit + 4 integration + 2 e2e)                            |
+| **Test Helpers**            | 3 (GitHarness, MockLLM, PerformanceTracker)                     |
+| **Scripts**                 | 2 (run-demos, validate-setup)                                   |
 
 ---
 

@@ -4,13 +4,13 @@
 
 ### Required Software
 
-| Software | Minimum Version | Purpose |
-|----------|----------------|---------|
-| Node.js | 20.0.0 | Runtime environment |
-| npm | 10.x | Package manager |
-| Git | 2.x | Version control |
-| Ollama | Latest | Local LLM for testing |
-| Code Editor | Any | VS Code recommended |
+| Software    | Minimum Version | Purpose               |
+| ----------- | --------------- | --------------------- |
+| Node.js     | 20.0.0          | Runtime environment   |
+| npm         | 10.x            | Package manager       |
+| Git         | 2.x             | Version control       |
+| Ollama      | Latest          | Local LLM for testing |
+| Code Editor | Any             | VS Code recommended   |
 
 ### Recommended Extensions (VS Code)
 
@@ -37,6 +37,7 @@ npm install
 ```
 
 This installs:
+
 - Production dependencies (`dependencies`)
 - Development dependencies (`devDependencies`)
 
@@ -78,6 +79,7 @@ npm run dev
 This uses `tsx` to run TypeScript directly without building.
 
 **Examples:**
+
 ```bash
 npm run dev setup           # Run setup command
 npm run dev commit          # Run commit command
@@ -95,6 +97,7 @@ npm run build
 **Output:** `dist/index.js` (ESM bundle with shebang)
 
 **Build Tool:** tsup (esbuild-based)
+
 - Fast compilation
 - Single file output
 - ESM format
@@ -169,21 +172,25 @@ devai-cli/
 ### Running Tests
 
 **All Tests:**
+
 ```bash
 npm run test
 ```
 
 **Watch Mode (for TDD):**
+
 ```bash
 npm run test:watch
 ```
 
 **Unit Tests Only (fastest):**
+
 ```bash
 npm run test:unit
 ```
 
 **Integration Tests (requires Ollama):**
+
 ```bash
 # Ensure Ollama is running
 ollama serve
@@ -193,11 +200,13 @@ npm run test:integration
 ```
 
 **End-to-End Tests:**
+
 ```bash
 npm run test:e2e
 ```
 
 **Coverage Report:**
+
 ```bash
 npm run test:coverage
 ```
@@ -213,16 +222,19 @@ Opens HTML report in browser with detailed coverage breakdown.
 **Configuration:** `eslint.config.js`
 
 **Run Linter:**
+
 ```bash
 npm run lint
 ```
 
 **Auto-fix Issues:**
+
 ```bash
 npm run lint:fix
 ```
 
 **Rules:**
+
 - TypeScript ESLint recommended rules
 - Prettier compatibility
 - Simple import sort
@@ -233,11 +245,13 @@ npm run lint:fix
 **Configuration:** `prettier.config.mjs`
 
 **Format All Files:**
+
 ```bash
 npm run format
 ```
 
 **Check Formatting:**
+
 ```bash
 npm run format:check
 ```
@@ -247,11 +261,13 @@ npm run format:check
 ### Type Checking
 
 **Run Type Checker:**
+
 ```bash
 npm run typecheck
 ```
 
 **Configuration:**
+
 - `tsconfig.json` - Root config (extends build config)
 - `tsconfig.build.json` - Build settings (ES2022, NodeNext)
 
@@ -266,6 +282,7 @@ npm run typecheck
 This project follows **Conventional Commits** (naturally!).
 
 **Format:**
+
 ```
 <type>(<scope>): <subject>
 
@@ -275,6 +292,7 @@ This project follows **Conventional Commits** (naturally!).
 ```
 
 **Types:**
+
 - `feat` - New feature
 - `fix` - Bug fix
 - `docs` - Documentation changes
@@ -284,6 +302,7 @@ This project follows **Conventional Commits** (naturally!).
 - `chore` - Build/tooling changes
 
 **Example:**
+
 ```
 feat(commit): add retry logic for failed LLM responses
 
@@ -298,17 +317,20 @@ Closes #42
 Before committing:
 
 1. **Run lint & format:**
+
    ```bash
    npm run lint:fix
    npm run format
    ```
 
 2. **Run type check:**
+
    ```bash
    npm run typecheck
    ```
 
 3. **Run tests:**
+
    ```bash
    npm run test
    ```
@@ -339,6 +361,7 @@ UI → Features → Core ← Infrastructure
 ```
 
 **Rules:**
+
 1. **Core** has NO external dependencies
 2. **Features** depend only on core
 3. **Infrastructure** implements core ports
@@ -347,6 +370,7 @@ UI → Features → Core ← Infrastructure
 ### Adding New Features
 
 **Structure:**
+
 ```
 src/features/new-feature/
 ├── controllers/           # Command handlers
@@ -360,6 +384,7 @@ src/features/new-feature/
 ```
 
 **Steps:**
+
 1. Define domain types in `src/core/types/`
 2. Define ports (if needed) in `src/core/ports/`
 3. Implement use cases in `src/features/new-feature/use-cases/`
@@ -370,6 +395,7 @@ src/features/new-feature/
 ### Adding Infrastructure Adapters
 
 **Structure:**
+
 ```
 src/infrastructure/adapters/new-adapter/
 ├── new-adapter.ts         # Port implementation
@@ -378,6 +404,7 @@ src/infrastructure/adapters/new-adapter/
 ```
 
 **Steps:**
+
 1. Implement port interface from `src/core/ports/`
 2. Handle errors → translate to domain errors
 3. Write unit tests with mocked external dependencies
@@ -386,6 +413,7 @@ src/infrastructure/adapters/new-adapter/
 ### Adding UI Components
 
 **Structure:**
+
 ```
 src/ui/new-component/
 ├── new-component.ts       # Component implementation
@@ -395,6 +423,7 @@ src/ui/new-component/
 ```
 
 **Steps:**
+
 1. Use `@clack/prompts` for interactions
 2. Keep components pure (testable)
 3. Create `.demo.ts` for manual testing
@@ -418,6 +447,7 @@ DEBUG=devai-cli:ollama,devai-cli:git npm run dev commit
 ```
 
 **Available Loggers:**
+
 - `devai-cli:ollama` - Ollama adapter
 - `devai-cli:git` - Git adapter
 - `devai-cli:editor` - Editor adapter
@@ -458,6 +488,7 @@ npm run test:demo
 This runs `scripts/run-demos.ts` which executes all `.demo.ts` files.
 
 **Manual Demo:**
+
 ```bash
 npm run dev -- tsx src/ui/commit/components/type-selector/type-selector.demo.ts
 ```
@@ -465,6 +496,7 @@ npm run dev -- tsx src/ui/commit/components/type-selector/type-selector.demo.ts
 ### Creating Demos
 
 **Template:**
+
 ```typescript
 // component.demo.ts
 import { myComponent } from './component.js';
@@ -487,6 +519,7 @@ demo();
 **Problem:** "Failed to connect to Ollama"
 
 **Solution:**
+
 1. Check Ollama is running: `ollama list`
 2. Start daemon: `ollama serve`
 3. Check port: Default is `http://localhost:11434`
@@ -496,6 +529,7 @@ demo();
 **Problem:** "Model qwen2.5-coder:1.5b-conventional-commit not found"
 
 **Solution:**
+
 ```bash
 npm run dev setup
 ```
@@ -507,6 +541,7 @@ This re-provisions the custom model.
 **Problem:** TypeScript errors in editor
 
 **Solution:**
+
 1. Restart TS server (VS Code: Cmd+Shift+P → "Restart TS Server")
 2. Delete `node_modules` and reinstall: `rm -rf node_modules && npm install`
 3. Check `tsconfig.json` extends correct files
@@ -516,6 +551,7 @@ This re-provisions the custom model.
 **Problem:** Integration tests failing
 
 **Solution:**
+
 1. Ensure Ollama is running: `ollama serve`
 2. Check model exists: `ollama list | grep qwen2.5-coder`
 3. Re-run setup: `npm run dev setup`
@@ -527,6 +563,7 @@ This re-provisions the custom model.
 ### Pre-release Checklist
 
 1. **Update version in `package.json`**
+
    ```json
    {
      "version": "0.4.0"
@@ -539,22 +576,26 @@ This re-provisions the custom model.
    - Document breaking changes
 
 3. **Clean temporary files**
+
    ```bash
    npm run release:prep
    ```
 
 4. **Run full validation**
+
    ```bash
    npm run pr
    ```
 
 5. **Commit changes**
+
    ```bash
    git add package.json CHANGELOG.md
    git commit -m "chore: bump version to 0.4.0"
    ```
 
 6. **Tag release**
+
    ```bash
    git tag v0.4.0
    git push origin main --tags
@@ -593,19 +634,25 @@ export * from './use-cases/index.js';
 
 ```typescript
 import { something } from './module.js'; // ✅ Correct
-import { something } from './module';    // ❌ Wrong
+import { something } from './module'; // ❌ Wrong
 ```
 
 ### Error Handling
 
 **Use Domain Errors:**
+
 ```typescript
 import { GitError, OllamaError } from '@/core/types/errors.types.js';
 
-throw new GitError('No staged changes found', 1, 'Stage changes with: git add <files>');
+throw new GitError(
+  'No staged changes found',
+  1,
+  'Stage changes with: git add <files>'
+);
 ```
 
 **Error Properties:**
+
 - `message` - Human-readable error
 - `code` - Exit code
 - `remediation` - Suggested action (optional)
