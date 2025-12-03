@@ -20,6 +20,10 @@
 - [ ] **Add Intent**: Provide greater intent to the agent:
   - [ ] 1. The original plan was to provide <type> to the agent so it has context for prompt. I don't think that made it in. This would hopefully be a slight improvement. Test this before moving on.
   - [ ] 2. On the Commander.select() options for edit/refenerate etc, we should offer another solution for Provide Prompt (name to be decided). This lets you describe to the agent the general idea so that you can interact with the agent to an extent to inform it of what happened. This would eradicate - hopefully - some issues around e.g. when it reads jsdocs as actual code changes.
+  - [ ] 3. Regenerate should request that the agent thinks about the problem differently, potentially upping the temperature.
+- [ ] **Params experimentation**: I would link this into the body support as well as the intent stuff. I think that's basically a whole epics around testing outputs when we have a test environment setup that we can test in. This is removal reads as well. We can test it's a whole epics around the actual prompt generation where we want to have a little play with the system prompt with the way the actual prompt works. The other thing that I'm specifically mentioning here is that I think we should have a little bit of a play with the temperature such that we can see if up or down is kind of better. And that applies both to the initial prompt and adjusting it as part of regeneration.
+
+_TODO: create specific epic to capture prompt generation initatives_
 
 ## Development Notes
 
