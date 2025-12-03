@@ -32,7 +32,8 @@
     "validate:setup": "tsx scripts/validate-setup.ts",
     "build:link": "devai-cli setup && npm run build && npm link",
     "unlink": "npm unlink devai-cli",
-    "release:prep": "rm -rf dev docs .prompt-assets"
+    "release:prep": "rm -rf dev docs .prompt-assets",
+    "postinstall": "echo '✅ devai-cli installed! Run \"devai-cli setup\" to complete configuration.'"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

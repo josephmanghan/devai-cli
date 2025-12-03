@@ -10,7 +10,7 @@
 ## Medium Priority (Implementation Tasks)
 
 - [x] **Retries Counter**: Display retries as a counter during operations (DEFERRED - See rationale below)
-- [ ] **Post-install Setup**: Add post-install script for initial setup
+- [x] **Post-install Setup**: Add post-install script for initial setup
 
 ## Lower Priority (Complex Features)
 
@@ -78,8 +78,21 @@
 
 ### Post-install Setup
 
-- **Status**: 🔄 Pending
-- **Notes**: Add post-install script for initial setup
+- **Status**: ✅ Completed (2025-12-03)
+- **Implementation Complete**: ✅
+- **Architecture**: Simple npm postinstall script using echo for user notification
+- **Key Changes Implemented**:
+  - **Post-install Script**: Added `"postinstall": "echo '✅ devai-cli installed! Run \"devai-cli setup\" to complete configuration.'"` to package.json
+  - **User Notification**: Provides clear guidance to users after installation or upgrade
+  - **Minimal Complexity**: Uses echo command for maximum reliability across all npm environments
+- **Files Modified**:
+  - `package.json` - Added postinstall script in scripts section
+- **Message Content**:
+  - Confirms successful installation: "✅ devai-cli installed!"
+  - Provides clear next step: "Run \"devai-cli setup\" to complete configuration."
+  - Avoids technical details about Ollama or model management
+- **Verification**: Tested via `npm run postinstall` - message displays correctly
+- **User Experience**: Automatically runs after every `npm install devai-cli`, serving as helpful reminder for both new installations and upgrades
 
 ### Error Message Bug Fix
 
