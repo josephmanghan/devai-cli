@@ -43,16 +43,10 @@ export class GenerateCommit {
    */
   private validateInput(input: GenerateCommitInput): void {
     if (input.commitType.trim().length === 0) {
-      throw new ValidationError(
-        'Commit type cannot be empty',
-        '[R]egenerate [E]dit manually [C]ancel'
-      );
+      throw new ValidationError('Commit type cannot be empty');
     }
     if (input.diff.trim().length === 0) {
-      throw new ValidationError(
-        'Git diff cannot be empty',
-        '[R]egenerate [E]dit manually [C]ancel'
-      );
+      throw new ValidationError('Git diff cannot be empty');
     }
   }
 
@@ -81,8 +75,7 @@ export class GenerateCommit {
     }
 
     throw new ValidationError(
-      'Failed to generate valid commit message after maximum attempts',
-      '[R]egenerate [E]dit manually [C]ancel'
+      'Failed to generate valid commit message after maximum attempts'
     );
   }
 

@@ -118,10 +118,7 @@ describe('GenerateCommit', () => {
       const invalidInput = { ...validInput, commitType: '' };
 
       await expect(generateCommit.execute(invalidInput)).rejects.toThrow(
-        new ValidationError(
-          'Commit type cannot be empty',
-          '[R]egenerate [E]dit manually [C]ancel'
-        )
+        new ValidationError('Commit type cannot be empty')
       );
     });
 
@@ -129,10 +126,7 @@ describe('GenerateCommit', () => {
       const invalidInput = { ...validInput, diff: '' };
 
       await expect(generateCommit.execute(invalidInput)).rejects.toThrow(
-        new ValidationError(
-          'Git diff cannot be empty',
-          '[R]egenerate [E]dit manually [C]ancel'
-        )
+        new ValidationError('Git diff cannot be empty')
       );
     });
 
